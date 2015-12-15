@@ -1,0 +1,13 @@
+{
+    "syntaxVersion": 3,
+    "projectPackageId": "ca.nbsoft.whereareyou",
+    "authority": "ca.nbsoft.whereareyou.provider",
+    "providerJavaPackage": "ca.nbsoft.whereareyou.provider",
+    "providerClassName": "WhereRUProvider",
+    "sqliteOpenHelperClassName": "WhereRUSQLiteOpenHelper",
+    "sqliteOpenHelperCallbacksClassName": "WhereRUSQLiteOpenHelperCallbacks",
+    "databaseFileName": "wru.db",
+    "databaseVersion": 1,
+    "enableForeignKeys": true,
+    "useAnnotations": true
+}

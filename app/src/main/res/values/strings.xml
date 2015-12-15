@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">WhereAreYou</string>
+    <string name="title_activity_main">WhereAreYou</string>
+    <string name="login_button">Login</string>
+    <string name="login.error.registration_failed">An eror occured while singin up.</string>
+    <string name="login.message.registration_in_progress">Creating account.</string>
+</resources>

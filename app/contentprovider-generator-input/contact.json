@@ -1,0 +1,56 @@
+{
+    "documentation": "A contact.",
+    "fields": [
+        {
+            "documentation": "First name.",
+            "name": "first_name",
+            "type": "String",
+			"nullable": true,
+            "defaultValue": ""
+        },
+        {
+            "documentation": "Last name.",
+            "name": "last_name",
+            "type": "String",
+            "nullable": true,
+            "defaultValue": ""
+        },
+        {
+            "name": "email",
+            "type": "String",
+            "nullable": false
+        },
+		{
+			"name" : "userId",
+			"type": "String",
+            "nullable": false,
+			"index": true
+		},
+		{
+            "documentation": "Avatar url",
+            "name": "avatar_url",
+            "type": "String",
+            "nullable": true,
+            "defaultValue": ""
+        },
+		{
+			"name" : "blocked",
+			"type": "Boolean",
+            "nullable": false,
+			"defaultValue": false
+		},
+		{
+			"name" : "auto_reply",
+			"type": "Boolean",
+            "nullable": false,
+			"defaultValue": false
+		},
+    ],
+
+    "constraints": [
+        {
+            "name": "unique_email",
+            "definition": "UNIQUE (email) ON CONFLICT REPLACE"
+        }
+    ]
+}
