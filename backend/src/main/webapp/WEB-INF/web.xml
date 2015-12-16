@@ -13,8 +13,7 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>ca.nbsoft.whereareyou.backend.api.RegistrationEndpoint,
-                ca.nbsoft.whereareyou.backend.api.MessagingEndpoint</param-value>
+            <param-value>ca.nbsoft.whereareyou.backend.api.WhereAreYouApi</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

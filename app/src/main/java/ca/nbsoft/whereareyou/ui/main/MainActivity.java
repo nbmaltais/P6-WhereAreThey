@@ -1,4 +1,4 @@
-package ca.nbsoft.whereareyou.ui;
+package ca.nbsoft.whereareyou.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,8 +12,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.PreferenceUtils;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.ui.BaseActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.fab) FloatingActionButton mFab;
@@ -21,12 +22,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        signinIfNeeded();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
 
         setSupportActionBar(mToolbar);
 
@@ -44,16 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    private void signinIfNeeded() {
-        String accountName = PreferenceUtils.getAccountName(this);
-        boolean registered = PreferenceUtils.getSentRegistrationToBackend(this);
-        if(!registered || accountName==null)
-        {
-            Intent intent = new Intent(this,LoginActivity.class);
-            startActivity(intent);
-            finish(); // remove from back stack
-        }
-    }
+
 
 
 }

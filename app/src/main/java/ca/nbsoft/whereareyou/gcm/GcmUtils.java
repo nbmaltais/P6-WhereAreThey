@@ -5,8 +5,8 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import java.io.IOException;
 
 import ca.nbsoft.whereareyou.Endpoints;
-import ca.nbsoft.whereareyou.backend.registration.Registration;
-import ca.nbsoft.whereareyou.backend.registration.model.RegistrationId;
+import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
+import ca.nbsoft.whereareyou.backend.whereAreYou.model.RegistrationId;
 
 
 /**
@@ -21,12 +21,12 @@ public class GcmUtils {
      */
     static public void registerDevice( String token, GoogleAccountCredential credential) throws IOException {
 
-        Registration regService = Endpoints.getRegistrationEndpoint(credential);
+        WhereAreYou apiEndpoint = Endpoints.getApiEndpoint(credential);
 
         RegistrationId r = new RegistrationId();
         r.setToken(token);
 
-        regService.register(r).execute();
+        apiEndpoint.register(r).execute();
     }
 
 

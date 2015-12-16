@@ -10,7 +10,8 @@ import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 
 import java.io.IOException;
 
-import ca.nbsoft.whereareyou.backend.registration.Registration;
+import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
+
 
 /**
  * Created by Nicolas on 2015-12-09.
@@ -32,9 +33,9 @@ public class Endpoints {
         return cred;
     }
 
-    static public Registration getRegistrationEndpoint( GoogleAccountCredential credential )
+    static public WhereAreYou getApiEndpoint(GoogleAccountCredential credential)
     {
-        Registration.Builder builder = new Registration.Builder(AndroidHttp.newCompatibleTransport(),
+        WhereAreYou.Builder builder = new WhereAreYou.Builder(AndroidHttp.newCompatibleTransport(),
                 new AndroidJsonFactory(), credential)
                 // Need setRootUrl and setGoogleClientRequestInitializer only for local testing,
                 // otherwise they can be skipped
@@ -48,8 +49,8 @@ public class Endpoints {
                     }
                 });
 
-        Registration regService = builder.build();
+        WhereAreYou api = builder.build();
 
-        return regService;
+        return api;
     }
 }

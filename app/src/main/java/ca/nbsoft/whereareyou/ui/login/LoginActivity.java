@@ -1,10 +1,9 @@
-package ca.nbsoft.whereareyou.ui;
+package ca.nbsoft.whereareyou.ui.login;
 
 import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +20,7 @@ import ca.nbsoft.whereareyou.Endpoints;
 import ca.nbsoft.whereareyou.PreferenceUtils;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.gcm.RegistrationIntentService;
+import ca.nbsoft.whereareyou.ui.main.MainActivity;
 
 /**
  * todo Handle network connctivity

@@ -38,7 +38,7 @@ import static ca.nbsoft.whereareyou.backend.OfyService.ofy;
  * you'd like to add authentication, take a look at the documentation.
  */
 @Api(
-  name = "registration",
+  name = "whereAreYou",
   version = "v1",
   scopes = {ClientsID.EMAIL_SCOPE},
   clientIds = {ClientsID.WEB_CLIENT_ID,
@@ -51,9 +51,9 @@ import static ca.nbsoft.whereareyou.backend.OfyService.ofy;
     packagePath=""
   )
 )
-public class RegistrationEndpoint {
+public class WhereAreYouApi {
 
-    private static final Logger log = Logger.getLogger(RegistrationEndpoint.class.getName());
+    private static final Logger log = Logger.getLogger(WhereAreYouApi.class.getName());
 
 
     /**
@@ -81,7 +81,7 @@ public class RegistrationEndpoint {
         return userId;
     }
 
-    UserProfile createUserRecord(User user)
+    private UserProfile createUserRecord(User user)
     {
         String userId = user.getUserId();
         String email = user.getEmail();
@@ -170,7 +170,7 @@ public class RegistrationEndpoint {
      * @param registrationId The Google Cloud Messaging registration Id to remove
      */
     @ApiMethod(name = "unregister")
-    public void unregisterDevice(RegistrationId registrationId, User user) throws UnauthorizedException {
+    public void unregisterDevice(User user, RegistrationId registrationId) throws UnauthorizedException {
 
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
@@ -188,12 +188,16 @@ public class RegistrationEndpoint {
     }
 
     @ApiMethod(name = "requestContactLocation")
-    public void requestContactLocation( @Named("contactId") String contactUserId, @Named("message") String message, User user ) throws UnauthorizedException, IOException {
+    public void requestContactLocation( User user, @Named("contactId") String contactUserId, @Named("message") String message ) throws Exception {
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
 
         UserProfile userProfile = getUserProfile(user);
+
+        if(!userProfile.containsContactUserId(contactUserId))
+            throw new Exception("Invalid contact");
+
         UserProfile contactUserProfile = getUserProfileById(contactUserId);
 
         if(userProfile ==null || contactUserProfile ==null)
@@ -202,13 +206,96 @@ public class RegistrationEndpoint {
             return;
         }
 
-        GcmMessages.sendLocationRequest( userProfile.getUserId(), contactUserProfile.getRegId(), message );
+        GcmMessages.sendLocationRequest(userProfile, contactUserProfile, message);
 
+    }
+
+    @ApiMethod(name = "sendLocation")
+    public void sendLocation( User user,
+                              @Named("contactId") String contactUserId,
+                              @Named("location") String location,
+                              @Named("message") String message ) throws Exception {
+        if (user == null) {
+            throw new UnauthorizedException("Authorization required");
+        }
+
+        UserProfile userProfile = getUserProfile(user);
+        if(!userProfile.containsContactUserId(contactUserId))
+            throw new Exception("Invalid contact");
+
+        UserProfile contactProfile = getUserProfileById(contactUserId);
+
+        GcmMessages.sendLocation(userProfile, contactProfile, location, message);
+    }
+
+    @ApiMethod(name = "sendContactRequest")
+    public void sendContactRequest(User user, @Named("contactEmail") String contactEmail) throws Exception {
+        if (user == null) {
+            throw new UnauthorizedException("Authorization required");
+        }
+
+        UserProfile userProfile = getUserProfile(user);
+
+        UserProfile contactProfile=getUserProfileByEmail(contactEmail);
+        if(contactProfile==null)
+        {
+            // TODO: send invitation??
+
+            // TODO: return failure oce instead of throwing?
+            throw new Exception("User does not exists.");
+        }
+
+        if( userProfile.containsContactUserId(contactProfile.getUserId()) )
+        {
+            log.info("User is already in contact, aborting sendContactRequest");
+            return;
+        }
+
+        if( userProfile.containsPendingContactRequestUserId(contactProfile.getUserId()) )
+        {
+            log.info("User is already in pending contact request, aborting sendContactRequest");
+            return;
+        }
+
+        userProfile.addPendingContactRequestUserId(contactProfile.getUserId());
+        ofy().save().entity(userProfile).now();
+
+        GcmMessages.sendContactRequest(userProfile, contactProfile);
+    }
+
+    @ApiMethod(name = "confirmContactRequest")
+    public void confirmContactRequest(User user,
+                                      @Named("contactUserId") String contactUserId) throws UnauthorizedException {
+        if (user == null) {
+            throw new UnauthorizedException("Authorization required");
+        }
+
+        UserProfile userProfile = getUserProfile(user);
+        UserProfile contactProfile = getUserProfileById(contactUserId);
+
+        if( !contactProfile.containsPendingContactRequestUserId(contactUserId) )
+        {
+            log.info("No pending request found, aborting confirmContactRequest");
+            return;
+        }
+
+        contactProfile.removePendingContactRequestUserId(contactUserId);
+        contactProfile.addContactUserId(contactUserId);
+        ofy().save().entity(contactProfile).now();
+
+
+        // TODO send notification that contact request is confirmed
+        GcmMessages.confirmContactRequest(userProfile,contactProfile);
     }
 
     private UserProfile getUserProfileById( String userId)
     {
         return ofy().load().key(Key.create(UserProfile.class, userId)).now();
+    }
+
+    private UserProfile getUserProfileByEmail( String email)
+    {
+        return ofy().load().type(UserProfile.class).filter("email",email).first().now();
     }
 
     private UserProfile findUserByRegistrationId(String regId) {
@@ -221,6 +308,29 @@ public class RegistrationEndpoint {
             throw new UnauthorizedException("Authorization required");
         }
         return ofy().load().key(Key.create(UserProfile.class, getUserId(user))).now();
+    }
+
+    @ApiMethod(name = "getContactInfo")
+    public ContactInfo getContactInfo( @Named("contactUserId") String contactUserId, User user ) throws Exception {
+        UserProfile userProfile = getUserProfile(user);
+        if( userProfile.containsContactUserId(contactUserId) ) {
+
+            UserProfile contactProfile = ofy().load().key(Key.create(UserProfile.class, contactUserId)).now();
+            return createContactInfo(contactProfile);
+        }
+        else
+        {
+            throw new Exception("Invalid contact.");
+        }
+    }
+
+    private ContactInfo createContactInfo( UserProfile contactProfile )
+    {
+        ContactInfo contactInfo = new ContactInfo();
+        contactInfo.setEmail(contactProfile.getEmail());
+        contactInfo.setUserId(contactProfile.getUserId());
+
+        return contactInfo;
     }
 
 }
