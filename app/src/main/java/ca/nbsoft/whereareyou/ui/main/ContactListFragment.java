@@ -1,14 +1,16 @@
 package ca.nbsoft.whereareyou.ui.main;
 
 import android.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,8 +30,9 @@ import ca.nbsoft.whereareyou.ui.main.ContactAdapter;
 /**
  *
  */
-public class ContactListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ContactListFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
+    private static final String TAG = ContactListFragment.class.getSimpleName();
     @Bind (R.id.contact_list)
     RecyclerView mRecyclerView;
 
@@ -54,14 +57,16 @@ public class ContactListFragment extends Fragment implements LoaderManager.Loade
 
         mAdapter = new ContactAdapter();
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager( new LinearLayoutManager(getActivity()));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        getLoaderManager().initLoader(0,null,this);
 
         return view;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_contact_list,menu);
+        inflater.inflate(R.menu.menu_contact_list, menu);
     }
 
     @Override
@@ -90,24 +95,29 @@ public class ContactListFragment extends Fragment implements LoaderManager.Loade
 
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(TAG,"onCreateLoader");
 
         ContactSelection where = new ContactSelection();
 
 
-        CursorLoader loader = new CursorLoader(getActivity(),where.uri(), ContactColumns.ALL_COLUMNS,
+        android.support.v4.content.CursorLoader loader =
+                new android.support.v4.content.CursorLoader(getActivity(),where.uri(), ContactColumns.ALL_COLUMNS,
                 where.sel(),where.args(), where.order());
 
         return loader;
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
+        Log.d(TAG,"onCreateLoader");
         mAdapter.setContactCursor(new ContactCursor(data));
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
 
     }
+
+
 }
