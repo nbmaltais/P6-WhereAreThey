@@ -10,11 +10,15 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
@@ -38,7 +42,7 @@ public class ContactListFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -55,6 +59,22 @@ public class ContactListFragment extends Fragment implements LoaderManager.Loade
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_contact_list,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(item.getItemId()==R.id.action_refresh_contacts)
+        {
+            ApiService.updateContactList(getContext());
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -66,6 +86,7 @@ public class ContactListFragment extends Fragment implements LoaderManager.Loade
         super.onDetach();
 
     }
+
 
 
     @Override

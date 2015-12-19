@@ -17,7 +17,7 @@ public class BaseActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
     }
 
-    private void signinIfNeeded() {
+    protected void signinIfNeeded() {
         String accountName = PreferenceUtils.getAccountName(this);
         boolean registered = PreferenceUtils.getSentRegistrationToBackend(this);
         if(!registered || accountName==null)
@@ -26,5 +26,11 @@ public class BaseActivity extends AppCompatActivity{
             startActivity(intent);
             finish(); // remove from back stack
         }
+    }
+
+    protected void forceSignin()
+    {
+        PreferenceUtils.setSentRegistrationToBackend(this,false);
+        signinIfNeeded();
     }
 }

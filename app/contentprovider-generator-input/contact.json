@@ -51,6 +51,10 @@
         {
             "name": "unique_email",
             "definition": "UNIQUE (email) ON CONFLICT REPLACE"
+        },
+		{
+            "name": "unique_usrerId",
+            "definition": "UNIQUE (userId) ON CONFLICT REPLACE"
         }
     ]
 }

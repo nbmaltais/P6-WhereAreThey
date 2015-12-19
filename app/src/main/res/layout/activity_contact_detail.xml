@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          android:id="@+id/fragment"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:name="ca.nbsoft.whereareyou.ui.contact.ContactDetailFragment"
+          tools:layout="@layout/layout_contact_detail"
+          tools:context=".ui.contact.ContactDetailActivity">
+
+</fragment>

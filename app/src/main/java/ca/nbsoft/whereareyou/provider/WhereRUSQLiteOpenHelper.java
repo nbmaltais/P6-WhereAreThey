@@ -33,6 +33,7 @@ public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
             + ContactColumns.BLOCKED + " INTEGER NOT NULL DEFAULT 0, "
             + ContactColumns.AUTO_REPLY + " INTEGER NOT NULL DEFAULT 0 "
             + ", CONSTRAINT unique_email UNIQUE (email) ON CONFLICT REPLACE"
+            + ", CONSTRAINT unique_usrerId UNIQUE (userId) ON CONFLICT REPLACE"
             + " );";
 
     public static final String SQL_CREATE_INDEX_CONTACT_USERID = "CREATE INDEX IDX_CONTACT_USERID "

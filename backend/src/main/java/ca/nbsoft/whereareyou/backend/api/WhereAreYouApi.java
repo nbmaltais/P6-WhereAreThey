@@ -10,11 +10,14 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.users.User;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Logger;
 import javax.inject.Named;
 
@@ -83,7 +86,7 @@ public class WhereAreYouApi {
 
     private UserProfile createUserRecord(User user)
     {
-        String userId = user.getUserId();
+        String userId = getUserId(user);
         String email = user.getEmail();
 
         UserProfile record = new UserProfile();
@@ -101,6 +104,9 @@ public class WhereAreYouApi {
      */
     @ApiMethod(name = "createAccount")
     public void createAccount(User user) throws UnauthorizedException {
+
+        log.info("API call: createAccount, user = " + user);
+
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
@@ -124,6 +130,8 @@ public class WhereAreYouApi {
      */
     @ApiMethod(name = "register")
     public void registerDevice(RegistrationId registrationId, User user) throws UnauthorizedException {
+
+        log.info("API call: registerDevice, user = " + user);
 
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
@@ -150,6 +158,9 @@ public class WhereAreYouApi {
      */
     @ApiMethod(name = "deleteAccount")
     public void deleteAccount( User user ) throws UnauthorizedException {
+
+        log.info("API call: deleteAccount, user = " + user);
+
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
@@ -172,6 +183,8 @@ public class WhereAreYouApi {
     @ApiMethod(name = "unregister")
     public void unregisterDevice(User user, RegistrationId registrationId) throws UnauthorizedException {
 
+        log.info("API call: unregisterDevice, user = " + user);
+
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
@@ -189,6 +202,9 @@ public class WhereAreYouApi {
 
     @ApiMethod(name = "requestContactLocation")
     public void requestContactLocation( User user, @Named("contactId") String contactUserId, @Named("message") String message ) throws Exception {
+
+        log.info("API call: requestContactLocation, user = " + user);
+
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
@@ -213,15 +229,18 @@ public class WhereAreYouApi {
     @ApiMethod(name = "sendLocation")
     public void sendLocation( User user,
                               @Named("contactId") String contactUserId,
-                              @Named("location") String location,
+                              Location location,
                               @Named("message") String message ) throws Exception {
+
+        log.info("API call: sendLocation, user = " + user);
+
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
 
         UserProfile userProfile = getUserProfile(user);
         if(!userProfile.containsContactUserId(contactUserId))
-            throw new Exception("Invalid contact");
+            throw new InvalidContactException();
 
         UserProfile contactProfile = getUserProfileById(contactUserId);
 
@@ -230,6 +249,9 @@ public class WhereAreYouApi {
 
     @ApiMethod(name = "sendContactRequest")
     public void sendContactRequest(User user, @Named("contactEmail") String contactEmail) throws Exception {
+
+        log.info("API call: sendContactRequest, user = " + user);
+
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
@@ -240,9 +262,7 @@ public class WhereAreYouApi {
         if(contactProfile==null)
         {
             // TODO: send invitation??
-
-            // TODO: return failure oce instead of throwing?
-            throw new Exception("User does not exists.");
+            throw new InvalidContactException();
         }
 
         if( userProfile.containsContactUserId(contactProfile.getUserId()) )
@@ -257,15 +277,19 @@ public class WhereAreYouApi {
             return;
         }
 
-        userProfile.addPendingContactRequestUserId(contactProfile.getUserId());
-        ofy().save().entity(userProfile).now();
+
 
         GcmMessages.sendContactRequest(userProfile, contactProfile);
+
+        userProfile.addPendingContactRequestUserId(contactProfile.getUserId());
+        ofy().save().entity(userProfile).now();
     }
 
     @ApiMethod(name = "confirmContactRequest")
     public void confirmContactRequest(User user,
-                                      @Named("contactUserId") String contactUserId) throws UnauthorizedException {
+                                      @Named("contactUserId") String contactUserId) throws UnauthorizedException, IOException {
+
+        log.info("API call: confirmContactRequest, user = " + user);
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
@@ -273,19 +297,23 @@ public class WhereAreYouApi {
         UserProfile userProfile = getUserProfile(user);
         UserProfile contactProfile = getUserProfileById(contactUserId);
 
-        if( !contactProfile.containsPendingContactRequestUserId(contactUserId) )
+        String userId = userProfile.getUserId();
+
+        if( !contactProfile.containsPendingContactRequestUserId(userId) )
         {
-            log.info("No pending request found, aborting confirmContactRequest");
+            log.info("No pending request found for userid = " + userId + ", aborting confirmContactRequest");
             return;
         }
 
-        contactProfile.removePendingContactRequestUserId(contactUserId);
-        contactProfile.addContactUserId(contactUserId);
+        contactProfile.removePendingContactRequestUserId(userId);
+        contactProfile.addContactUserId(userId);
         ofy().save().entity(contactProfile).now();
 
+        userProfile.addContactUserId(contactUserId);
+        ofy().save().entity(userProfile).now();
 
         // TODO send notification that contact request is confirmed
-        GcmMessages.confirmContactRequest(userProfile,contactProfile);
+        GcmMessages.confirmContactRequest(userProfile, contactProfile);
     }
 
     private UserProfile getUserProfileById( String userId)
@@ -295,7 +323,7 @@ public class WhereAreYouApi {
 
     private UserProfile getUserProfileByEmail( String email)
     {
-        return ofy().load().type(UserProfile.class).filter("email",email).first().now();
+        return ofy().load().type(UserProfile.class).filter("email", email).first().now();
     }
 
     private UserProfile findUserByRegistrationId(String regId) {
@@ -304,6 +332,7 @@ public class WhereAreYouApi {
 
     @ApiMethod(name = "getUserProfile")
     public UserProfile getUserProfile(User user) throws UnauthorizedException {
+        log.info("API call: getUserProfile, user = " + user);
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
@@ -312,6 +341,12 @@ public class WhereAreYouApi {
 
     @ApiMethod(name = "getContactInfo")
     public ContactInfo getContactInfo( @Named("contactUserId") String contactUserId, User user ) throws Exception {
+        log.info("API call: getContactInfo, user = " + user);
+
+        if (user == null) {
+            throw new UnauthorizedException("Authorization required");
+        }
+
         UserProfile userProfile = getUserProfile(user);
         if( userProfile.containsContactUserId(contactUserId) ) {
 
@@ -322,6 +357,38 @@ public class WhereAreYouApi {
         {
             throw new Exception("Invalid contact.");
         }
+    }
+
+    @ApiMethod(name = "getContacts")
+    public Collection<ContactInfo> getContacts(  User user ) throws Exception {
+        log.info("API call: getContacts, user = " + user);
+
+        if (user == null) {
+            throw new UnauthorizedException("Authorization required");
+        }
+
+        boolean modified=false;
+        UserProfile userProfile = getUserProfile(user);
+        Collection<ContactInfo> contacts = new ArrayList<>();
+
+        for( String contactId : userProfile.getContactsKeys())
+        {
+            UserProfile contactProfile = ofy().load().key(Key.create(UserProfile.class, contactId)).now();
+            if(contactProfile!=null) {
+                contacts.add(createContactInfo(contactProfile));
+            }
+            else {
+                userProfile.removeContactUserId(contactId);
+                modified=true;
+            }
+        }
+
+        if(modified)
+        {
+            ofy().save().entity(userProfile).now();
+        }
+
+        return contacts;
     }
 
     private ContactInfo createContactInfo( UserProfile contactProfile )

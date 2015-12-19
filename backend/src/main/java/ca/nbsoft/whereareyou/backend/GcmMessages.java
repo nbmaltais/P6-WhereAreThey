@@ -4,11 +4,13 @@ import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
+import com.google.appengine.api.datastore.GeoPt;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
 import WhereAreYou.BuildConfig;
+import ca.nbsoft.whereareyou.backend.api.Location;
 import ca.nbsoft.whereareyou.backend.data.UserProfile;
 
 /**
@@ -18,14 +20,18 @@ public class GcmMessages {
     private static final Logger log = Logger.getLogger(GcmMessages.class.getName());
     private static final String API_KEY = BuildConfig.SERVER_API_KEY;//System.getProperty("gcm.api.key");
 
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_USER_ID = "user_id";
+    private static final String KEY_USER_EMAIL = "user_email";
+    private static final String KEY_MESSAGE = "message";
 
     static public void sendLocationRequest( UserProfile from, UserProfile to, String message ) throws IOException {
 
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
-                .addData("type","location-request")
-                .addData("from", from.getUserId())
-                .addData("message", message)
+                .addData(KEY_TYPE,"location-request")
+                .addData(KEY_USER_ID, from.getUserId())
+                .addData(KEY_MESSAGE, message)
                 .build();
 
         Result result = sender.send(msg, to.getRegId(), 5);
@@ -34,13 +40,14 @@ public class GcmMessages {
 
     }
 
-    public static void sendLocation(UserProfile from, UserProfile to, String location, String message) throws IOException {
+    public static void sendLocation(UserProfile from, UserProfile to, Location location, String message) throws IOException {
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
-                .addData("type","location")
-                .addData("from", from.getUserId())
-                .addData("location", location)
-                .addData("message", message)
+                .addData(KEY_TYPE,"location")
+                .addData(KEY_USER_ID, from.getUserId())
+                .addData("location_lat", Double.toString(location.getLatitude()))
+                .addData("location_long", Double.toString(location.getLongitude()))
+                .addData(KEY_MESSAGE, message)
                 .build();
 
         Result result = sender.send(msg, to.getRegId(), 5);
@@ -52,9 +59,9 @@ public class GcmMessages {
     public static void sendContactRequest(UserProfile from, UserProfile to) throws IOException {
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
-                .addData("type", "contact-request")
-                .addData("from", from.getUserId())
-                .addData("user-email", from.getEmail())
+                .addData(KEY_TYPE, "contact-request")
+                .addData(KEY_USER_ID, from.getUserId())
+                .addData(KEY_USER_EMAIL, from.getEmail())
                 .build();
 
         Result result = sender.send(msg, to.getRegId(), 5);
@@ -65,9 +72,9 @@ public class GcmMessages {
     public static void confirmContactRequest(UserProfile from, UserProfile to) throws IOException {
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
-                .addData("type", "contact-confirmation")
-                .addData("from", from.getUserId())
-                .addData("user-email", from.getEmail())
+                .addData(KEY_TYPE, "contact-confirmation")
+                .addData(KEY_USER_ID, from.getUserId())
+                .addData(KEY_USER_EMAIL, from.getEmail())
                 .build();
 
         Result result = sender.send(msg, to.getRegId(), 5);

@@ -95,6 +95,20 @@
             android:name=".ui.MapsActivity"
             android:label="@string/title_activity_maps">
         </activity>
+        <activity
+            android:name=".ui.contact.ContactDetailActivity"
+            android:label="@string/title_activity_contact_detail"
+            android:parentActivityName=".ui.main.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ca.nbsoft.whereareyou.ui.main.MainActivity"/>
+        </activity>
+
+        <service
+            android:name=".ApiService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>
