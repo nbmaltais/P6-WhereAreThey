@@ -12,7 +12,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 public class PlayServicesUtils {
 
     private static final String TAG = PlayServicesUtils.class.getSimpleName();
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     public static class PlayServicesNotSupported extends Exception
     {
@@ -34,4 +34,6 @@ public class PlayServicesUtils {
         }
         return true;
     }
+
+
 }

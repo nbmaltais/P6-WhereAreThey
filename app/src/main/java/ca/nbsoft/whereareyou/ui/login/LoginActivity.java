@@ -2,7 +2,6 @@ package ca.nbsoft.whereareyou.ui.login;
 
 import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,18 +39,16 @@ public class LoginActivity extends AppCompatActivity {
     GoogleAccountCredential mCredential;
 
 
-    BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
+    BroadcastReceiver mResultReceiver = new RegistrationIntentService.RegistrationResultReceiver() {
+
         @Override
-        public void onReceive(Context context, Intent intent) {
-            int result = intent.getIntExtra(RegistrationIntentService.RESULT_EXTRA,-1);
-            if(result == RegistrationIntentService.RESULT_SUCCEEDED)
-            {
-                onLoginSucceeded();
-            }
-            else if(result == RegistrationIntentService.RESULT_FAILED)
-            {
-                onLoginFailed();
-            }
+        protected void onLoginFailed() {
+            LoginActivity.this.onLoginFailed();
+        }
+
+        @Override
+        protected void onLoginSucceeded() {
+            LoginActivity.this.onLoginSucceeded();
         }
     };
 
@@ -81,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        RegistrationIntentService.suscribeToResult(this, mResultReceiver);
+        RegistrationIntentService.subscribeToResult(this, mResultReceiver);
         mCredential = Endpoints.getCredential(this);
 
         mLoginButton.setOnClickListener(new View.OnClickListener() {
@@ -122,7 +119,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         // Unregister since the activity is about to be closed.
-        RegistrationIntentService.unsuscribeToResult(this,mResultReceiver);
+        RegistrationIntentService.unSubscribeFromResult(this, mResultReceiver);
         super.onDestroy();
     }
 

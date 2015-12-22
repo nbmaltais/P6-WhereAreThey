@@ -13,6 +13,7 @@ import android.view.View;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.PreferenceUtils;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
@@ -34,8 +35,10 @@ public class MainActivity extends BaseActivity {
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
+
+                AddContactActivity.startActivity(MainActivity.this);
             }
         });
     }
@@ -66,6 +69,10 @@ public class MainActivity extends BaseActivity {
         {
             forceSignin();
             return true;
+        }
+        else if(item.getItemId()==R.id.action_test_send_position)
+        {
+            ApiService.requestContactLocation(this, PreferenceUtils.getUserId(this),"Test from myself");
         }
 
         return super.onOptionsItemSelected(item);

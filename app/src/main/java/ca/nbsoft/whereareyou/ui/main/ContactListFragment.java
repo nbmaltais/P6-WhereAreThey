@@ -25,16 +25,18 @@ import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
+import ca.nbsoft.whereareyou.ui.contact.ContactDetailActivity;
 import ca.nbsoft.whereareyou.ui.main.ContactAdapter;
 
 /**
  *
  */
-public class ContactListFragment extends Fragment implements LoaderCallbacks<Cursor> {
+public class ContactListFragment extends Fragment implements LoaderCallbacks<Cursor>, ContactAdapter.OnItemClickCallback {
 
     private static final String TAG = ContactListFragment.class.getSimpleName();
     @Bind (R.id.contact_list)
     RecyclerView mRecyclerView;
+
 
     ContactAdapter mAdapter;
 
@@ -55,7 +57,7 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
         View view = inflater.inflate(R.layout.fragment_contact_list, container, false);
         ButterKnife.bind(this, view);
 
-        mAdapter = new ContactAdapter();
+        mAdapter = new ContactAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -120,4 +122,8 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
     }
 
 
+    @Override
+    public void onContactItemClicked(String userId) {
+        ContactDetailActivity.startActivity(getContext(),userId);
+    }
 }

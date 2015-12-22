@@ -42,13 +42,20 @@ public class GcmMessages {
 
     public static void sendLocation(UserProfile from, UserProfile to, Location location, String message) throws IOException {
         Sender sender = new Sender(API_KEY);
-        Message msg = new Message.Builder()
-                .addData(KEY_TYPE,"location")
+
+
+
+        Message.Builder builder = new Message.Builder()
+                .addData(KEY_TYPE, "location")
                 .addData(KEY_USER_ID, from.getUserId())
-                .addData("location_lat", Double.toString(location.getLatitude()))
-                .addData("location_long", Double.toString(location.getLongitude()))
-                .addData(KEY_MESSAGE, message)
-                .build();
+                .addData(KEY_MESSAGE, message);
+
+        if(location!=null) {
+            builder.addData("location_lat", Double.toString(location.getLatitude()))
+                    .addData("location_long", Double.toString(location.getLongitude()));
+        }
+
+        Message msg = builder.build();
 
         Result result = sender.send(msg, to.getRegId(), 5);
 

@@ -13,9 +13,12 @@ import android.widget.Toast;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import ca.nbsoft.whereareyou.ApiService;
+import ca.nbsoft.whereareyou.Constants;
+import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
+import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
 public class MyGcmListenerService extends GcmListenerService {
     private static final String TAG = GcmListenerService.class.getSimpleName();
@@ -28,6 +31,9 @@ public class MyGcmListenerService extends GcmListenerService {
     private static final int LOCATION_REQUEST_NOTIF_ID = 1012;
     private static final int LOCATION_NOTIF_ID = 1013;
     private static final int CONTACT_CONFIRMATION_NOTIF_ID = 1014;
+    private static final String KEY_LATITUDE = "location_lat";
+    private static final String KEY_LONGITUDE = "location_long";
+
 
     public MyGcmListenerService() {
     }
@@ -117,8 +123,28 @@ public class MyGcmListenerService extends GcmListenerService {
         String fromUserId = message.getString(KEY_USER_ID);
         String messageText = message.getString(KEY_MESSAGE);
 
-        ContactCursor contactCursor = getContact(fromUserId);
-        if(!contactCursor.moveToFirst())
+        android.location.Location loc = new android.location.Location("WhereAreYouBackend");
+        if(message.containsKey(KEY_LATITUDE) && message.containsKey(KEY_LONGITUDE))
+        {
+            try {
+                String latString = message.getString(KEY_LATITUDE);
+                String longString = message.getString(KEY_LONGITUDE);
+
+                double latDouble = Double.parseDouble(latString);
+                double longDouble = Double.parseDouble(longString);
+
+                loc.setLatitude(latDouble);
+                loc.setLongitude(longDouble);
+                Log.d(TAG, "location = " + loc);
+            }
+            catch(NumberFormatException e)
+            {
+                Log.w(TAG,"Invalid location format");
+            }
+        }
+
+        Contact contact = getContact(fromUserId);
+        if(contact==null)
         {
             Log.w(TAG,"onLocation, no contact matching contact id");
             return;
@@ -126,18 +152,28 @@ public class MyGcmListenerService extends GcmListenerService {
 
 
         String title = "Location Received";
-        String contentText = "From " + contactCursor.getEmail();
+        String contentText = "From " + contact.getEmail();
+        int notifId = LOCATION_NOTIF_ID;
+
+        Intent locationIntent = new Intent(this, MapsActivity.class);
+        locationIntent.putExtra(Constants.EXTRA_CONTACT,contact);
+        locationIntent.putExtra(Constants.EXTRA_LOCATION,loc);
+        locationIntent.putExtra(Constants.EXTRA_MESSAGE,messageText);
+        locationIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION,notifId);
+
+        PendingIntent locationPendingIntent = PendingIntent.getActivity(this,0,locationIntent,PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
         builder.setContentTitle(title)
                 .setContentText(contentText)
-                .setSmallIcon(R.drawable.ic_notification);
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentIntent(locationPendingIntent);
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        notifyMgr.notify(LOCATION_NOTIF_ID, builder.build());
+        notifyMgr.notify(notifId, builder.build());
     }
 
     private void onLocationRequest(Bundle message) {
@@ -147,8 +183,8 @@ public class MyGcmListenerService extends GcmListenerService {
         String fromUserId = message.getString(KEY_USER_ID);
         String messageText = message.getString(KEY_MESSAGE);
 
-        ContactCursor contactCursor = getContact(fromUserId);
-        if(!contactCursor.moveToFirst())
+        Contact contact = getContact(fromUserId);
+        if(contact==null)
         {
             Log.w(TAG,"onLocationRequest, no contact matching contact id");
             return;
@@ -157,12 +193,12 @@ public class MyGcmListenerService extends GcmListenerService {
         int notifId = LOCATION_REQUEST_NOTIF_ID;
         String title = getString(R.string.notification_location_request_title);
         String replyText = getString(R.string.notification_reply_action);
-        String contentText = "From " + contactCursor.getEmail();
+        String contentText = "From " + contact.getEmail();
 
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
-        Intent replyIntent = ApiService.sendLocationIntent(this,fromUserId,null);
+        Intent replyIntent = ApiService.sendLocationIntent(this,fromUserId,"");
         replyIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION,notifId);
         PendingIntent replyPendingIntent = PendingIntent.getService(this,0,replyIntent,PendingIntent.FLAG_ONE_SHOT);
 
@@ -176,11 +212,18 @@ public class MyGcmListenerService extends GcmListenerService {
         notifyMgr.notify(notifId, builder.build());
     }
 
-    private ContactCursor getContact(String fromUserId) {
+    private Contact getContact(String fromUserId) {
         ContactSelection where = new ContactSelection();
         where.userid(fromUserId);
 
-        return where.query(getContentResolver());
+        ContactCursor query = where.query(getContentResolver());
+        if(query.moveToFirst())
+        {
+            return Contact.fromCursor(query);
+        }
+        else {
+            return null;
+        }
     }
 
     protected void showToast(final String message) {

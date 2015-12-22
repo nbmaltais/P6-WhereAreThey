@@ -59,6 +59,32 @@ public class WhereAreYouApi {
     private static final Logger log = Logger.getLogger(WhereAreYouApi.class.getName());
 
 
+    public static class BooleanResult {
+
+        private final Boolean result;
+
+        public BooleanResult(Boolean result) {
+            this.result = result;
+        }
+
+        public Boolean getResult() {
+            return result;
+        }
+    }
+
+    public static class StringResult {
+
+        private final String result;
+
+        public StringResult(String result) {
+            this.result = result;
+        }
+
+        public String getResult() {
+            return result;
+        }
+    }
+
     /**
      * Taken from the udacity ccourse on Scalable app with Java
      * https://github.com/udacity/ud859/blob/master/ConferenceCentral_Complete/src/main/java/com/google/devrel/training/conference/spi/ConferenceApi.java
@@ -103,7 +129,7 @@ public class WhereAreYouApi {
      * @throws UnauthorizedException
      */
     @ApiMethod(name = "createAccount")
-    public void createAccount(User user) throws UnauthorizedException {
+    public StringResult createAccount(User user) throws UnauthorizedException {
 
         log.info("API call: createAccount, user = " + user);
 
@@ -112,15 +138,19 @@ public class WhereAreYouApi {
         }
 
         UserProfile userProfile = getUserProfile(user);
-        if(userProfile != null)
+        if(userProfile == null)
+        {
+            UserProfile record = createUserRecord(user);
+
+            ofy().save().entity(record).now();
+        }
+        else
         {
             log.info("User " + user.getEmail() + " already signed up, skipping");
-            return;
         }
 
-        UserProfile record = createUserRecord(user);
 
-        ofy().save().entity(record).now();
+        return new StringResult(userProfile.getUserId());
     }
 
     /**
@@ -129,7 +159,7 @@ public class WhereAreYouApi {
      * @param registrationId The Google Cloud Messaging registration Id to add
      */
     @ApiMethod(name = "register")
-    public void registerDevice(RegistrationId registrationId, User user) throws UnauthorizedException {
+    public StringResult registerDevice(RegistrationId registrationId, User user) throws UnauthorizedException {
 
         log.info("API call: registerDevice, user = " + user);
 
@@ -149,6 +179,8 @@ public class WhereAreYouApi {
         userProfile.setRegId(regId);
 
         ofy().save().entity(userProfile).now();
+
+        return new StringResult(userProfile.getUserId());
     }
 
     /**
@@ -216,11 +248,6 @@ public class WhereAreYouApi {
 
         UserProfile contactUserProfile = getUserProfileById(contactUserId);
 
-        if(userProfile ==null || contactUserProfile ==null)
-        {
-            // TODO: 2015-12-10
-            return;
-        }
 
         GcmMessages.sendLocationRequest(userProfile, contactUserProfile, message);
 

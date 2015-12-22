@@ -7,6 +7,7 @@ import java.io.IOException;
 import ca.nbsoft.whereareyou.Endpoints;
 import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.RegistrationId;
+import ca.nbsoft.whereareyou.backend.whereAreYou.model.StringResult;
 
 
 /**
@@ -19,14 +20,14 @@ public class GcmUtils {
      * @param token
      * @throws IOException
      */
-    static public void registerDevice( String token, GoogleAccountCredential credential) throws IOException {
+    static public StringResult registerDevice( String token, GoogleAccountCredential credential) throws IOException {
 
         WhereAreYou apiEndpoint = Endpoints.getApiEndpoint(credential);
 
         RegistrationId r = new RegistrationId();
         r.setToken(token);
 
-        apiEndpoint.register(r).execute();
+        return apiEndpoint.register(r).execute();
     }
 
 

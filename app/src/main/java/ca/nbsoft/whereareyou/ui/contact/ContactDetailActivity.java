@@ -45,7 +45,7 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_contact_detail);
+        setContentView(R.layout.activity_contact_detail);
 
         ButterKnife.bind(this);
 
@@ -80,9 +80,14 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        ContactCursor cursor = new ContactCursor(data);
+        if(data.moveToFirst()) {
+            ContactCursor cursor = new ContactCursor(data);
 
-        mCollapsingToolbarLayout.setTitle( cursor.getEmail() );
+            mCollapsingToolbarLayout.setTitle(cursor.getEmail());
+            ContactDetailFragment contactFragment = (ContactDetailFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+
+            contactFragment.bind(cursor);
+        }
     }
 
     @Override

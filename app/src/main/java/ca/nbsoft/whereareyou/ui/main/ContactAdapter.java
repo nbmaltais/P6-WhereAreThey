@@ -16,11 +16,18 @@ import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
  */
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
 
+    interface OnItemClickCallback
+    {
+        void onContactItemClicked(String userId);
+    }
+
+    private OnItemClickCallback mItemClickCallback;
     private ContactCursor mCursor;
 
-    public ContactAdapter()
+    public ContactAdapter(OnItemClickCallback callback)
     {
         super();
+        mItemClickCallback=callback;
     }
 
     public void setContactCursor( ContactCursor c )
@@ -40,7 +47,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         if(mCursor.moveToPosition(position))
         {
-            holder.bind(mCursor);
+            holder.bind(mCursor,mItemClickCallback);
         }
     }
 
@@ -57,13 +64,22 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         @Bind(R.id.email_view)
         TextView mEmail;
 
+        private String mUserId;
+
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        public void bind(ContactCursor cursor) {
+        public void bind(ContactCursor cursor, final OnItemClickCallback itemClickCallback) {
+            mUserId = cursor.getUserid();
             mEmail.setText(cursor.getEmail());
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    itemClickCallback.onContactItemClicked(mUserId);
+                }
+            });
         }
     }
 
