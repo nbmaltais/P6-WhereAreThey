@@ -1,4 +1,4 @@
-package ca.nbsoft.whereareyou;
+package ca.nbsoft.whereareyou.Utility;
 
 import android.content.Context;
 import android.content.SharedPreferences;

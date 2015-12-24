@@ -16,7 +16,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.Endpoints;
-import ca.nbsoft.whereareyou.PreferenceUtils;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.gcm.RegistrationIntentService;
 import ca.nbsoft.whereareyou.ui.main.MainActivity;

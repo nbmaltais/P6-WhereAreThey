@@ -173,7 +173,8 @@ public class MyGcmListenerService extends GcmListenerService {
         builder.setContentTitle(title)
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setContentIntent(locationPendingIntent);
+                .setContentIntent(locationPendingIntent)
+                .setAutoCancel(true);
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 

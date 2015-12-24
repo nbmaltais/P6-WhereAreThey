@@ -15,7 +15,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 
 import ca.nbsoft.whereareyou.BuildConfig;
 import ca.nbsoft.whereareyou.Endpoints;
-import ca.nbsoft.whereareyou.PreferenceUtils;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.StringResult;
 
 

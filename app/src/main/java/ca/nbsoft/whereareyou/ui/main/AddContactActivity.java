@@ -15,6 +15,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.Utility.Utils;
 
 public class AddContactActivity extends AppCompatActivity {
 
@@ -58,6 +59,8 @@ public class AddContactActivity extends AppCompatActivity {
     @OnClick(R.id.add_button)
     void addContact()
     {
+        Utils.closeKeyboard(this);
+
         String email = mEmailView.getText().toString();
         ApiService.sendContactRequest(this, email);
     }

@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import ca.nbsoft.whereareyou.PlayServicesUtils;
-import ca.nbsoft.whereareyou.PreferenceUtils;
+import ca.nbsoft.whereareyou.Utility.PlayServicesUtils;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.ui.login.LoginActivity;
 
 /**

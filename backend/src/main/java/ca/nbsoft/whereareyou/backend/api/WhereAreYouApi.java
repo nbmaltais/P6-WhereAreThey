@@ -343,6 +343,7 @@ public class WhereAreYouApi {
 
         // TODO send notification that contact request is confirmed
         GcmMessages.confirmContactRequest(userProfile, contactProfile);
+        GcmMessages.confirmContactRequest(contactProfile, userProfile);
     }
 
     private UserProfile getUserProfileById( String userId)
