@@ -74,6 +74,7 @@ public class MyGcmListenerService extends GcmListenerService {
         String title = "Contact Confirmation";
         String contentText = "From " + fromEmail;
 
+        // Notification
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
@@ -84,6 +85,9 @@ public class MyGcmListenerService extends GcmListenerService {
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         notifyMgr.notify(CONTACT_CONFIRMATION_NOTIF_ID, builder.build());
+
+        // Update contact list
+        ApiService.updateContactList(this);
     }
 
     private void onContactRequest(Bundle message) {
@@ -121,7 +125,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.d(TAG,"onLocation");
 
         String fromUserId = message.getString(KEY_USER_ID);
-        String messageText = message.getString(KEY_MESSAGE);
+        String messageText= message.getString(KEY_MESSAGE,null);
 
         android.location.Location loc = new android.location.Location("WhereAreYouBackend");
         if(message.containsKey(KEY_LATITUDE) && message.containsKey(KEY_LONGITUDE))
@@ -181,7 +185,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.d(TAG,"onLocationRequest");
 
         String fromUserId = message.getString(KEY_USER_ID);
-        String messageText = message.getString(KEY_MESSAGE);
+        String messageText = message.getString(KEY_MESSAGE,null);
 
         Contact contact = getContact(fromUserId);
         if(contact==null)
@@ -198,7 +202,7 @@ public class MyGcmListenerService extends GcmListenerService {
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
-        Intent replyIntent = ApiService.sendLocationIntent(this,fromUserId,"");
+        Intent replyIntent = ApiService.sendLocationIntent(this,fromUserId,null);
         replyIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION,notifId);
         PendingIntent replyPendingIntent = PendingIntent.getService(this,0,replyIntent,PendingIntent.FLAG_ONE_SHOT);
 

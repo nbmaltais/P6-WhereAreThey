@@ -28,12 +28,14 @@ public class GcmMessages {
     static public void sendLocationRequest( UserProfile from, UserProfile to, String message ) throws IOException {
 
         Sender sender = new Sender(API_KEY);
-        Message msg = new Message.Builder()
-                .addData(KEY_TYPE,"location-request")
-                .addData(KEY_USER_ID, from.getUserId())
-                .addData(KEY_MESSAGE, message)
-                .build();
+        Message.Builder builder = new Message.Builder()
+                .addData(KEY_TYPE, "location-request")
+                .addData(KEY_USER_ID, from.getUserId());
 
+        if(message!=null)
+            builder.addData(KEY_MESSAGE, message);
+
+        Message msg = builder.build();
         Result result = sender.send(msg, to.getRegId(), 5);
 
         handleResult(result,to.getRegId());
@@ -47,8 +49,10 @@ public class GcmMessages {
 
         Message.Builder builder = new Message.Builder()
                 .addData(KEY_TYPE, "location")
-                .addData(KEY_USER_ID, from.getUserId())
-                .addData(KEY_MESSAGE, message);
+                .addData(KEY_USER_ID, from.getUserId());
+
+        if(message!=null)
+            builder.addData(KEY_MESSAGE, message);
 
         if(location!=null) {
             builder.addData("location_lat", Double.toString(location.getLatitude()))

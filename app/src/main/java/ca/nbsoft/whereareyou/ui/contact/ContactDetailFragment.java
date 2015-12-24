@@ -43,7 +43,7 @@ public class ContactDetailFragment extends Fragment {
     @OnClick(R.id.request_location_button)
     void onRequestLocationClicked()
     {
-        ApiService.requestContactLocation(getContext(),mUserId,"");
+        ApiService.requestContactLocation(getContext(),mUserId,null);
         Snackbar.make(mTopContainer,"Requested position of " + mContactName, Snackbar.LENGTH_SHORT);
     }
 

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 
 import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfo;
@@ -168,7 +169,30 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
     public static void subscribeToResult(Context ctx, @ActionName String action, BroadcastReceiver receiver)
     {
-        LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver,  new IntentFilter(action));
+        LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, new IntentFilter(action));
+    }
+
+    public static void subscribeToResult(Context ctx, List<String> actions, BroadcastReceiver receiver)
+    {
+        IntentFilter filter = new IntentFilter();
+        for( String action : actions) {
+            filter.addAction(action);
+        }
+        LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter );
+    }
+
+    public static void subscribeToResult(Context ctx,  BroadcastReceiver receiver)
+    {
+        IntentFilter filter = new IntentFilter();
+
+
+        filter.addAction(ACTION_REQUEST_LOCATION);
+        filter.addAction(ACTION_SEND_CONTACT_REQUEST);
+        filter.addAction(ACTION_CONFIRM_CONTACT_REQUEST);
+        filter.addAction(ACTION_SEND_LOCATION);
+        filter.addAction(ACTION_UPDATE_CONTACT_LIST);
+
+        LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter);
     }
 
     public static void unSubscribeFromResult(Context ctx, BroadcastReceiver receiver)
@@ -191,7 +215,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         context.startService(intent);
     }
 
-    public static Intent sendLocationIntent(Context context, @NonNull String contactId, @NonNull String message) {
+    public static Intent sendLocationIntent(Context context, @NonNull String contactId,  String message) {
         Intent intent = new Intent(context, ApiService.class);
         intent.setAction(ACTION_SEND_LOCATION);
         intent.putExtra(Constants.EXTRA_CONTACT_USER_ID, contactId);
@@ -199,7 +223,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         return intent;
     }
 
-    public static void sendLocation(Context context, @NonNull String contactId, @NonNull String message) {
+    public static void sendLocation(Context context, @NonNull String contactId, String message) {
         context.startActivity(sendLocationIntent(context, contactId, message));
     }
 
@@ -312,7 +336,11 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
         showToast("Sending location to " + userId);
 
-        mApi.sendLocation(userId, message, loc);
+        WhereAreYou.SendLocation sendLocation = mApi.sendLocation(userId, loc);
+        if(message!=null)
+            sendLocation.setMessage(message);
+
+        sendLocation.execute();
 
         return RESULT_SUCCESS;
     }
@@ -370,10 +398,13 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         return RESULT_SUCCESS;
     }
 
-    private @ResultCode int handleRequestContactLocation(@NonNull String userId, @NonNull String message)throws IOException {
+    private @ResultCode int handleRequestContactLocation(@NonNull String userId, String message)throws IOException {
         Log.d(TAG, "handleRequestContactLocation, userId = " + userId);
 
-        mApi.requestContactLocation(userId, message).execute();
+        WhereAreYou.RequestContactLocation requestContactLocation = mApi.requestContactLocation(userId);
+        if(message!=null)
+            requestContactLocation.setMessage(message);
+        requestContactLocation.execute();
 
         return RESULT_SUCCESS;
     }

@@ -9,6 +9,7 @@ package ca.nbsoft.whereareyou.backend.api;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
+import com.google.api.server.spi.config.Nullable;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.users.User;
@@ -233,7 +234,8 @@ public class WhereAreYouApi {
     }
 
     @ApiMethod(name = "requestContactLocation")
-    public void requestContactLocation( User user, @Named("contactId") String contactUserId, @Named("message") String message ) throws Exception {
+    public void requestContactLocation( User user, @Named("contactId") String contactUserId,
+                                        @Nullable @Named("message") String message ) throws Exception {
 
         log.info("API call: requestContactLocation, user = " + user);
 
@@ -257,7 +259,7 @@ public class WhereAreYouApi {
     public void sendLocation( User user,
                               @Named("contactId") String contactUserId,
                               Location location,
-                              @Named("message") String message ) throws Exception {
+                              @Nullable @Named("message") String message ) throws Exception {
 
         log.info("API call: sendLocation, user = " + user);
 
