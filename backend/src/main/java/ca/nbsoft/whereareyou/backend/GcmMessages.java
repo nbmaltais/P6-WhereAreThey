@@ -27,6 +27,12 @@ public class GcmMessages {
 
     static public void sendLocationRequest( UserProfile from, UserProfile to, String message ) throws IOException {
 
+        if(to.getRegId()==null)
+        {
+            log.info("sendLocationRequest: user has no registered device");
+            return;
+        }
+
         Sender sender = new Sender(API_KEY);
         Message.Builder builder = new Message.Builder()
                 .addData(KEY_TYPE, "location-request")
@@ -45,7 +51,11 @@ public class GcmMessages {
     public static void sendLocation(UserProfile from, UserProfile to, Location location, String message) throws IOException {
         Sender sender = new Sender(API_KEY);
 
-
+        if(to.getRegId()==null)
+        {
+            log.info("sendLocation: user has no registered device");
+            return;
+        }
 
         Message.Builder builder = new Message.Builder()
                 .addData(KEY_TYPE, "location")
@@ -68,6 +78,14 @@ public class GcmMessages {
 
 
     public static void sendContactRequest(UserProfile from, UserProfile to) throws IOException {
+
+        if(to.getRegId()==null)
+        {
+            log.info("sendContactRequest: user has no registered device");
+            return;
+        }
+
+
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
                 .addData(KEY_TYPE, "contact-request")
@@ -81,6 +99,13 @@ public class GcmMessages {
     }
 
     public static void confirmContactRequest(UserProfile from, UserProfile to) throws IOException {
+
+        if(to.getRegId()==null)
+        {
+            log.info("confirmContactRequest: user has no registered device");
+            return;
+        }
+
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
                 .addData(KEY_TYPE, "contact-confirmation")

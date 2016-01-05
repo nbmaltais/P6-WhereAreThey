@@ -24,9 +24,14 @@ public class UserProfile {
     @Index
     private String email;
 
+    // Contacts
     private List<String> contactsUserId = new ArrayList<>(0);
 
+    // Contacts for whom this user is waiting for a confirmation
     private List<String> pendingContactRequestsUserId = new ArrayList<>(0);
+
+    // Contacts who are waiting a confirmation from this user
+    private List<String> waitingForConfirmationUserId = new ArrayList<>(0);
 
     public UserProfile() {
     }
@@ -60,31 +65,48 @@ public class UserProfile {
         this.regId = regId;
     }
 
-    public List<String> getContactsKeys() {
+    public List<String> getContactsUserId() {
         return ImmutableList.copyOf(contactsUserId);
     }
 
-    public void addContactUserId(String contactKey) {
-        contactsUserId.add(contactKey);
+    public void addContactUserId(String userId) {
+        if(!contactsUserId.contains(userId))
+            contactsUserId.add(userId);
     }
 
-    public void removeContactUserId(String contactKey) {
-        contactsUserId.remove(contactKey);
+    public void removeContactUserId(String userId) {
+        contactsUserId.remove(userId);
     }
 
-    public boolean containsContactUserId(String contactKey) {
-        return contactsUserId.contains(contactKey);
+    public boolean containsContactUserId(String userId) {
+        return contactsUserId.contains(userId);
     }
 
-    public void addPendingContactRequestUserId(String contactKey) {
-        pendingContactRequestsUserId.add(contactKey);
+    public void addPendingContactRequestUserId(String userId) {
+        if(!pendingContactRequestsUserId.contains(userId))
+            pendingContactRequestsUserId.add(userId);
     }
 
-    public void removePendingContactRequestUserId(String contactKey) {
-        pendingContactRequestsUserId.remove(contactKey);
+    public void removePendingContactRequestUserId(String userId) {
+        pendingContactRequestsUserId.remove(userId);
     }
 
-    public boolean containsPendingContactRequestUserId(String contactKey) {
-        return pendingContactRequestsUserId.contains(contactKey);
+    public boolean containsPendingContactRequestUserId(String userId) {
+        return pendingContactRequestsUserId.contains(userId);
+    }
+
+    public void removeWaitingForConfirmationUserId(String userId) {
+        waitingForConfirmationUserId.remove(userId);
+    }
+
+    public void addWaitingForConfirmationUserId(String userId) {
+        if(!waitingForConfirmationUserId.contains(userId))
+            waitingForConfirmationUserId.add(userId);
+
+    }
+
+    public boolean containsWaitingForConfirmationUserId(String userId)
+    {
+        return waitingForConfirmationUserId.contains(userId);
     }
 }
