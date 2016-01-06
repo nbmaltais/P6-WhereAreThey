@@ -287,7 +287,9 @@ public class WhereAreYouApi {
             throw new UnauthorizedException("Authorization required");
         }
 
+
         UserProfile userProfile = getUserProfile(user);
+
 
         if(!userProfile.containsContactUserId(contactUserId))
             throw new InvalidUserException("Specified user is not in contact list.");
@@ -375,6 +377,11 @@ public class WhereAreYouApi {
 
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
+        }
+
+        if(user.getEmail().equals(contactEmail))
+        {
+            throw new InvalidUserException("Sending contact request to self is not permitted.");
         }
 
         UserProfile userProfile = getUserProfile(user);

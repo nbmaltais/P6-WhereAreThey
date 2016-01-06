@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import ca.nbsoft.whereareyou.ApiService;
+import ca.nbsoft.whereareyou.BuildConfig;
 import ca.nbsoft.whereareyou.Utility.PlayServicesUtils;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.ui.login.LoginActivity;
@@ -39,12 +41,21 @@ public class BaseActivity extends AppCompatActivity{
         String userId = PreferenceUtils.getUserId(this);
         String accountName = PreferenceUtils.getAccountName(this);
         boolean registered = PreferenceUtils.getSentRegistrationToBackend(this);
+
         if(!registered || accountName==null || userId==null)
         {
             Intent intent = new Intent(this,LoginActivity.class);
             startActivity(intent);
             finish(); // remove from back stack
         }
+        else if(BuildConfig.isLocalServer)
+        {
+            // Only with debug server, refresh the contact list since it may be invalid if the
+            // server was restarted
+            ApiService.updateContactList(this);
+        }
+
+
     }
 
     protected void forceSignin()

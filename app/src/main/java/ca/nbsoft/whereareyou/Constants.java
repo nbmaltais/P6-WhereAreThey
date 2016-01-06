@@ -8,4 +8,6 @@ public class Constants {
     public static final String EXTRA_LOCATION = "ca.nbsoft.whereareyou.extra.LOCATION";
     public static final String EXTRA_MESSAGE = "ca.nbsoft.whereareyou.extra.MESSAGE";
     public static final String EXTRA_CONTACT = "ca.nbsoft.whereareyou.extra.CONTACT";
+
+
 }

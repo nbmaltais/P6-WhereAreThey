@@ -234,6 +234,14 @@ public class WhereAreYouApiTest {
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendContactRequest(user, "unknown@gmail.com");
     }
 
+    @Test(expected = InvalidUserException.class)
+    public void testSendContactRequest_sameUser() throws Exception {
+        UserProfile profile1 = new UserProfile(user);
+        UserProfileHelper.saveUserProfile(profile1);
+
+        WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendContactRequest(user, user.getEmail());
+    }
+
     @Test
     public void testSendContactRequest_pending() throws Exception {
         setupProfilesWithPendingRequest();

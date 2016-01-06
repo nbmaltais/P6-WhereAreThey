@@ -13,6 +13,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
+import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.BuildConfig;
 import ca.nbsoft.whereareyou.Endpoints;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
@@ -127,6 +128,9 @@ public class RegistrationIntentService extends IntentService {
             if (callback != null) {
                 callback.send(RESULT_SUCCEEDED, null);
             }
+
+            // Update contact list after registration
+            ApiService.updateContactList(this);
 
         } catch (Exception e) {
             Log.d(TAG, "Failed to complete token refresh", e);

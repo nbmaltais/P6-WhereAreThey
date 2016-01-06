@@ -25,8 +25,8 @@ public class AddContactActivity extends AppCompatActivity {
 
     BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver(){
         @Override
-        public void onSendContactRequestResult(@ApiService.ResultCode int resultCode) {
-            if( resultCode == ApiService.RESULT_SUCCESS)
+        public void onSendContactRequestResult(ApiService.Result resultCode) {
+            if( resultCode.getResultCode() == ApiService.Result.RESULT_SUCCESS)
             {
                 //mEmailView.getText();
                 Snackbar.make(mEmailView, R.string.add_contact_succeeded,Snackbar.LENGTH_SHORT).show();

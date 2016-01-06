@@ -12,10 +12,22 @@ android {
         versionName "1.0"
 
         buildConfigField "String", "GCM_SENDER_ID", GCM_SENDER_ID
-        buildConfigField "String", "BACKEND_URL", BACKEND_URL
         buildConfigField "String", "WEB_CLIENT_ID", WEB_CLIENT_ID
         resValue("string", "google_api_key", ANDROID_API_KEY)
     }
+
+    productFlavors {
+        localServer {
+            buildConfigField "boolean", "isLocalServer", "true"
+            buildConfigField "String", "BACKEND_URL", LOCAL_BACKEND_URL
+        }
+        remoteServer {
+            buildConfigField "boolean", "isLocalServer", "false"
+            buildConfigField "String", "BACKEND_URL", BACKEND_URL
+        }
+    }
+
+
     buildTypes {
         release {
             minifyEnabled false

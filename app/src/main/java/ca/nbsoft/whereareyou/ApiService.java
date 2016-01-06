@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
@@ -36,6 +38,7 @@ import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfo;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfoCollection;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.Location;
+import ca.nbsoft.whereareyou.backend.whereAreYou.model.StatusResult;
 import ca.nbsoft.whereareyou.provider.WhereRUProvider;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactContentValues;
@@ -57,6 +60,17 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     public static final String ACTION_UPDATE_CONTACT_LIST = "ca.nbsoft.whereareyou.action.UPDATE_CONTACT_LIST";
 
 
+    public static final class StatusCode
+    {
+        public static final int RESULT_OK = 0;
+        public static final int RESULT_NOT_REGISTERED = -1;
+        public static final int RESULT_CONTACT_ALREADY_ADDED = -2;
+        public static final int RESULT_CONTACT_REQUEST_PENDING = -3;
+        public static final int RESULT_NO_PENDING_REQUEST = -4;
+        public static final int RESULT_NOT_IN_CONTACT = -5;
+        public static final int RESULT_USER_UNSUBSCRIBED = -6;
+    }
+
     @Retention(RetentionPolicy.SOURCE)
     @StringDef ({ACTION_REQUEST_LOCATION,
             ACTION_SEND_CONTACT_REQUEST,
@@ -65,18 +79,87 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             ACTION_UPDATE_CONTACT_LIST})
     public @interface ActionName {}
 
-    public static final int RESULT_SUCCESS =0;
-    public static final int RESULT_FAILURE =-1;
-    public static final int RESULT_DB_ERROR = -2;
-    public static final int RESULT_INVALID_ACTION =-3;
-    public static final int RESULT_ERROR_PERMISSION=-4;
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RESULT_SUCCESS,
-            RESULT_FAILURE,
-            RESULT_DB_ERROR,
-            RESULT_INVALID_ACTION,
-            RESULT_ERROR_PERMISSION})
-    public @interface ResultCode {}
+    public static class Result implements Parcelable {
+
+
+        public static final int RESULT_SUCCESS =0;
+        public static final int RESULT_FAILURE =-1;
+        public static final int RESULT_DB_ERROR = -2;
+        public static final int RESULT_INVALID_ACTION =-3;
+        public static final int RESULT_BACKEND_ERROR_PERMISSION =-4;
+        public static final int RESULT_BACKEND_ERROR_INVALID_USER =-5;
+        public static final int RESULT_BACKEND_ERROR_STATUSCODE = -6;
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({RESULT_SUCCESS,
+                RESULT_FAILURE,
+                RESULT_DB_ERROR,
+                RESULT_INVALID_ACTION,
+                RESULT_BACKEND_ERROR_PERMISSION,
+                RESULT_BACKEND_ERROR_INVALID_USER,
+                RESULT_BACKEND_ERROR_STATUSCODE})
+        public @interface ResultCode {}
+
+
+        int resultCode;
+        int specificResultCode;
+
+        public static Result from(@ResultCode int rc)
+        {
+            return new Result(rc);
+        }
+
+        public static Result from(StatusResult result)
+        {
+            if(result.getResultCode()==StatusCode.RESULT_OK)
+                return new Result(RESULT_SUCCESS);
+            else
+                return new Result(RESULT_BACKEND_ERROR_STATUSCODE,result.getResultCode());
+        }
+
+        public Result(@ResultCode int rc){
+            resultCode=rc;
+            specificResultCode=0;
+        }
+
+        public Result(@ResultCode int rc, int specifirRc){
+            resultCode=rc;
+            specificResultCode=specifirRc;
+        }
+
+        public int getResultCode() {
+            return resultCode;
+        }
+
+        public int getSpecificResultCode() {
+            return specificResultCode;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.resultCode);
+            dest.writeInt(this.specificResultCode);
+        }
+
+        protected Result(Parcel in) {
+            this.resultCode = in.readInt();
+            this.specificResultCode = in.readInt();
+        }
+
+        public static final Parcelable.Creator<Result> CREATOR = new Parcelable.Creator<Result>() {
+            public Result createFromParcel(Parcel source) {
+                return new Result(source);
+            }
+
+            public Result[] newArray(int size) {
+                return new Result[size];
+            }
+        };
+    }
 
 
     public static final String EXTRA_CONTACT_EMAIL = "ca.nbsoft.whereareyou.extra.EMAIL";
@@ -97,52 +180,52 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
         public static final String EXTRA_RESULT_CODE = "RESULT_CODE";
 
-        public static void sendResult(Context ctx,@ActionName String action, @ResultCode int resultCode)
+        public static void sendResult(Context ctx,@ActionName String action, Result result)
         {
             Intent intent = new Intent(action);
-            intent.putExtra(EXTRA_RESULT_CODE, resultCode);
+            intent.putExtra(EXTRA_RESULT_CODE, result);
             LocalBroadcastManager.getInstance(ctx).sendBroadcast(intent);
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            @ResultCode int code = intent.getIntExtra(EXTRA_RESULT_CODE,-1);
+            Result result = intent.getParcelableExtra(EXTRA_RESULT_CODE);
             switch( intent.getAction()) {
                 case ACTION_REQUEST_LOCATION:
-                    onRequestLocationResult(code);
+                    onRequestLocationResult(result);
                     break;
                 case ACTION_SEND_LOCATION:
-                    onSendLocationResult(code);
+                    onSendLocationResult(result);
                     break;
                 case ACTION_UPDATE_CONTACT_LIST:
-                    onUpdateContactListResult(code);
+                    onUpdateContactListResult(result);
                     break;
                 case ACTION_SEND_CONTACT_REQUEST:
-                    onSendContactRequestResult(code);
+                    onSendContactRequestResult(result);
                     break;
                 case ACTION_CONFIRM_CONTACT_REQUEST:
-                    onConfirmContactRequestResult(code);
+                    onConfirmContactRequestResult(result);
                     break;
             }
         }
 
-        public void onConfirmContactRequestResult(@ResultCode int resultCode ) {
+        public void onConfirmContactRequestResult(Result resultCode ) {
 
         }
 
-        public void onSendContactRequestResult(@ResultCode int resultCode) {
+        public void onSendContactRequestResult(Result resultCode) {
             
         }
 
-        public void onUpdateContactListResult(@ResultCode int resultCode) {
+        public void onUpdateContactListResult(Result resultCode) {
             
         }
 
-        public void onSendLocationResult(@ResultCode int resultCode) {
+        public void onSendLocationResult(Result resultCode) {
             
         }
 
-        public void onRequestLocationResult(@ResultCode int resultCode) {
+        public void onRequestLocationResult(Result resultCode) {
             
         }
     }
@@ -256,9 +339,9 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             @ActionName final String action = intent.getAction();
             final String userId;
             final String message;
-            @ResultCode int resultCode = RESULT_INVALID_ACTION;
+            Result resultCode = new Result(Result.RESULT_INVALID_ACTION);
             try {
-
+                // Cancel the associated notification
                 if (intent.hasExtra(EXTRA_CANCEL_NOTIFICATION)) {
                     int id = intent.getIntExtra(EXTRA_CANCEL_NOTIFICATION, 0);
                     NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -295,17 +378,17 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
             } catch (IOException e) {
                 Log.e(TAG, "Error while performing action :" + action, e);
-                ResultBroadcastReceiver.sendResult(this, action, RESULT_FAILURE);
+                ResultBroadcastReceiver.sendResult(this, action,  Result.from(Result.RESULT_FAILURE));
                 // TODO: report error to UI
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error while performing action :" + action + ". Google API was not connected", e);
-                ResultBroadcastReceiver.sendResult(this, action, RESULT_FAILURE);
+                ResultBroadcastReceiver.sendResult(this, action,  Result.from(Result.RESULT_FAILURE));
             }
 
         }
     }
 
-    private @ResultCode int handleSendLocation(@NonNull String userId, @NonNull String message) throws IOException, InterruptedException {
+    private Result handleSendLocation(@NonNull String userId, @NonNull String message) throws IOException, InterruptedException {
         Log.d(TAG, "Sending location to " + userId);
 
         Location loc = null;
@@ -320,7 +403,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             Log.w(TAG,"User has not grated permission for location");
-            return RESULT_ERROR_PERMISSION;
+            return  Result.from(Result.RESULT_BACKEND_ERROR_PERMISSION);
         }
         else {
 
@@ -340,21 +423,21 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         if(message!=null)
             sendLocation.setMessage(message);
 
-        sendLocation.execute();
+        StatusResult result = sendLocation.execute();
 
-        return RESULT_SUCCESS;
+        return Result.from(result);
     }
 
-    private @ResultCode int handleConfirmContactRequest(@NonNull String userId) throws IOException {
+    private Result handleConfirmContactRequest(@NonNull String userId) throws IOException {
         Log.d(TAG, "Confirming contact request with " + userId);
         showToast("Confirming contact request with " + userId);
 
-        mApi.confirmContactRequest(userId).execute();
+        StatusResult result = mApi.confirmContactRequest(userId).execute();
 
-        return RESULT_SUCCESS;
+        return Result.from(result);
     }
 
-    private @ResultCode int handleUpdateContactList() throws IOException {
+    private Result handleUpdateContactList() throws IOException {
         Log.d(TAG, "handleUpdateContactList");
 
         ContactInfoCollection contacts = mApi.getContacts().execute();
@@ -362,52 +445,56 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
         // TODO: do a merge instead of nuking all contacts and recreating them
 
-        getContentResolver().delete(ContactColumns.CONTENT_URI,null,null);
+        getContentResolver().delete(ContactColumns.CONTENT_URI, null, null);
 
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
+        List<ContactInfo> items = contacts.getItems();
+        if(items!=null) {
+            for (ContactInfo contact : items) {
+                ContactContentValues values = new ContactContentValues();
 
-        for( ContactInfo contact : contacts.getItems())
-        {
-            ContactContentValues values = new ContactContentValues();
+                values.putUserid(contact.getUserId());
+                values.putEmail(contact.getEmail());
 
-            values.putUserid(contact.getUserId());
-            values.putEmail(contact.getEmail());
-
-            batch.add(ContentProviderOperation.newInsert(ContactColumns.CONTENT_URI).withValues(values.values()).build());
+                batch.add(ContentProviderOperation.newInsert(ContactColumns.CONTENT_URI).withValues(values.values()).build());
+            }
         }
 
         try {
             getContentResolver().applyBatch(WhereRUProvider.AUTHORITY, batch);
-            return RESULT_SUCCESS;
+            return Result.from(Result.RESULT_SUCCESS);
         } catch (RemoteException e) {
             Log.e(TAG,"Contact DB update failed",e);
-            return RESULT_DB_ERROR;
+            return Result.from(Result.RESULT_DB_ERROR);
         } catch (OperationApplicationException e) {
             Log.e(TAG, "Contact DB update failed", e);
-            return RESULT_DB_ERROR;
+            return Result.from(Result.RESULT_DB_ERROR);
         }
 
     }
 
-    private @ResultCode int handleSendContactRequest(@NonNull String email)throws IOException {
+    private Result  handleSendContactRequest(@NonNull String email)throws IOException {
         Log.d(TAG, "handleSendContactRequest");
 
-        mApi.sendContactRequest(email).execute();
+        StatusResult result = mApi.sendContactRequest(email).execute();
 
-        return RESULT_SUCCESS;
+        return Result.from(result);
     }
 
-    private @ResultCode int handleRequestContactLocation(@NonNull String userId, String message)throws IOException {
+    private Result handleRequestContactLocation(@NonNull String userId, String message)throws IOException {
         Log.d(TAG, "handleRequestContactLocation, userId = " + userId);
 
         WhereAreYou.RequestContactLocation requestContactLocation = mApi.requestContactLocation(userId);
         if(message!=null)
             requestContactLocation.setMessage(message);
-        requestContactLocation.execute();
+        StatusResult result = requestContactLocation.execute();
 
-        return RESULT_SUCCESS;
+
+        return Result.from(result);
     }
+
+
 
     protected void showToast(final String message) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
