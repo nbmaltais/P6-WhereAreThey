@@ -42,6 +42,7 @@ import ca.nbsoft.whereareyou.backend.whereAreYou.model.StatusResult;
 import ca.nbsoft.whereareyou.provider.WhereRUProvider;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactContentValues;
+import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -58,6 +59,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     public static final String ACTION_CONFIRM_CONTACT_REQUEST = "ca.nbsoft.whereareyou.action.CONFIRM_CONTACT_REQUEST";
     public static final String ACTION_SEND_LOCATION = "ca.nbsoft.whereareyou.action.SEND_LOCATION";
     public static final String ACTION_UPDATE_CONTACT_LIST = "ca.nbsoft.whereareyou.action.UPDATE_CONTACT_LIST";
+    public static final String ACTION_DELETE_CONTACT ="ca.nbsoft.whereareyou.action.DELETE_CONTACT";
 
 
     public static final class StatusCode
@@ -76,7 +78,8 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             ACTION_SEND_CONTACT_REQUEST,
             ACTION_CONFIRM_CONTACT_REQUEST,
             ACTION_SEND_LOCATION,
-            ACTION_UPDATE_CONTACT_LIST})
+            ACTION_UPDATE_CONTACT_LIST,
+            ACTION_DELETE_CONTACT})
     public @interface ActionName {}
 
     public static class Result implements Parcelable {
@@ -124,6 +127,11 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         public Result(@ResultCode int rc, int specifirRc){
             resultCode=rc;
             specificResultCode=specifirRc;
+        }
+
+        public boolean isOk()
+        {
+            return resultCode == RESULT_SUCCESS;
         }
 
         public int getResultCode() {
@@ -206,6 +214,9 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
                 case ACTION_CONFIRM_CONTACT_REQUEST:
                     onConfirmContactRequestResult(result);
                     break;
+                case ACTION_DELETE_CONTACT:
+                    onDeleteContactResult(result);
+                    break;
             }
         }
 
@@ -227,6 +238,10 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
         public void onRequestLocationResult(Result resultCode) {
             
+        }
+
+        public void onDeleteContactResult(Result resultCode) {
+
         }
     }
 
@@ -255,13 +270,13 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, new IntentFilter(action));
     }
 
-    public static void subscribeToResult(Context ctx, List<String> actions, BroadcastReceiver receiver)
+    public static void subscribeToResult(Context ctx, String[] actions, BroadcastReceiver receiver)
     {
         IntentFilter filter = new IntentFilter();
         for( String action : actions) {
             filter.addAction(action);
         }
-        LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter );
+        LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter);
     }
 
     public static void subscribeToResult(Context ctx,  BroadcastReceiver receiver)
@@ -274,6 +289,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         filter.addAction(ACTION_CONFIRM_CONTACT_REQUEST);
         filter.addAction(ACTION_SEND_LOCATION);
         filter.addAction(ACTION_UPDATE_CONTACT_LIST);
+        filter.addAction(ACTION_DELETE_CONTACT);
 
         LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter);
     }
@@ -321,6 +337,13 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         context.startService(confirmContactRequestIntent(context, contactUserId));
     }
 
+    public static void deleteContact(Context context, @NonNull String contactUserId) {
+        Intent intent = new Intent(context, ApiService.class);
+        intent.setAction(ACTION_DELETE_CONTACT);
+        intent.putExtra(Constants.EXTRA_CONTACT_USER_ID, contactUserId);
+        context.startService(intent);
+    }
+
     public static void updateContactList(Context context) {
         Intent intent = new Intent(context, ApiService.class);
         intent.setAction(ACTION_UPDATE_CONTACT_LIST);
@@ -332,7 +355,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
 
-            // TODO: add definitice action to a pending queue in case the operation fails.
+            // TODO: add  action to a pending queue in case the operation fails.
             // The pending queue should be processed later
             //
 
@@ -370,7 +393,15 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
                         message = intent.getStringExtra(Constants.EXTRA_MESSAGE);
                         resultCode = handleSendLocation(userId, message);
                         break;
+                    case ACTION_DELETE_CONTACT:
+                        userId = intent.getStringExtra(Constants.EXTRA_CONTACT_USER_ID);
+                        resultCode = handleDeleteContact(userId);
+                        break;
+
                 }
+
+                // Perform specific action post
+                handleResultCode(resultCode);
 
                 ResultBroadcastReceiver.sendResult(this,action,resultCode);
 
@@ -388,6 +419,37 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         }
     }
 
+    private void handleResultCode(Result resultCode) {
+        if( resultCode.getResultCode() == Result.RESULT_BACKEND_ERROR_STATUSCODE )
+        {
+            switch( resultCode.getSpecificResultCode() )
+            {
+                case StatusCode.RESULT_USER_UNSUBSCRIBED:
+                    // Force a contact update
+                    ApiService.updateContactList(this);
+                    break;
+            }
+        }
+    }
+
+    private Result handleDeleteContact(String userId) throws IOException {
+        Log.d(TAG, "Deleting contact " + userId);
+
+        StatusResult result = mApi.removeContact(userId).execute();
+
+        removeContactFromDb(userId);
+
+        return Result.from(result);
+    }
+
+    private void removeContactFromDb(String userId) {
+        ContactSelection sel = new ContactSelection();
+
+        sel.userid(userId);
+
+        sel.delete(getContentResolver());
+    }
+
     private Result handleSendLocation(@NonNull String userId, @NonNull String message) throws IOException, InterruptedException {
         Log.d(TAG, "Sending location to " + userId);
 
@@ -402,7 +464,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            Log.w(TAG,"User has not grated permission for location");
+            Log.w(TAG,"User has not granted permission for location");
             return  Result.from(Result.RESULT_BACKEND_ERROR_PERMISSION);
         }
         else {

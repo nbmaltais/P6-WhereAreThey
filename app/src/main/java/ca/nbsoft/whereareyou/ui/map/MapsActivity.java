@@ -58,6 +58,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng contactPos = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         Log.d(TAG,"onMapReady, latlong = " + contactPos);
         mMap.addMarker(new MarkerOptions().position(contactPos).title(mContact.getDisplayName()));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(contactPos));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom (contactPos,18));
+
+
     }
 }

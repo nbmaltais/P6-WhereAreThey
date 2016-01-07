@@ -18,6 +18,7 @@ import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
+import ca.nbsoft.whereareyou.ui.main.MainActivity;
 import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
 public class MyGcmListenerService extends GcmListenerService {
@@ -74,6 +75,9 @@ public class MyGcmListenerService extends GcmListenerService {
         String title = "Contact Confirmation";
         String contentText = "From " + fromEmail;
 
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent, PendingIntent.FLAG_ONE_SHOT);
+
         // Notification
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
@@ -81,6 +85,9 @@ public class MyGcmListenerService extends GcmListenerService {
         builder.setContentTitle(title)
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification);
+
+        builder.setAutoCancel(true);
+        builder.setContentIntent(pendingIntent);
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 

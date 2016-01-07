@@ -99,7 +99,7 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
-    <string name="contact_detail_request_location">Location</string>
+    <string name="contact_detail_request_location">Ask Location</string>
     <string name="menu_login">Login</string>
     <string name="notification_location_request_title">Location Request</string>
     <string name="notification_reply_action">Reply</string>
@@ -113,4 +113,11 @@
     <string name="add_contact_button">Add</string>
     <string name="add_contact_succeeded">A contact request has been send</string>
     <string name="add_contact_failed">Failed to add contact</string>
+    <string name="contact_detail_send_location">Send location</string>
+    <string name="contact_detail_delete_contact">Delete</string>
+    <string name="contact_detail_message_hint">message</string>
+    <string name="contact_detail_send_position_confirmation">Position sent</string>
+    <string name="contact_detail_request_position_confirmation">Requested position</string>
+    <string name="contact_detail_cancel">Cancel</string>
+    <string name="contact_detail_delete_confirmation">Contact deleted</string>
 </resources>
