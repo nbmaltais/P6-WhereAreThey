@@ -25,16 +25,22 @@ public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
     public static final String SQL_CREATE_TABLE_CONTACT = "CREATE TABLE IF NOT EXISTS "
             + ContactColumns.TABLE_NAME + " ( "
             + ContactColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + ContactColumns.FIRST_NAME + " TEXT, "
-            + ContactColumns.LAST_NAME + " TEXT, "
+            + ContactColumns.ACCOUNT + " TEXT NOT NULL, "
+            + ContactColumns.NAME + " TEXT, "
             + ContactColumns.EMAIL + " TEXT NOT NULL, "
             + ContactColumns.USERID + " TEXT NOT NULL, "
-            + ContactColumns.AVATAR_URL + " TEXT, "
+            + ContactColumns.PHOTO_URL + " TEXT, "
             + ContactColumns.BLOCKED + " INTEGER NOT NULL DEFAULT 0, "
-            + ContactColumns.AUTO_REPLY + " INTEGER NOT NULL DEFAULT 0 "
+            + ContactColumns.AUTO_REPLY + " INTEGER NOT NULL DEFAULT 0, "
+            + ContactColumns.POSITION_LATITUDE + " REAL NOT NULL DEFAULT 0, "
+            + ContactColumns.POSITION_LONGITUDE + " REAL NOT NULL DEFAULT 0, "
+            + ContactColumns.POSITION_TIMSTAMP + " REAL NOT NULL DEFAULT 0 "
             + ", CONSTRAINT unique_email UNIQUE (email) ON CONFLICT REPLACE"
             + ", CONSTRAINT unique_usrerId UNIQUE (userId) ON CONFLICT REPLACE"
             + " );";
+
+    public static final String SQL_CREATE_INDEX_CONTACT_ACCOUNT = "CREATE INDEX IDX_CONTACT_ACCOUNT "
+            + " ON " + ContactColumns.TABLE_NAME + " ( " + ContactColumns.ACCOUNT + " );";
 
     public static final String SQL_CREATE_INDEX_CONTACT_USERID = "CREATE INDEX IDX_CONTACT_USERID "
             + " ON " + ContactColumns.TABLE_NAME + " ( " + ContactColumns.USERID + " );";
@@ -94,6 +100,7 @@ public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
         if (BuildConfig.DEBUG) Log.d(TAG, "onCreate");
         mOpenHelperCallbacks.onPreCreate(mContext, db);
         db.execSQL(SQL_CREATE_TABLE_CONTACT);
+        db.execSQL(SQL_CREATE_INDEX_CONTACT_ACCOUNT);
         db.execSQL(SQL_CREATE_INDEX_CONTACT_USERID);
         mOpenHelperCallbacks.onPostCreate(mContext, db);
     }

@@ -38,6 +38,7 @@ buildConfig {
             // The behaviour is to keep the string delimiter, we must remove them
             buildConfigField "String", "WEB_CLIENT_ID", WEB_CLIENT_ID[1..-2]
             buildConfigField "String", "ANDROID_DEBUG_CLIENT_ID", ANDROID_DEBUG_CLIENT_ID[1..-2]
+            buildConfigField "String", "ANDROID_RELEASE_CLIENT_ID", ANDROID_RELEASE_CLIENT_ID[1..-2]
             buildConfigField "String", "SERVER_API_KEY", SERVER_API_KEY[1..-2]
         }
     }

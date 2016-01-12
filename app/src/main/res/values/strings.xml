@@ -106,7 +106,7 @@
     <string name="notification_contact_request_title">Contact Request</string>
     <string name="notification_accept_action">Accept</string>
     <string name="action_refresh_contacts">Refresh</string>
-    <string name="action_test_send_position">Test location</string>
+    <string name="action_delete_account">Delete account</string>
     <string name="contact_email_hint">Email</string>
     <string name="add_contact_fragment_add_button">Add</string>
     <string name="add_contact_fragment_cancel_button">Cancel</string>
@@ -120,4 +120,6 @@
     <string name="contact_detail_request_position_confirmation">Requested position</string>
     <string name="contact_detail_cancel">Cancel</string>
     <string name="contact_detail_delete_confirmation">Contact deleted</string>
+    <string name="main_activity_delete_account_confirmation">Account deleted</string>
+    <string name="base_activity_signin_progress_caption">Signin in</string>
 </resources>

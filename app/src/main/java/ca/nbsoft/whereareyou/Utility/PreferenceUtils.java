@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import ca.nbsoft.whereareyou.gcm.RegistrationIntentService;
-
 /**
  * Created by Nicolas on 2015-11-29.
  */

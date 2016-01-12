@@ -57,13 +57,20 @@ public class WhereAreYouApiTest {
 
     @Test
     public void testCreateAccount() throws UnauthorizedException, InvalidUserException {
-        WhereAreYouApi.StringResult result = whereAreYouApi.createAccount(user);
+        NewAccountInfo accountInfo = new NewAccountInfo();
+        accountInfo.setDisplayName("Me myself and I");
+        accountInfo.setPhotoUrl("http://photo.jpg");
 
-        assertEquals(result.getResult(), user.getUserId());
+        WhereAreYouApi.StatusResult result = whereAreYouApi.createAccount(user,accountInfo);
+
+        assertEquals(result.getResultCode(), WhereAreYouApi.RESULT_OK);
 
         UserProfile userProfile = whereAreYouApi.getUserProfile(user);
         assertNotNull(userProfile);
         assertEquals(userProfile.getUserId(), user.getUserId());
+        assertEquals(userProfile.getEmail(), user.getEmail());
+        assertEquals(userProfile.getDisplayName(), accountInfo.getDisplayName());
+        assertEquals(userProfile.getPhotoUrl(), accountInfo.getPhotoUrl());
     }
 
 
@@ -127,18 +134,24 @@ public class WhereAreYouApiTest {
 
     @Test(expected = UnauthorizedException.class)
     public void testCreateAccount_WithoutUser() throws UnauthorizedException, InvalidUserException {
-        WhereAreYouApi.StringResult result = whereAreYouApi.createAccount(null);
+        NewAccountInfo accountInfo = new NewAccountInfo();
+        accountInfo.setDisplayName("Me myself and I");
+        accountInfo.setPhotoUrl("http://photo.jpg");
+
+        WhereAreYouApi.StatusResult result = whereAreYouApi.createAccount(null,accountInfo);
     }
 
     @Test
     public void testRegisterDevice() throws UnauthorizedException, InvalidUserException {
-        WhereAreYouApi.StringResult result = whereAreYouApi.registerDevice(REGISTRATION_TOKEN, user);
 
-        assertEquals(result.getResult(), user.getUserId());
+        setupSingleProfile();
+
+        WhereAreYouApi.StatusResult result = whereAreYouApi.registerDevice(user, REGISTRATION_TOKEN );
+
+        assertEquals(result.getResultCode(), whereAreYouApi.RESULT_OK);
 
         UserProfile userProfile = whereAreYouApi.getUserProfile(user);
-        assertNotNull(userProfile);
-        assertEquals(userProfile.getUserId(), user.getUserId());
+
         assertEquals(userProfile.getRegId(), REGISTRATION_TOKEN.getToken());
     }
 
@@ -212,7 +225,7 @@ public class WhereAreYouApiTest {
 
         assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
 
-        // Gte the updated  profiles
+        // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
         UserProfile profile2 = whereAreYouApi.getUserProfile(otherUser);
 

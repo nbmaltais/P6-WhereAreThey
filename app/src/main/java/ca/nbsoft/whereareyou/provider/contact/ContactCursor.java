@@ -27,22 +27,24 @@ public class ContactCursor extends AbstractCursor implements ContactModel {
     }
 
     /**
-     * First name.
-     * Can be {@code null}.
+     * User acount this contact is linked to
+     * Cannot be {@code null}.
      */
-    @Nullable
-    public String getFirstName() {
-        String res = getStringOrNull(ContactColumns.FIRST_NAME);
+    @NonNull
+    public String getAccount() {
+        String res = getStringOrNull(ContactColumns.ACCOUNT);
+        if (res == null)
+            throw new NullPointerException("The value of 'account' in the database was null, which is not allowed according to the model definition");
         return res;
     }
 
     /**
-     * Last name.
+     * Name.
      * Can be {@code null}.
      */
     @Nullable
-    public String getLastName() {
-        String res = getStringOrNull(ContactColumns.LAST_NAME);
+    public String getName() {
+        String res = getStringOrNull(ContactColumns.NAME);
         return res;
     }
 
@@ -75,8 +77,8 @@ public class ContactCursor extends AbstractCursor implements ContactModel {
      * Can be {@code null}.
      */
     @Nullable
-    public String getAvatarUrl() {
-        String res = getStringOrNull(ContactColumns.AVATAR_URL);
+    public String getPhotoUrl() {
+        String res = getStringOrNull(ContactColumns.PHOTO_URL);
         return res;
     }
 
@@ -97,6 +99,36 @@ public class ContactCursor extends AbstractCursor implements ContactModel {
         Boolean res = getBooleanOrNull(ContactColumns.AUTO_REPLY);
         if (res == null)
             throw new NullPointerException("The value of 'auto_reply' in the database was null, which is not allowed according to the model definition");
+        return res;
+    }
+
+    /**
+     * Get the {@code position_latitude} value.
+     */
+    public float getPositionLatitude() {
+        Float res = getFloatOrNull(ContactColumns.POSITION_LATITUDE);
+        if (res == null)
+            throw new NullPointerException("The value of 'position_latitude' in the database was null, which is not allowed according to the model definition");
+        return res;
+    }
+
+    /**
+     * Get the {@code position_longitude} value.
+     */
+    public float getPositionLongitude() {
+        Float res = getFloatOrNull(ContactColumns.POSITION_LONGITUDE);
+        if (res == null)
+            throw new NullPointerException("The value of 'position_longitude' in the database was null, which is not allowed according to the model definition");
+        return res;
+    }
+
+    /**
+     * Get the {@code position_timstamp} value.
+     */
+    public float getPositionTimstamp() {
+        Float res = getFloatOrNull(ContactColumns.POSITION_TIMSTAMP);
+        if (res == null)
+            throw new NullPointerException("The value of 'position_timstamp' in the database was null, which is not allowed according to the model definition");
         return res;
     }
 }

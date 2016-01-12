@@ -13,18 +13,18 @@ import android.support.annotation.Nullable;
 public interface ContactModel extends BaseModel {
 
     /**
-     * First name.
-     * Can be {@code null}.
+     * User acount this contact is linked to
+     * Cannot be {@code null}.
      */
-    @Nullable
-    String getFirstName();
+    @NonNull
+    String getAccount();
 
     /**
-     * Last name.
+     * Name.
      * Can be {@code null}.
      */
     @Nullable
-    String getLastName();
+    String getName();
 
     /**
      * Get the {@code email} value.
@@ -45,7 +45,7 @@ public interface ContactModel extends BaseModel {
      * Can be {@code null}.
      */
     @Nullable
-    String getAvatarUrl();
+    String getPhotoUrl();
 
     /**
      * Get the {@code blocked} value.
@@ -56,4 +56,19 @@ public interface ContactModel extends BaseModel {
      * Get the {@code auto_reply} value.
      */
     boolean getAutoReply();
+
+    /**
+     * Get the {@code position_latitude} value.
+     */
+    float getPositionLatitude();
+
+    /**
+     * Get the {@code position_longitude} value.
+     */
+    float getPositionLongitude();
+
+    /**
+     * Get the {@code position_timstamp} value.
+     */
+    float getPositionTimstamp();
 }

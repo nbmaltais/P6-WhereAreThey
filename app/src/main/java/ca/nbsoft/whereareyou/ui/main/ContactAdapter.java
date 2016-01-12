@@ -4,7 +4,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -62,7 +65,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     static class ViewHolder extends  RecyclerView.ViewHolder
     {
         @Bind(R.id.email_view)
-        TextView mEmail;
+        TextView mEmailView;
+        @Bind(R.id.name_view)
+        TextView mNameView;
+        @Bind(R.id.photo_view)
+        ImageView mPhotoView;
 
         private String mUserId;
 
@@ -73,7 +80,17 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
         public void bind(ContactCursor cursor, final OnItemClickCallback itemClickCallback) {
             mUserId = cursor.getUserid();
-            mEmail.setText(cursor.getEmail());
+            mEmailView.setText(cursor.getEmail());
+            mNameView.setText(cursor.getName());
+
+            String photoUrl = cursor.getPhotoUrl();
+            if(photoUrl!=null && !photoUrl.isEmpty()) {
+                Picasso.with(itemView.getContext()).load(photoUrl).centerCrop().fit().into(mPhotoView);
+            }
+            else
+            {
+                // TOTO load place holder contact image
+            }
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

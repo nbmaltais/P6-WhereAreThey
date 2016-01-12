@@ -1,5 +1,7 @@
 package ca.nbsoft.whereareyou.ui.main;
 
+import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
@@ -11,14 +13,26 @@ import android.view.View;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.ApiService;
-import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.Utility.Utils;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
+import ca.nbsoft.whereareyou.ui.login.LoginActivity;
 
 public class MainActivity extends BaseActivity {
 
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.fab) FloatingActionButton mFab;
+
+    BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
+    {
+        @Override
+        public void onDeleteAccountResult(ApiService.Result result) {
+            if(result.isOk())
+            {
+                registerDeviceIfNeeded();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +52,28 @@ public class MainActivity extends BaseActivity {
                 AddContactActivity.startActivity(MainActivity.this);
             }
         });
+
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        ApiService.subscribeToResult(this, ApiService.ACTION_DELETE_ACCOUNT, mReceiver);
     }
 
+    @Override
+    protected void onPause() {
+        ApiService.unSubscribeFromResult(this, mReceiver);
+        super.onPause();
+
+    }
+
+    @Override
+    protected void onSignInRequired() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -62,14 +91,20 @@ public class MainActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if( item.getItemId() == R.id.menu_login )
+        if( item.getItemId() == R.id.action_login)
         {
-            forceSignin();
+            forceRegisterDevice();
             return true;
         }
-        else if(item.getItemId()==R.id.action_test_send_position)
+        else if(item.getItemId()==R.id.action_delete_account)
         {
-            ApiService.requestContactLocation(this, PreferenceUtils.getUserId(this),"Test from myself");
+            Utils.cancelableActionSnackbar(mToolbar, getString(R.string.main_activity_delete_account_confirmation), new Runnable() {
+                @Override
+                public void run() {
+                    ApiService.deleteAccount(MainActivity.this);
+                }
+            });
+
         }
 
         return super.onOptionsItemSelected(item);

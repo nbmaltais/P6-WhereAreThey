@@ -78,83 +78,83 @@ public class ContactSelection extends AbstractSelection<ContactSelection> {
         return orderById(false);
     }
 
-    public ContactSelection firstName(String... value) {
-        addEquals(ContactColumns.FIRST_NAME, value);
+    public ContactSelection account(String... value) {
+        addEquals(ContactColumns.ACCOUNT, value);
         return this;
     }
 
-    public ContactSelection firstNameNot(String... value) {
-        addNotEquals(ContactColumns.FIRST_NAME, value);
+    public ContactSelection accountNot(String... value) {
+        addNotEquals(ContactColumns.ACCOUNT, value);
         return this;
     }
 
-    public ContactSelection firstNameLike(String... value) {
-        addLike(ContactColumns.FIRST_NAME, value);
+    public ContactSelection accountLike(String... value) {
+        addLike(ContactColumns.ACCOUNT, value);
         return this;
     }
 
-    public ContactSelection firstNameContains(String... value) {
-        addContains(ContactColumns.FIRST_NAME, value);
+    public ContactSelection accountContains(String... value) {
+        addContains(ContactColumns.ACCOUNT, value);
         return this;
     }
 
-    public ContactSelection firstNameStartsWith(String... value) {
-        addStartsWith(ContactColumns.FIRST_NAME, value);
+    public ContactSelection accountStartsWith(String... value) {
+        addStartsWith(ContactColumns.ACCOUNT, value);
         return this;
     }
 
-    public ContactSelection firstNameEndsWith(String... value) {
-        addEndsWith(ContactColumns.FIRST_NAME, value);
+    public ContactSelection accountEndsWith(String... value) {
+        addEndsWith(ContactColumns.ACCOUNT, value);
         return this;
     }
 
-    public ContactSelection orderByFirstName(boolean desc) {
-        orderBy(ContactColumns.FIRST_NAME, desc);
+    public ContactSelection orderByAccount(boolean desc) {
+        orderBy(ContactColumns.ACCOUNT, desc);
         return this;
     }
 
-    public ContactSelection orderByFirstName() {
-        orderBy(ContactColumns.FIRST_NAME, false);
+    public ContactSelection orderByAccount() {
+        orderBy(ContactColumns.ACCOUNT, false);
         return this;
     }
 
-    public ContactSelection lastName(String... value) {
-        addEquals(ContactColumns.LAST_NAME, value);
+    public ContactSelection name(String... value) {
+        addEquals(ContactColumns.NAME, value);
         return this;
     }
 
-    public ContactSelection lastNameNot(String... value) {
-        addNotEquals(ContactColumns.LAST_NAME, value);
+    public ContactSelection nameNot(String... value) {
+        addNotEquals(ContactColumns.NAME, value);
         return this;
     }
 
-    public ContactSelection lastNameLike(String... value) {
-        addLike(ContactColumns.LAST_NAME, value);
+    public ContactSelection nameLike(String... value) {
+        addLike(ContactColumns.NAME, value);
         return this;
     }
 
-    public ContactSelection lastNameContains(String... value) {
-        addContains(ContactColumns.LAST_NAME, value);
+    public ContactSelection nameContains(String... value) {
+        addContains(ContactColumns.NAME, value);
         return this;
     }
 
-    public ContactSelection lastNameStartsWith(String... value) {
-        addStartsWith(ContactColumns.LAST_NAME, value);
+    public ContactSelection nameStartsWith(String... value) {
+        addStartsWith(ContactColumns.NAME, value);
         return this;
     }
 
-    public ContactSelection lastNameEndsWith(String... value) {
-        addEndsWith(ContactColumns.LAST_NAME, value);
+    public ContactSelection nameEndsWith(String... value) {
+        addEndsWith(ContactColumns.NAME, value);
         return this;
     }
 
-    public ContactSelection orderByLastName(boolean desc) {
-        orderBy(ContactColumns.LAST_NAME, desc);
+    public ContactSelection orderByName(boolean desc) {
+        orderBy(ContactColumns.NAME, desc);
         return this;
     }
 
-    public ContactSelection orderByLastName() {
-        orderBy(ContactColumns.LAST_NAME, false);
+    public ContactSelection orderByName() {
+        orderBy(ContactColumns.NAME, false);
         return this;
     }
 
@@ -238,43 +238,43 @@ public class ContactSelection extends AbstractSelection<ContactSelection> {
         return this;
     }
 
-    public ContactSelection avatarUrl(String... value) {
-        addEquals(ContactColumns.AVATAR_URL, value);
+    public ContactSelection photoUrl(String... value) {
+        addEquals(ContactColumns.PHOTO_URL, value);
         return this;
     }
 
-    public ContactSelection avatarUrlNot(String... value) {
-        addNotEquals(ContactColumns.AVATAR_URL, value);
+    public ContactSelection photoUrlNot(String... value) {
+        addNotEquals(ContactColumns.PHOTO_URL, value);
         return this;
     }
 
-    public ContactSelection avatarUrlLike(String... value) {
-        addLike(ContactColumns.AVATAR_URL, value);
+    public ContactSelection photoUrlLike(String... value) {
+        addLike(ContactColumns.PHOTO_URL, value);
         return this;
     }
 
-    public ContactSelection avatarUrlContains(String... value) {
-        addContains(ContactColumns.AVATAR_URL, value);
+    public ContactSelection photoUrlContains(String... value) {
+        addContains(ContactColumns.PHOTO_URL, value);
         return this;
     }
 
-    public ContactSelection avatarUrlStartsWith(String... value) {
-        addStartsWith(ContactColumns.AVATAR_URL, value);
+    public ContactSelection photoUrlStartsWith(String... value) {
+        addStartsWith(ContactColumns.PHOTO_URL, value);
         return this;
     }
 
-    public ContactSelection avatarUrlEndsWith(String... value) {
-        addEndsWith(ContactColumns.AVATAR_URL, value);
+    public ContactSelection photoUrlEndsWith(String... value) {
+        addEndsWith(ContactColumns.PHOTO_URL, value);
         return this;
     }
 
-    public ContactSelection orderByAvatarUrl(boolean desc) {
-        orderBy(ContactColumns.AVATAR_URL, desc);
+    public ContactSelection orderByPhotoUrl(boolean desc) {
+        orderBy(ContactColumns.PHOTO_URL, desc);
         return this;
     }
 
-    public ContactSelection orderByAvatarUrl() {
-        orderBy(ContactColumns.AVATAR_URL, false);
+    public ContactSelection orderByPhotoUrl() {
+        orderBy(ContactColumns.PHOTO_URL, false);
         return this;
     }
 
@@ -305,6 +305,126 @@ public class ContactSelection extends AbstractSelection<ContactSelection> {
 
     public ContactSelection orderByAutoReply() {
         orderBy(ContactColumns.AUTO_REPLY, false);
+        return this;
+    }
+
+    public ContactSelection positionLatitude(float... value) {
+        addEquals(ContactColumns.POSITION_LATITUDE, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection positionLatitudeNot(float... value) {
+        addNotEquals(ContactColumns.POSITION_LATITUDE, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection positionLatitudeGt(float value) {
+        addGreaterThan(ContactColumns.POSITION_LATITUDE, value);
+        return this;
+    }
+
+    public ContactSelection positionLatitudeGtEq(float value) {
+        addGreaterThanOrEquals(ContactColumns.POSITION_LATITUDE, value);
+        return this;
+    }
+
+    public ContactSelection positionLatitudeLt(float value) {
+        addLessThan(ContactColumns.POSITION_LATITUDE, value);
+        return this;
+    }
+
+    public ContactSelection positionLatitudeLtEq(float value) {
+        addLessThanOrEquals(ContactColumns.POSITION_LATITUDE, value);
+        return this;
+    }
+
+    public ContactSelection orderByPositionLatitude(boolean desc) {
+        orderBy(ContactColumns.POSITION_LATITUDE, desc);
+        return this;
+    }
+
+    public ContactSelection orderByPositionLatitude() {
+        orderBy(ContactColumns.POSITION_LATITUDE, false);
+        return this;
+    }
+
+    public ContactSelection positionLongitude(float... value) {
+        addEquals(ContactColumns.POSITION_LONGITUDE, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection positionLongitudeNot(float... value) {
+        addNotEquals(ContactColumns.POSITION_LONGITUDE, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection positionLongitudeGt(float value) {
+        addGreaterThan(ContactColumns.POSITION_LONGITUDE, value);
+        return this;
+    }
+
+    public ContactSelection positionLongitudeGtEq(float value) {
+        addGreaterThanOrEquals(ContactColumns.POSITION_LONGITUDE, value);
+        return this;
+    }
+
+    public ContactSelection positionLongitudeLt(float value) {
+        addLessThan(ContactColumns.POSITION_LONGITUDE, value);
+        return this;
+    }
+
+    public ContactSelection positionLongitudeLtEq(float value) {
+        addLessThanOrEquals(ContactColumns.POSITION_LONGITUDE, value);
+        return this;
+    }
+
+    public ContactSelection orderByPositionLongitude(boolean desc) {
+        orderBy(ContactColumns.POSITION_LONGITUDE, desc);
+        return this;
+    }
+
+    public ContactSelection orderByPositionLongitude() {
+        orderBy(ContactColumns.POSITION_LONGITUDE, false);
+        return this;
+    }
+
+    public ContactSelection positionTimstamp(float... value) {
+        addEquals(ContactColumns.POSITION_TIMSTAMP, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection positionTimstampNot(float... value) {
+        addNotEquals(ContactColumns.POSITION_TIMSTAMP, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection positionTimstampGt(float value) {
+        addGreaterThan(ContactColumns.POSITION_TIMSTAMP, value);
+        return this;
+    }
+
+    public ContactSelection positionTimstampGtEq(float value) {
+        addGreaterThanOrEquals(ContactColumns.POSITION_TIMSTAMP, value);
+        return this;
+    }
+
+    public ContactSelection positionTimstampLt(float value) {
+        addLessThan(ContactColumns.POSITION_TIMSTAMP, value);
+        return this;
+    }
+
+    public ContactSelection positionTimstampLtEq(float value) {
+        addLessThanOrEquals(ContactColumns.POSITION_TIMSTAMP, value);
+        return this;
+    }
+
+    public ContactSelection orderByPositionTimstamp(boolean desc) {
+        orderBy(ContactColumns.POSITION_TIMSTAMP, desc);
+        return this;
+    }
+
+    public ContactSelection orderByPositionTimstamp() {
+        orderBy(ContactColumns.POSITION_TIMSTAMP, false);
         return this;
     }
 }

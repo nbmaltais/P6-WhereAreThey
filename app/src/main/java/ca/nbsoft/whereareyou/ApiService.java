@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.OperationApplicationException;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,6 +26,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
 import com.google.android.gms.location.LocationServices;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
@@ -34,10 +37,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfo;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfoCollection;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.Location;
+import ca.nbsoft.whereareyou.backend.whereAreYou.model.NewAccountInfo;
+import ca.nbsoft.whereareyou.backend.whereAreYou.model.RegistrationId;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.StatusResult;
 import ca.nbsoft.whereareyou.provider.WhereRUProvider;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
@@ -60,6 +66,9 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     public static final String ACTION_SEND_LOCATION = "ca.nbsoft.whereareyou.action.SEND_LOCATION";
     public static final String ACTION_UPDATE_CONTACT_LIST = "ca.nbsoft.whereareyou.action.UPDATE_CONTACT_LIST";
     public static final String ACTION_DELETE_CONTACT ="ca.nbsoft.whereareyou.action.DELETE_CONTACT";
+    public static final String ACTION_DELETE_ACCOUNT ="ca.nbsoft.whereareyou.action.DELETE_ACCOUNT";
+    public static final String ACTION_REGISTER_DEVICE ="ca.nbsoft.whereareyou.action._REGISTER_DEVICE";
+    public static final String ACTION_CREATE_ACCOUNT ="ca.nbsoft.whereareyou.action.CREATE_ACCOUNT";
 
 
     public static final class StatusCode
@@ -79,7 +88,10 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             ACTION_CONFIRM_CONTACT_REQUEST,
             ACTION_SEND_LOCATION,
             ACTION_UPDATE_CONTACT_LIST,
-            ACTION_DELETE_CONTACT})
+            ACTION_DELETE_CONTACT,
+            ACTION_DELETE_ACCOUNT,
+            ACTION_REGISTER_DEVICE,
+            ACTION_CREATE_ACCOUNT})
     public @interface ActionName {}
 
     public static class Result implements Parcelable {
@@ -92,6 +104,8 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         public static final int RESULT_BACKEND_ERROR_PERMISSION =-4;
         public static final int RESULT_BACKEND_ERROR_INVALID_USER =-5;
         public static final int RESULT_BACKEND_ERROR_STATUSCODE = -6;
+        public static final int RESULT_ERROR_NO_NETWORK = -7;
+        private static final int RESULT_NO_ACCOUNT = -8;
         @Retention(RetentionPolicy.SOURCE)
         @IntDef({RESULT_SUCCESS,
                 RESULT_FAILURE,
@@ -99,7 +113,9 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
                 RESULT_INVALID_ACTION,
                 RESULT_BACKEND_ERROR_PERMISSION,
                 RESULT_BACKEND_ERROR_INVALID_USER,
-                RESULT_BACKEND_ERROR_STATUSCODE})
+                RESULT_BACKEND_ERROR_STATUSCODE,
+                RESULT_ERROR_NO_NETWORK,
+                RESULT_NO_ACCOUNT})
         public @interface ResultCode {}
 
 
@@ -168,18 +184,6 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             }
         };
     }
-
-
-    public static final String EXTRA_CONTACT_EMAIL = "ca.nbsoft.whereareyou.extra.EMAIL";
-    public static final String EXTRA_CANCEL_NOTIFICATION = "ca.nbsoft.whereareyou.extra.CANCEL_NOTIFICATION";
-
-
-    private WhereAreYou mApi;
-    private GoogleApiClient mGoogleApiClient;
-    private boolean mGoogleApiConnected = false;
-    private boolean mGoogleApiInitDone = false;
-    private final Object mGoogleApiLock = new Object();
-
     /**
      * BroadcastReceiver that should be extended to receive completion results
      */
@@ -217,7 +221,28 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
                 case ACTION_DELETE_CONTACT:
                     onDeleteContactResult(result);
                     break;
+                case ACTION_DELETE_ACCOUNT:
+                    onDeleteAccountResult(result);
+                    break;
+                case ACTION_REGISTER_DEVICE:
+                    onRegisterDeviceResult(result);
+                    break;
+                case ACTION_CREATE_ACCOUNT:
+                    onCreateAccountResult(result);
+                    break;
             }
+        }
+
+        public void onCreateAccountResult(Result result) {
+
+        }
+
+        public void onRegisterDeviceResult(Result result) {
+
+        }
+
+        public void onDeleteAccountResult(Result result) {
+
         }
 
         public void onConfirmContactRequestResult(Result resultCode ) {
@@ -225,25 +250,39 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         }
 
         public void onSendContactRequestResult(Result resultCode) {
-            
+
         }
 
         public void onUpdateContactListResult(Result resultCode) {
-            
+
         }
 
         public void onSendLocationResult(Result resultCode) {
-            
+
         }
 
         public void onRequestLocationResult(Result resultCode) {
-            
+
         }
 
         public void onDeleteContactResult(Result resultCode) {
 
         }
     }
+
+    public static final String EXTRA_CONTACT_EMAIL = "ca.nbsoft.whereareyou.extra.EMAIL";
+    public static final String EXTRA_CANCEL_NOTIFICATION = "ca.nbsoft.whereareyou.extra.CANCEL_NOTIFICATION";
+    public static final String EXTRA_DISPLAY_NAME="ca.nbsoft.whereareyou.extra.DISPLAY_NAME";
+    public static final String EXTRA_PHOTO_URL="ca.nbsoft.whereareyou.extra.PHOTO_URL";
+
+    private WhereAreYou mApi;
+    private GoogleApiClient mGoogleApiClient;
+    private boolean mGoogleApiConnected = false;
+    private boolean mGoogleApiInitDone = false;
+    private String mAccountName;
+    private final Object mGoogleApiLock = new Object();
+
+
 
 
     public ApiService() {
@@ -254,6 +293,8 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     public void onCreate() {
         super.onCreate();
         GoogleAccountCredential credential = Endpoints.getCredential(this);
+        mAccountName = credential.getSelectedAccountName();
+
         mApi = Endpoints.getApiEndpoint(credential);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -290,6 +331,9 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         filter.addAction(ACTION_SEND_LOCATION);
         filter.addAction(ACTION_UPDATE_CONTACT_LIST);
         filter.addAction(ACTION_DELETE_CONTACT);
+        filter.addAction(ACTION_DELETE_ACCOUNT);
+        filter.addAction(ACTION_REGISTER_DEVICE);
+        filter.addAction(ACTION_CREATE_ACCOUNT);
 
         LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter);
     }
@@ -297,6 +341,32 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     public static void unSubscribeFromResult(Context ctx, BroadcastReceiver receiver)
     {
         LocalBroadcastManager.getInstance(ctx).unregisterReceiver(receiver);
+    }
+
+    public static void createAccount(Context ctx, String displayName, Uri photoUrl) {
+        Intent intent = new Intent(ctx, ApiService.class);
+        intent.setAction(ACTION_CREATE_ACCOUNT);
+        intent.putExtra(EXTRA_DISPLAY_NAME, displayName);
+        intent.putExtra(EXTRA_PHOTO_URL,photoUrl!=null ? photoUrl.toString() : "");
+        ctx.startService(intent);
+    }
+
+    public static void registerDevice(Context ctx) {
+        Log.d(TAG, "Starting registration servive.");
+        Intent intent = new Intent(ctx, ApiService.class);
+        intent.setAction(ACTION_REGISTER_DEVICE);
+        ctx.startService(intent);
+    }
+
+    public static boolean registerDeviceIfNeeded(Context ctx) {
+        boolean regIdSent = PreferenceUtils.getSentRegistrationToBackend(ctx);
+        if (regIdSent == false ) {
+            registerDevice(ctx);
+            return true;
+        } else {
+            Log.d(TAG, "Device is already registered.");
+            return false;
+        }
     }
 
     public static void requestContactLocation(Context context, @NonNull String contactId, @NonNull String message) {
@@ -323,7 +393,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     }
 
     public static void sendLocation(Context context, @NonNull String contactId, String message) {
-        context.startActivity(sendLocationIntent(context, contactId, message));
+        context.startService(sendLocationIntent(context, contactId, message));
     }
 
     public static Intent confirmContactRequestIntent(Context context, @NonNull String contactUserId) {
@@ -350,10 +420,17 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         context.startService(intent);
     }
 
+    public static void deleteAccount(Context context)
+    {
+        Intent intent = new Intent(context, ApiService.class);
+        intent.setAction(ACTION_DELETE_ACCOUNT);
+        context.startService(intent);
+    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
+
 
             // TODO: add  action to a pending queue in case the operation fails.
             // The pending queue should be processed later
@@ -363,12 +440,20 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             final String userId;
             final String message;
             Result resultCode = new Result(Result.RESULT_INVALID_ACTION);
+
+
             try {
                 // Cancel the associated notification
                 if (intent.hasExtra(EXTRA_CANCEL_NOTIFICATION)) {
                     int id = intent.getIntExtra(EXTRA_CANCEL_NOTIFICATION, 0);
                     NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                     notifyMgr.cancel(id);
+                }
+
+                if(mAccountName==null)
+                {
+                    ResultBroadcastReceiver.sendResult(this, action, Result.from(Result.RESULT_NO_ACCOUNT));
+                    return;
                 }
 
                 switch (action) {
@@ -397,7 +482,17 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
                         userId = intent.getStringExtra(Constants.EXTRA_CONTACT_USER_ID);
                         resultCode = handleDeleteContact(userId);
                         break;
-
+                    case ACTION_DELETE_ACCOUNT:
+                        resultCode = handleDeleteAccount();
+                        break;
+                    case ACTION_REGISTER_DEVICE:
+                        resultCode = handleRegisterDevice();
+                        break;
+                    case ACTION_CREATE_ACCOUNT:
+                        String displayName = intent.getStringExtra(EXTRA_DISPLAY_NAME);
+                        String photoUrl = intent.getStringExtra(EXTRA_PHOTO_URL);
+                        resultCode = handleCreateAccount(displayName, photoUrl);
+                        break;
                 }
 
                 // Perform specific action post
@@ -405,7 +500,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
                 ResultBroadcastReceiver.sendResult(this,action,resultCode);
 
-                // TODO: remove action from pending queue upon sucess
+                // TODO: remove action from pending queue upon success
 
             } catch (IOException e) {
                 Log.e(TAG, "Error while performing action :" + action, e);
@@ -419,6 +514,8 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         }
     }
 
+
+
     private void handleResultCode(Result resultCode) {
         if( resultCode.getResultCode() == Result.RESULT_BACKEND_ERROR_STATUSCODE )
         {
@@ -431,6 +528,78 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             }
         }
     }
+
+
+    private Result handleCreateAccount(String displayName, String photoUrl) throws IOException {
+
+        Log.d(TAG, "Creating account, name=" + displayName + ", phtotUrl="+photoUrl);
+
+        NewAccountInfo accountInfo = new NewAccountInfo();
+        accountInfo.setDisplayName(displayName);
+        accountInfo.setPhotoUrl(photoUrl);
+
+        StatusResult result = mApi.createAccount(accountInfo).execute();
+
+        return Result.from(result);
+    }
+
+    private Result handleRegisterDevice() {
+        try {
+            // get gcm token for this app
+
+            Log.d(TAG, "Getting registration token");
+            InstanceID instanceID = InstanceID.getInstance(this);
+            String token = instanceID.getToken(BuildConfig.GCM_SENDER_ID, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+
+            Log.i(TAG, "GCM Registration Token: " + token);
+
+            // Send  registration to backend.
+            Log.d(TAG, "Registering device with backend");
+
+
+            RegistrationId r = new RegistrationId();
+            r.setToken(token);
+
+            StatusResult result = mApi.register(r).execute();
+
+            Result resultCode = Result.from(Result.RESULT_SUCCESS);
+            if(resultCode.isOk()) {
+                Log.d(TAG, "Writing preference");
+                // You should store a boolean that indicates whether the generated token has been
+                // sent to your server. If the boolean is false, send the token to your server,
+                // otherwise your server should have already received the token.
+                PreferenceUtils.setSentRegistrationToBackend(this, true);
+            }
+
+            return resultCode;
+
+        } catch (Exception e) {
+            Log.d(TAG, "Failed to complete token refresh", e);
+            // If an exception happens while fetching the new token or updating our registration data
+            // on a third-party server, this ensures that we'll attempt the update at a later time.
+            PreferenceUtils.setSentRegistrationToBackend(this, false);
+
+            return Result.from(Result.RESULT_FAILURE);
+        }
+    }
+
+
+    private Result handleDeleteAccount() throws IOException {
+        Log.d(TAG, "Deleting account");
+
+
+        StatusResult result = mApi.deleteAccount().execute();
+
+        PreferenceUtils.setAccountName(this,null);
+        PreferenceUtils.setSentRegistrationToBackend(this, false);
+        PreferenceUtils.setUserId(this,null);
+        deleteAccountFromDb();
+
+        return Result.from(result);
+    }
+
+
+
 
     private Result handleDeleteContact(String userId) throws IOException {
         Log.d(TAG, "Deleting contact " + userId);
@@ -448,6 +617,10 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         sel.userid(userId);
 
         sel.delete(getContentResolver());
+    }
+
+    private void deleteAccountFromDb() {
+        getContentResolver().delete(ContactColumns.CONTENT_URI,null,null);
     }
 
     private Result handleSendLocation(@NonNull String userId, @NonNull String message) throws IOException, InterruptedException {
@@ -516,8 +689,11 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             for (ContactInfo contact : items) {
                 ContactContentValues values = new ContactContentValues();
 
+                values.putAccount(mAccountName);
                 values.putUserid(contact.getUserId());
                 values.putEmail(contact.getEmail());
+                values.putName(contact.getDisplayName());
+                values.putPhotoUrl(contact.getPhotoUrl());
 
                 batch.add(ContentProviderOperation.newInsert(ContactColumns.CONTENT_URI).withValues(values.values()).build());
             }

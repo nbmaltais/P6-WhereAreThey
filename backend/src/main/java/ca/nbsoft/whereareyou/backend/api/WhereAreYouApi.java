@@ -47,6 +47,7 @@ import static ca.nbsoft.whereareyou.backend.OfyService.ofy;
   scopes = {ClientsID.EMAIL_SCOPE},
   clientIds = {ClientsID.WEB_CLIENT_ID,
   ClientsID.ANDROID_DEBUG_CLIENT_ID,
+          ClientsID.ANDROID_RELEASE_CLIENT_ID,
   com.google.api.server.spi.Constant.API_EXPLORER_CLIENT_ID},
   audiences = {ClientsID.ANDROID_AUDIENCE},
   namespace = @ApiNamespace(
@@ -163,7 +164,7 @@ public class WhereAreYouApi {
         return userId;
     }
 
-    private UserProfile createUserProfile(User user)
+    private UserProfile createUserProfile(User user, NewAccountInfo accountInfo)
     {
         String userId = getUserId(user);
         String email = user.getEmail();
@@ -172,6 +173,9 @@ public class WhereAreYouApi {
         record.setUserId(userId);
         record.setEmail(email);
         record.setRegId(null);
+
+        record.setDisplayName(accountInfo.getDisplayName());
+        record.setPhotoUrl(accountInfo.getPhotoUrl());
 
         return record;
     }
@@ -182,7 +186,7 @@ public class WhereAreYouApi {
      * @throws UnauthorizedException
      */
     @ApiMethod(name = "createAccount")
-    public StringResult createAccount(User user) throws UnauthorizedException {
+    public StatusResult createAccount(User user, NewAccountInfo accountInfo) throws UnauthorizedException {
 
         log.info("API call: createAccount, user = " + user);
 
@@ -193,16 +197,19 @@ public class WhereAreYouApi {
         UserProfile userProfile = UserProfileHelper.getUserProfile(getUserId(user));
         if(userProfile == null)
         {
-            userProfile = createUserProfile(user);
-            UserProfileHelper.saveUserProfile(userProfile);
+            userProfile = createUserProfile(user,accountInfo);
         }
         else
         {
             log.info("User " + user.getEmail() + " already signed up, skipping");
+
+            userProfile.setDisplayName(accountInfo.getDisplayName());
+            userProfile.setPhotoUrl(accountInfo.getPhotoUrl());
         }
 
+        UserProfileHelper.saveUserProfile(userProfile);
 
-        return new StringResult(userProfile.getUserId());
+        return noErrorStatusResult();
     }
 
     /**
@@ -211,7 +218,7 @@ public class WhereAreYouApi {
      * @param registrationId The Google Cloud Messaging registration Id to add
      */
     @ApiMethod(name = "register")
-    public StringResult registerDevice(RegistrationId registrationId, User user) throws UnauthorizedException {
+    public StatusResult registerDevice(User user, RegistrationId registrationId) throws UnauthorizedException, InvalidUserException {
 
         log.info("API call: registerDevice, user = " + user);
 
@@ -222,7 +229,7 @@ public class WhereAreYouApi {
         UserProfile userProfile = UserProfileHelper.getUserProfile(getUserId(user));
         if(userProfile == null)
         {
-            userProfile = createUserProfile(user);
+            throw new InvalidUserException();
         }
 
         String regId = registrationId.getToken();
@@ -232,7 +239,7 @@ public class WhereAreYouApi {
         UserProfileHelper.saveUserProfile(userProfile);
 
 
-        return new StringResult(userProfile.getUserId());
+        return noErrorStatusResult();
     }
 
     /**
@@ -542,6 +549,8 @@ public class WhereAreYouApi {
         ContactInfo contactInfo = new ContactInfo();
         contactInfo.setEmail(contactProfile.getEmail());
         contactInfo.setUserId(contactProfile.getUserId());
+        contactInfo.setDisplayName(contactProfile.getDisplayName());
+        contactInfo.setPhotoUrl(contactProfile.getPhotoUrl());
 
         return contactInfo;
     }

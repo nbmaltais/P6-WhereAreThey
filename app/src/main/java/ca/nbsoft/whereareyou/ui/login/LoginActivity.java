@@ -1,30 +1,31 @@
 package ca.nbsoft.whereareyou.ui.login;
 
-import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.SignInButton;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.Endpoints;
-import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.R;
-import ca.nbsoft.whereareyou.gcm.RegistrationIntentService;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
+import ca.nbsoft.whereareyou.ui.BaseActivity;
 import ca.nbsoft.whereareyou.ui.main.MainActivity;
 
 /**
  * todo Handle network connctivity
  */
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int REQUEST_ACCOUNT_PICKER = 1010;
@@ -32,38 +33,42 @@ public class LoginActivity extends AppCompatActivity {
     @Bind(R.id.status_view)
     TextView mStatusView;
 
-    @Bind(R.id.login_button)
-    Button mLoginButton;
+    @Bind(R.id.signin_button)
+    SignInButton mSignInButton;
 
 
     GoogleAccountCredential mCredential;
 
-
-    BroadcastReceiver mResultReceiver = new RegistrationIntentService.RegistrationResultReceiver() {
-
+    BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
+    {
         @Override
-        protected void onLoginFailed() {
-            LoginActivity.this.onLoginFailed();
+        public void onCreateAccountResult(ApiService.Result result) {
+            if(result.isOk())
+            {
+                onAccountCreated();
+            }
+            else
+            {
+                onOperationFailed();
+            }
         }
 
         @Override
-        protected void onLoginSucceeded() {
-            LoginActivity.this.onLoginSucceeded();
+        public void onRegisterDeviceResult(ApiService.Result result) {
+            if(result.isOk())
+            {
+                onDeviceRegistered();
+            }
+            else
+            {
+                onOperationFailed();
+            }
         }
     };
 
-    private void onLoginFailed() {
-        Log.e(TAG,"Registration with backend failed.");
 
-        mStatusView.setText(R.string.login_error_registration_failed);
 
-        Toast.makeText(this,"Login failed",Toast.LENGTH_LONG).show();
-    }
 
-    private void onLoginSucceeded() {
-        Log.d(TAG, "Registration with backend succeeded.");
-        returnToMainActivity();
-    }
 
     private void returnToMainActivity() {
         Intent intent = new Intent(this,MainActivity.class);
@@ -78,20 +83,64 @@ public class LoginActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        RegistrationIntentService.subscribeToResult(this, mResultReceiver);
+        String[] actions = {ApiService.ACTION_CREATE_ACCOUNT, ApiService.ACTION_REGISTER_DEVICE};
+        ApiService.subscribeToResult(this, actions, mReceiver);
         mCredential = Endpoints.getCredential(this);
 
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
+        mSignInButton.setSize(SignInButton.SIZE_STANDARD);
+        mSignInButton.setScopes(gso().getScopeArray());
+
+        /**mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startLoginProcess();
             }
-        });
-
-        startLoginProcess();
+        });*/
     }
 
-    private void startLoginProcess() {
+    @Override
+    protected void onDestroy() {
+        // Unregister since the activity is about to be closed.
+        ApiService.unSubscribeFromResult(this, mReceiver);
+        super.onDestroy();
+    }
+
+    @OnClick(R.id.signin_button)
+    void onSignInClicked()
+    {
+        signIn();
+    }
+
+    @Override
+    protected void onSignedIn(GoogleSignInAccount signInAccount) {
+
+        Log.d(TAG,"onSignedIn");
+        String accountName = signInAccount.getEmail();
+        PreferenceUtils.setAccountName(this, accountName);
+        Log.d(TAG, "Account choosen: " + accountName);
+        mCredential.setSelectedAccountName(accountName);
+
+        showSignInProgressDialog();
+        ApiService.createAccount(this, signInAccount.getDisplayName(), signInAccount.getPhotoUrl());
+    }
+
+    protected void onAccountCreated()
+    {
+        Log.d(TAG, "onAccountCreated");
+        ApiService.registerDevice(this);
+    }
+
+    protected void onDeviceRegistered()
+    {
+        Log.d(TAG,"onDeviceRegistered");
+        returnToMainActivity();
+    }
+
+    private void onOperationFailed() {
+        hideSignInProgressDialog();
+    }
+
+    /*private void startLoginProcess() {
         if(mCredential.getSelectedAccountName()==null)
         {
             chooseAccount();
@@ -114,13 +163,6 @@ public class LoginActivity extends AppCompatActivity {
         {
             mStatusView.setText(R.string.login_message_registration_in_progress);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        // Unregister since the activity is about to be closed.
-        RegistrationIntentService.unSubscribeFromResult(this, mResultReceiver);
-        super.onDestroy();
     }
 
     void chooseAccount() {
@@ -150,5 +192,5 @@ public class LoginActivity extends AppCompatActivity {
                 onChooseAccountResult(data);
                 break;
         }
-    }
+    }*/
 }

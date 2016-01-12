@@ -19,14 +19,14 @@ public class ContactColumns implements BaseColumns {
     public static final String _ID = BaseColumns._ID;
 
     /**
-     * First name.
+     * User acount this contact is linked to
      */
-    public static final String FIRST_NAME = "first_name";
+    public static final String ACCOUNT = "account";
 
     /**
-     * Last name.
+     * Name.
      */
-    public static final String LAST_NAME = "last_name";
+    public static final String NAME = "name";
 
     public static final String EMAIL = "email";
 
@@ -35,11 +35,17 @@ public class ContactColumns implements BaseColumns {
     /**
      * Avatar url
      */
-    public static final String AVATAR_URL = "avatar_url";
+    public static final String PHOTO_URL = "photo_url";
 
     public static final String BLOCKED = "blocked";
 
     public static final String AUTO_REPLY = "auto_reply";
+
+    public static final String POSITION_LATITUDE = "position_latitude";
+
+    public static final String POSITION_LONGITUDE = "position_longitude";
+
+    public static final String POSITION_TIMSTAMP = "position_timstamp";
 
 
     public static final String DEFAULT_ORDER = TABLE_NAME + "." +_ID;
@@ -47,26 +53,32 @@ public class ContactColumns implements BaseColumns {
     // @formatter:off
     public static final String[] ALL_COLUMNS = new String[] {
             _ID,
-            FIRST_NAME,
-            LAST_NAME,
+            ACCOUNT,
+            NAME,
             EMAIL,
             USERID,
-            AVATAR_URL,
+            PHOTO_URL,
             BLOCKED,
-            AUTO_REPLY
+            AUTO_REPLY,
+            POSITION_LATITUDE,
+            POSITION_LONGITUDE,
+            POSITION_TIMSTAMP
     };
     // @formatter:on
 
     public static boolean hasColumns(String[] projection) {
         if (projection == null) return true;
         for (String c : projection) {
-            if (c.equals(FIRST_NAME) || c.contains("." + FIRST_NAME)) return true;
-            if (c.equals(LAST_NAME) || c.contains("." + LAST_NAME)) return true;
+            if (c.equals(ACCOUNT) || c.contains("." + ACCOUNT)) return true;
+            if (c.equals(NAME) || c.contains("." + NAME)) return true;
             if (c.equals(EMAIL) || c.contains("." + EMAIL)) return true;
             if (c.equals(USERID) || c.contains("." + USERID)) return true;
-            if (c.equals(AVATAR_URL) || c.contains("." + AVATAR_URL)) return true;
+            if (c.equals(PHOTO_URL) || c.contains("." + PHOTO_URL)) return true;
             if (c.equals(BLOCKED) || c.contains("." + BLOCKED)) return true;
             if (c.equals(AUTO_REPLY) || c.contains("." + AUTO_REPLY)) return true;
+            if (c.equals(POSITION_LATITUDE) || c.contains("." + POSITION_LATITUDE)) return true;
+            if (c.equals(POSITION_LONGITUDE) || c.contains("." + POSITION_LONGITUDE)) return true;
+            if (c.equals(POSITION_TIMSTAMP) || c.contains("." + POSITION_TIMSTAMP)) return true;
         }
         return false;
     }

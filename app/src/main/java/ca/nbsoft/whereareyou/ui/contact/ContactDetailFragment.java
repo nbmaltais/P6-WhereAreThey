@@ -3,19 +3,22 @@ package ca.nbsoft.whereareyou.ui.contact;
 
 import android.content.BroadcastReceiver;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
+
+import ca.nbsoft.whereareyou.Utility.Utils;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 
 /**
@@ -26,6 +29,8 @@ public class ContactDetailFragment extends Fragment {
     @Bind(R.id.top_container) View mTopContainer;
     @Bind(R.id.message)
     EditText mMessageView;
+    @Bind(R.id.photo_view)
+    ImageView mPhotoView;
 
     private String mUserId;
     private String mContactName;
@@ -47,6 +52,7 @@ public class ContactDetailFragment extends Fragment {
 
         }
     };
+    private String mPhotoUrl;
 
     public ContactDetailFragment() {
         // Required empty public constructor
@@ -85,7 +91,7 @@ public class ContactDetailFragment extends Fragment {
     {
         String text = getContext().getString(R.string.contact_detail_request_position_confirmation);
 
-        cancelableActionSnackbar(mTopContainer, text, new Runnable() {
+        Utils.cancelableActionSnackbar(mTopContainer, text, new Runnable() {
             @Override
             public void run() {
                 ApiService.requestContactLocation(getContext(), mUserId, getMessage());
@@ -102,7 +108,7 @@ public class ContactDetailFragment extends Fragment {
     {
         String text = getContext().getString(R.string.contact_detail_send_position_confirmation);
 
-        cancelableActionSnackbar(mTopContainer, text, new Runnable() {
+        Utils.cancelableActionSnackbar(mTopContainer, text, new Runnable() {
             @Override
             public void run() {
                 ApiService.sendLocation(getContext(), mUserId, getMessage());
@@ -117,7 +123,7 @@ public class ContactDetailFragment extends Fragment {
     void onDeleteContactClicked()
     {
         String text = getContext().getString(R.string.contact_detail_delete_confirmation);
-        cancelableActionSnackbar(mTopContainer, text, new Runnable() {
+        Utils.cancelableActionSnackbar(mTopContainer, text, new Runnable() {
             @Override
             public void run() {
                 ApiService.deleteContact(getContext(), mUserId);
@@ -132,29 +138,16 @@ public class ContactDetailFragment extends Fragment {
 
     public void bind(ContactCursor cursor) {
         mUserId = cursor.getUserid();
-        mContactName = cursor.getEmail();
+        mContactName = cursor.getName();
+        mPhotoUrl=cursor.getPhotoUrl();
+
+        if(mPhotoUrl!=null && !mPhotoUrl.isEmpty()) {
+            Picasso.with(getContext()).load(mPhotoUrl).centerCrop().fit().into(mPhotoView);
+        }
+        else
+        {
+
+        }
     }
 
-    void cancelableActionSnackbar( View v, String text, final Runnable action )
-    {
-        Snackbar snackbar = Snackbar.make(v, text, Snackbar.LENGTH_SHORT);
-        snackbar.setAction(R.string.contact_detail_cancel, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // do nothing
-            }
-        });
-
-        snackbar.setCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
-                    action.run();
-                }
-            }
-        });
-
-        snackbar.show();
-
-    }
 }

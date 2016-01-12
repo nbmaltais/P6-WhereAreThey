@@ -9,25 +9,12 @@ import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
  * Created by Nicolas on 2015-12-20.
  */
 public class Contact implements Parcelable {
-    private String mFirstName;
-    private String mLastName;
+
+
+    private String mName;
+    private String mPhotoUrl;
     private String mEmail;
 
-    public String getFirstName() {
-        return mFirstName;
-    }
-
-    public void setFirstName(String firstName) {
-        mFirstName = firstName;
-    }
-
-    public String getLastName() {
-        return mLastName;
-    }
-
-    public void setLastName(String lastName) {
-        mLastName = lastName;
-    }
 
     public String getEmail() {
         return mEmail;
@@ -36,17 +23,20 @@ public class Contact implements Parcelable {
     public void setEmail(String email) {
         mEmail = email;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getName() {
+        return mName;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mFirstName);
-        dest.writeString(this.mLastName);
-        dest.writeString(this.mEmail);
+    public void setName(String name) {
+        mName = name;
+    }
+
+    public String getPhotoUrl() {
+        return mPhotoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        mPhotoUrl = photoUrl;
     }
 
     public Contact() {
@@ -56,25 +46,36 @@ public class Contact implements Parcelable {
     {
         Contact c = new Contact();
         c.mEmail = cursor.getEmail();
-        c.mFirstName = cursor.getFirstName();
-        c.mLastName = cursor.getLastName();
+        c.mName = cursor.getName();
+        c.mPhotoUrl = cursor.getPhotoUrl();
 
         return c;
     }
 
     public String getDisplayName()
     {
-        // TODO
-        return mEmail;
+        return mName;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mName);
+        dest.writeString(this.mPhotoUrl);
+        dest.writeString(this.mEmail);
     }
 
     protected Contact(Parcel in) {
-        this.mFirstName = in.readString();
-        this.mLastName = in.readString();
+        this.mName = in.readString();
+        this.mPhotoUrl = in.readString();
         this.mEmail = in.readString();
     }
 
-    public static final Parcelable.Creator<Contact> CREATOR = new Parcelable.Creator<Contact>() {
+    public static final Creator<Contact> CREATOR = new Creator<Contact>() {
         public Contact createFromParcel(Parcel source) {
             return new Contact(source);
         }

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -166,13 +167,20 @@ public class MyGcmListenerService extends GcmListenerService {
         String contentText = "From " + contact.getEmail();
         int notifId = LOCATION_NOTIF_ID;
 
+        // TODO: create backstack for map activity
         Intent locationIntent = new Intent(this, MapsActivity.class);
         locationIntent.putExtra(Constants.EXTRA_CONTACT,contact);
         locationIntent.putExtra(Constants.EXTRA_LOCATION,loc);
         locationIntent.putExtra(Constants.EXTRA_MESSAGE,messageText);
-        locationIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION,notifId);
+        locationIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
 
-        PendingIntent locationPendingIntent = PendingIntent.getActivity(this,0,locationIntent,PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent locationPendingIntent = TaskStackBuilder.create(this)
+                // add all of DetailsActivity's parents to the stack,
+                // followed by DetailsActivity itself
+                .addNextIntentWithParentStack(locationIntent)
+                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //PendingIntent locationPendingIntent = PendingIntent.getActivity(this,0,locationIntent,PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);

@@ -26,24 +26,24 @@ public class ContactInfo {
         this.userId = userId;
     }
 
-    public String getFisrtName() {
-        return fisrtName;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setFisrtName(String fisrtName) {
-        this.fisrtName = fisrtName;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     String email;
     String userId;
-    String fisrtName;
-    String lastName;
+    String displayName;
+    String photoUrl;
 }

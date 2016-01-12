@@ -83,7 +83,7 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
         if(data.moveToFirst()) {
             ContactCursor cursor = new ContactCursor(data);
 
-            mCollapsingToolbarLayout.setTitle(cursor.getEmail());
+            mCollapsingToolbarLayout.setTitle(cursor.getName());
             ContactDetailFragment contactFragment = (ContactDetailFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
 
             contactFragment.bind(cursor);

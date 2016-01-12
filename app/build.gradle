@@ -4,6 +4,11 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
+    File keystoreFile = file('keystore.properties')
+    signingConfigs {
+        release
+    }
+
     defaultConfig {
         applicationId "ca.nbsoft.whereareyou"
         minSdkVersion 19
@@ -30,11 +35,19 @@ android {
 
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
+
+def props = new Properties()
+props.load(new FileInputStream(rootProject.file("keystore.properties")))
+android.signingConfigs.release.storeFile rootProject.file(props.keyStore)
+android.signingConfigs.release.storePassword props.keyStorePassword
+android.signingConfigs.release.keyAlias props.keyAlias
+android.signingConfigs.release.keyPassword props.keyAliasPassword
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -50,5 +63,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.google.android.gms:play-services-maps:8.4.0'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }

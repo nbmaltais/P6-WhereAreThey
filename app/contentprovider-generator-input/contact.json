@@ -1,18 +1,18 @@
 {
     "documentation": "A contact.",
     "fields": [
+		{
+			"documentation": "User acount this contact is linked to",
+			"name" : "account",
+			"type": "String",
+            "nullable": false,
+			"index": true
+		},
         {
-            "documentation": "First name.",
-            "name": "first_name",
+            "documentation": "Name.",
+            "name": "name",
             "type": "String",
 			"nullable": true,
-            "defaultValue": ""
-        },
-        {
-            "documentation": "Last name.",
-            "name": "last_name",
-            "type": "String",
-            "nullable": true,
             "defaultValue": ""
         },
         {
@@ -28,7 +28,7 @@
 		},
 		{
             "documentation": "Avatar url",
-            "name": "avatar_url",
+            "name": "photo_url",
             "type": "String",
             "nullable": true,
             "defaultValue": ""
@@ -44,6 +44,24 @@
 			"type": "Boolean",
             "nullable": false,
 			"defaultValue": false
+		},
+		{
+			"name" : "position_latitude",
+			"type": "Float",
+            "nullable": false,
+			"defaultValue": 0
+		},
+		{
+			"name" : "position_longitude",
+			"type": "Float",
+            "nullable": false,
+			"defaultValue": 0
+		},
+		{
+			"name" : "position_timestamp",
+			"type": "Float",
+            "nullable": false,
+			"defaultValue": 0
 		},
     ],
 

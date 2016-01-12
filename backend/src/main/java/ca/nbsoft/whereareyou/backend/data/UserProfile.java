@@ -23,6 +23,13 @@ public class UserProfile {
 
     @Index
     private String email;
+    private String displayName;
+
+    private String photoUrl;
+
+
+
+
 
     // Contacts
     private List<String> contactsUserId = new ArrayList<>(0);
@@ -39,6 +46,22 @@ public class UserProfile {
     public UserProfile(User user) {
         userId = user.getUserId();
         email = user.getEmail();
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     public String getUserId() {

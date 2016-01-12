@@ -40,28 +40,25 @@ public class ContactContentValues extends AbstractContentValues {
     }
 
     /**
-     * First name.
+     * User acount this contact is linked to
      */
-    public ContactContentValues putFirstName(@Nullable String value) {
-        mContentValues.put(ContactColumns.FIRST_NAME, value);
+    public ContactContentValues putAccount(@NonNull String value) {
+        if (value == null) throw new IllegalArgumentException("account must not be null");
+        mContentValues.put(ContactColumns.ACCOUNT, value);
         return this;
     }
 
-    public ContactContentValues putFirstNameNull() {
-        mContentValues.putNull(ContactColumns.FIRST_NAME);
-        return this;
-    }
 
     /**
-     * Last name.
+     * Name.
      */
-    public ContactContentValues putLastName(@Nullable String value) {
-        mContentValues.put(ContactColumns.LAST_NAME, value);
+    public ContactContentValues putName(@Nullable String value) {
+        mContentValues.put(ContactColumns.NAME, value);
         return this;
     }
 
-    public ContactContentValues putLastNameNull() {
-        mContentValues.putNull(ContactColumns.LAST_NAME);
+    public ContactContentValues putNameNull() {
+        mContentValues.putNull(ContactColumns.NAME);
         return this;
     }
 
@@ -82,13 +79,13 @@ public class ContactContentValues extends AbstractContentValues {
     /**
      * Avatar url
      */
-    public ContactContentValues putAvatarUrl(@Nullable String value) {
-        mContentValues.put(ContactColumns.AVATAR_URL, value);
+    public ContactContentValues putPhotoUrl(@Nullable String value) {
+        mContentValues.put(ContactColumns.PHOTO_URL, value);
         return this;
     }
 
-    public ContactContentValues putAvatarUrlNull() {
-        mContentValues.putNull(ContactColumns.AVATAR_URL);
+    public ContactContentValues putPhotoUrlNull() {
+        mContentValues.putNull(ContactColumns.PHOTO_URL);
         return this;
     }
 
@@ -100,6 +97,24 @@ public class ContactContentValues extends AbstractContentValues {
 
     public ContactContentValues putAutoReply(boolean value) {
         mContentValues.put(ContactColumns.AUTO_REPLY, value);
+        return this;
+    }
+
+
+    public ContactContentValues putPositionLatitude(float value) {
+        mContentValues.put(ContactColumns.POSITION_LATITUDE, value);
+        return this;
+    }
+
+
+    public ContactContentValues putPositionLongitude(float value) {
+        mContentValues.put(ContactColumns.POSITION_LONGITUDE, value);
+        return this;
+    }
+
+
+    public ContactContentValues putPositionTimstamp(float value) {
+        mContentValues.put(ContactColumns.POSITION_TIMSTAMP, value);
         return this;
     }
 
