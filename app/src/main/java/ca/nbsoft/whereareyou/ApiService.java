@@ -37,6 +37,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.nbsoft.whereareyou.Utility.MessagesUtils;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfo;
@@ -347,7 +348,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         Intent intent = new Intent(ctx, ApiService.class);
         intent.setAction(ACTION_CREATE_ACCOUNT);
         intent.putExtra(EXTRA_DISPLAY_NAME, displayName);
-        intent.putExtra(EXTRA_PHOTO_URL,photoUrl!=null ? photoUrl.toString() : "");
+        intent.putExtra(EXTRA_PHOTO_URL, photoUrl != null ? photoUrl.toString() : "");
         ctx.startService(intent);
     }
 
@@ -592,7 +593,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
         PreferenceUtils.setAccountName(this,null);
         PreferenceUtils.setSentRegistrationToBackend(this, false);
-        PreferenceUtils.setUserId(this,null);
+        PreferenceUtils.setUserId(this, null);
         deleteAccountFromDb();
 
         return Result.from(result);
@@ -620,7 +621,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     }
 
     private void deleteAccountFromDb() {
-        getContentResolver().delete(ContactColumns.CONTENT_URI,null,null);
+        getContentResolver().delete(ContactColumns.CONTENT_URI, null, null);
     }
 
     private Result handleSendLocation(@NonNull String userId, @NonNull String message) throws IOException, InterruptedException {
@@ -655,12 +656,20 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         showToast("Sending location to " + userId);
 
         WhereAreYou.SendLocation sendLocation = mApi.sendLocation(userId, loc);
-        if(message!=null)
+        if(message!=null) {
             sendLocation.setMessage(message);
+        }
 
-        StatusResult result = sendLocation.execute();
+        StatusResult statusResult = sendLocation.execute();
 
-        return Result.from(result);
+        Result result = Result.from(statusResult);
+
+        if(result.isOk() && message!=null && !message.isEmpty())
+        {
+            MessagesUtils.addSentMessage(this,userId,message);
+        }
+
+        return result;
     }
 
     private Result handleConfirmContactRequest(@NonNull String userId) throws IOException {
@@ -726,10 +735,16 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         WhereAreYou.RequestContactLocation requestContactLocation = mApi.requestContactLocation(userId);
         if(message!=null)
             requestContactLocation.setMessage(message);
-        StatusResult result = requestContactLocation.execute();
+        StatusResult statusResult = requestContactLocation.execute();
 
+        Result result = Result.from(statusResult);
 
-        return Result.from(result);
+        if(result.isOk() && message!=null && !message.isEmpty())
+        {
+            MessagesUtils.addSentMessage(this,userId,message);
+        }
+
+        return result;
     }
 
 

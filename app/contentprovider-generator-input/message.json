@@ -1,0 +1,30 @@
+{
+	"fields": [
+		{
+			"name": "contact_id",
+			"type": "Long",
+			"nullable": false,
+			"index": true,
+			"foreignKey": {
+				"table": "contact",
+				"onDelete": "CASCADE"
+			}
+		},
+		{
+			"name": "content",
+			"type": "String",
+			"nullable": false,
+		},
+		{
+			"name": "userIsSender",
+			"type": "Boolean",
+			"nullable": false,
+		},
+		{
+			"name": "timestamp",
+			"type": "Long",
+			"nullable": false,
+		},
+	],
+
+}

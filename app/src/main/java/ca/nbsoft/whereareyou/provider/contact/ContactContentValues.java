@@ -101,20 +101,20 @@ public class ContactContentValues extends AbstractContentValues {
     }
 
 
-    public ContactContentValues putPositionLatitude(float value) {
+    public ContactContentValues putPositionLatitude(double value) {
         mContentValues.put(ContactColumns.POSITION_LATITUDE, value);
         return this;
     }
 
 
-    public ContactContentValues putPositionLongitude(float value) {
+    public ContactContentValues putPositionLongitude(double value) {
         mContentValues.put(ContactColumns.POSITION_LONGITUDE, value);
         return this;
     }
 
 
-    public ContactContentValues putPositionTimstamp(float value) {
-        mContentValues.put(ContactColumns.POSITION_TIMSTAMP, value);
+    public ContactContentValues putPositionTimestamp(long value) {
+        mContentValues.put(ContactColumns.POSITION_TIMESTAMP, value);
         return this;
     }
 

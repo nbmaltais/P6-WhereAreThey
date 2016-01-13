@@ -11,6 +11,7 @@ import android.util.Log;
 
 import ca.nbsoft.whereareyou.BuildConfig;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
+import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 
 public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
     private static final String TAG = WhereRUSQLiteOpenHelper.class.getSimpleName();
@@ -34,7 +35,7 @@ public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
             + ContactColumns.AUTO_REPLY + " INTEGER NOT NULL DEFAULT 0, "
             + ContactColumns.POSITION_LATITUDE + " REAL NOT NULL DEFAULT 0, "
             + ContactColumns.POSITION_LONGITUDE + " REAL NOT NULL DEFAULT 0, "
-            + ContactColumns.POSITION_TIMSTAMP + " REAL NOT NULL DEFAULT 0 "
+            + ContactColumns.POSITION_TIMESTAMP + " INTEGER NOT NULL DEFAULT 0 "
             + ", CONSTRAINT unique_email UNIQUE (email) ON CONFLICT REPLACE"
             + ", CONSTRAINT unique_usrerId UNIQUE (userId) ON CONFLICT REPLACE"
             + " );";
@@ -44,6 +45,19 @@ public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
 
     public static final String SQL_CREATE_INDEX_CONTACT_USERID = "CREATE INDEX IDX_CONTACT_USERID "
             + " ON " + ContactColumns.TABLE_NAME + " ( " + ContactColumns.USERID + " );";
+
+    public static final String SQL_CREATE_TABLE_MESSAGE = "CREATE TABLE IF NOT EXISTS "
+            + MessageColumns.TABLE_NAME + " ( "
+            + MessageColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + MessageColumns.CONTACT_ID + " INTEGER NOT NULL, "
+            + MessageColumns.CONTENT + " TEXT NOT NULL, "
+            + MessageColumns.USERISSENDER + " INTEGER NOT NULL, "
+            + MessageColumns.TIMESTAMP + " INTEGER NOT NULL "
+            + ", CONSTRAINT fk_contact_id FOREIGN KEY (" + MessageColumns.CONTACT_ID + ") REFERENCES contact (_id) ON DELETE CASCADE"
+            + " );";
+
+    public static final String SQL_CREATE_INDEX_MESSAGE_CONTACT_ID = "CREATE INDEX IDX_MESSAGE_CONTACT_ID "
+            + " ON " + MessageColumns.TABLE_NAME + " ( " + MessageColumns.CONTACT_ID + " );";
 
     // @formatter:on
 
@@ -102,6 +116,8 @@ public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_TABLE_CONTACT);
         db.execSQL(SQL_CREATE_INDEX_CONTACT_ACCOUNT);
         db.execSQL(SQL_CREATE_INDEX_CONTACT_USERID);
+        db.execSQL(SQL_CREATE_TABLE_MESSAGE);
+        db.execSQL(SQL_CREATE_INDEX_MESSAGE_CONTACT_ID);
         mOpenHelperCallbacks.onPostCreate(mContext, db);
     }
 

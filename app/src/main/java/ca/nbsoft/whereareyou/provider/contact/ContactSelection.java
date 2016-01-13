@@ -308,32 +308,32 @@ public class ContactSelection extends AbstractSelection<ContactSelection> {
         return this;
     }
 
-    public ContactSelection positionLatitude(float... value) {
+    public ContactSelection positionLatitude(double... value) {
         addEquals(ContactColumns.POSITION_LATITUDE, toObjectArray(value));
         return this;
     }
 
-    public ContactSelection positionLatitudeNot(float... value) {
+    public ContactSelection positionLatitudeNot(double... value) {
         addNotEquals(ContactColumns.POSITION_LATITUDE, toObjectArray(value));
         return this;
     }
 
-    public ContactSelection positionLatitudeGt(float value) {
+    public ContactSelection positionLatitudeGt(double value) {
         addGreaterThan(ContactColumns.POSITION_LATITUDE, value);
         return this;
     }
 
-    public ContactSelection positionLatitudeGtEq(float value) {
+    public ContactSelection positionLatitudeGtEq(double value) {
         addGreaterThanOrEquals(ContactColumns.POSITION_LATITUDE, value);
         return this;
     }
 
-    public ContactSelection positionLatitudeLt(float value) {
+    public ContactSelection positionLatitudeLt(double value) {
         addLessThan(ContactColumns.POSITION_LATITUDE, value);
         return this;
     }
 
-    public ContactSelection positionLatitudeLtEq(float value) {
+    public ContactSelection positionLatitudeLtEq(double value) {
         addLessThanOrEquals(ContactColumns.POSITION_LATITUDE, value);
         return this;
     }
@@ -348,32 +348,32 @@ public class ContactSelection extends AbstractSelection<ContactSelection> {
         return this;
     }
 
-    public ContactSelection positionLongitude(float... value) {
+    public ContactSelection positionLongitude(double... value) {
         addEquals(ContactColumns.POSITION_LONGITUDE, toObjectArray(value));
         return this;
     }
 
-    public ContactSelection positionLongitudeNot(float... value) {
+    public ContactSelection positionLongitudeNot(double... value) {
         addNotEquals(ContactColumns.POSITION_LONGITUDE, toObjectArray(value));
         return this;
     }
 
-    public ContactSelection positionLongitudeGt(float value) {
+    public ContactSelection positionLongitudeGt(double value) {
         addGreaterThan(ContactColumns.POSITION_LONGITUDE, value);
         return this;
     }
 
-    public ContactSelection positionLongitudeGtEq(float value) {
+    public ContactSelection positionLongitudeGtEq(double value) {
         addGreaterThanOrEquals(ContactColumns.POSITION_LONGITUDE, value);
         return this;
     }
 
-    public ContactSelection positionLongitudeLt(float value) {
+    public ContactSelection positionLongitudeLt(double value) {
         addLessThan(ContactColumns.POSITION_LONGITUDE, value);
         return this;
     }
 
-    public ContactSelection positionLongitudeLtEq(float value) {
+    public ContactSelection positionLongitudeLtEq(double value) {
         addLessThanOrEquals(ContactColumns.POSITION_LONGITUDE, value);
         return this;
     }
@@ -388,43 +388,43 @@ public class ContactSelection extends AbstractSelection<ContactSelection> {
         return this;
     }
 
-    public ContactSelection positionTimstamp(float... value) {
-        addEquals(ContactColumns.POSITION_TIMSTAMP, toObjectArray(value));
+    public ContactSelection positionTimestamp(long... value) {
+        addEquals(ContactColumns.POSITION_TIMESTAMP, toObjectArray(value));
         return this;
     }
 
-    public ContactSelection positionTimstampNot(float... value) {
-        addNotEquals(ContactColumns.POSITION_TIMSTAMP, toObjectArray(value));
+    public ContactSelection positionTimestampNot(long... value) {
+        addNotEquals(ContactColumns.POSITION_TIMESTAMP, toObjectArray(value));
         return this;
     }
 
-    public ContactSelection positionTimstampGt(float value) {
-        addGreaterThan(ContactColumns.POSITION_TIMSTAMP, value);
+    public ContactSelection positionTimestampGt(long value) {
+        addGreaterThan(ContactColumns.POSITION_TIMESTAMP, value);
         return this;
     }
 
-    public ContactSelection positionTimstampGtEq(float value) {
-        addGreaterThanOrEquals(ContactColumns.POSITION_TIMSTAMP, value);
+    public ContactSelection positionTimestampGtEq(long value) {
+        addGreaterThanOrEquals(ContactColumns.POSITION_TIMESTAMP, value);
         return this;
     }
 
-    public ContactSelection positionTimstampLt(float value) {
-        addLessThan(ContactColumns.POSITION_TIMSTAMP, value);
+    public ContactSelection positionTimestampLt(long value) {
+        addLessThan(ContactColumns.POSITION_TIMESTAMP, value);
         return this;
     }
 
-    public ContactSelection positionTimstampLtEq(float value) {
-        addLessThanOrEquals(ContactColumns.POSITION_TIMSTAMP, value);
+    public ContactSelection positionTimestampLtEq(long value) {
+        addLessThanOrEquals(ContactColumns.POSITION_TIMESTAMP, value);
         return this;
     }
 
-    public ContactSelection orderByPositionTimstamp(boolean desc) {
-        orderBy(ContactColumns.POSITION_TIMSTAMP, desc);
+    public ContactSelection orderByPositionTimestamp(boolean desc) {
+        orderBy(ContactColumns.POSITION_TIMESTAMP, desc);
         return this;
     }
 
-    public ContactSelection orderByPositionTimstamp() {
-        orderBy(ContactColumns.POSITION_TIMSTAMP, false);
+    public ContactSelection orderByPositionTimestamp() {
+        orderBy(ContactColumns.POSITION_TIMESTAMP, false);
         return this;
     }
 }

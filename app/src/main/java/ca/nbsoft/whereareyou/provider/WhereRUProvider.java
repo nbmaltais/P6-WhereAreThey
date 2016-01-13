@@ -13,6 +13,7 @@ import android.util.Log;
 import ca.nbsoft.whereareyou.BuildConfig;
 import ca.nbsoft.whereareyou.provider.base.BaseContentProvider;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
+import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 
 public class WhereRUProvider extends BaseContentProvider {
     private static final String TAG = WhereRUProvider.class.getSimpleName();
@@ -28,6 +29,9 @@ public class WhereRUProvider extends BaseContentProvider {
     private static final int URI_TYPE_CONTACT = 0;
     private static final int URI_TYPE_CONTACT_ID = 1;
 
+    private static final int URI_TYPE_MESSAGE = 2;
+    private static final int URI_TYPE_MESSAGE_ID = 3;
+
 
 
     private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
@@ -35,6 +39,8 @@ public class WhereRUProvider extends BaseContentProvider {
     static {
         URI_MATCHER.addURI(AUTHORITY, ContactColumns.TABLE_NAME, URI_TYPE_CONTACT);
         URI_MATCHER.addURI(AUTHORITY, ContactColumns.TABLE_NAME + "/#", URI_TYPE_CONTACT_ID);
+        URI_MATCHER.addURI(AUTHORITY, MessageColumns.TABLE_NAME, URI_TYPE_MESSAGE);
+        URI_MATCHER.addURI(AUTHORITY, MessageColumns.TABLE_NAME + "/#", URI_TYPE_MESSAGE_ID);
     }
 
     @Override
@@ -55,6 +61,11 @@ public class WhereRUProvider extends BaseContentProvider {
                 return TYPE_CURSOR_DIR + ContactColumns.TABLE_NAME;
             case URI_TYPE_CONTACT_ID:
                 return TYPE_CURSOR_ITEM + ContactColumns.TABLE_NAME;
+
+            case URI_TYPE_MESSAGE:
+                return TYPE_CURSOR_DIR + MessageColumns.TABLE_NAME;
+            case URI_TYPE_MESSAGE_ID:
+                return TYPE_CURSOR_ITEM + MessageColumns.TABLE_NAME;
 
         }
         return null;
@@ -106,12 +117,24 @@ public class WhereRUProvider extends BaseContentProvider {
                 res.orderBy = ContactColumns.DEFAULT_ORDER;
                 break;
 
+            case URI_TYPE_MESSAGE:
+            case URI_TYPE_MESSAGE_ID:
+                res.table = MessageColumns.TABLE_NAME;
+                res.idColumn = MessageColumns._ID;
+                res.tablesWithJoins = MessageColumns.TABLE_NAME;
+                if (ContactColumns.hasColumns(projection)) {
+                    res.tablesWithJoins += " LEFT OUTER JOIN " + ContactColumns.TABLE_NAME + " AS " + MessageColumns.PREFIX_CONTACT + " ON " + MessageColumns.TABLE_NAME + "." + MessageColumns.CONTACT_ID + "=" + MessageColumns.PREFIX_CONTACT + "." + ContactColumns._ID;
+                }
+                res.orderBy = MessageColumns.DEFAULT_ORDER;
+                break;
+
             default:
                 throw new IllegalArgumentException("The uri '" + uri + "' is not supported by this ContentProvider");
         }
 
         switch (matchedId) {
             case URI_TYPE_CONTACT_ID:
+            case URI_TYPE_MESSAGE_ID:
                 id = uri.getLastPathSegment();
         }
         if (id != null) {

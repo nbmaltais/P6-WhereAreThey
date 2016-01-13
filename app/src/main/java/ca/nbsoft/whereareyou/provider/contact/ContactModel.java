@@ -60,15 +60,15 @@ public interface ContactModel extends BaseModel {
     /**
      * Get the {@code position_latitude} value.
      */
-    float getPositionLatitude();
+    double getPositionLatitude();
 
     /**
      * Get the {@code position_longitude} value.
      */
-    float getPositionLongitude();
+    double getPositionLongitude();
 
     /**
-     * Get the {@code position_timstamp} value.
+     * Get the {@code position_timestamp} value.
      */
-    float getPositionTimstamp();
+    long getPositionTimestamp();
 }

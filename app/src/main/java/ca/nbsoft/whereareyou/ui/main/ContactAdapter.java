@@ -89,7 +89,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             }
             else
             {
-                // TOTO load place holder contact image
+                Picasso.with(itemView.getContext()).load(R.drawable.ic_person_black_48dp).centerCrop().fit().into(mPhotoView);
             }
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

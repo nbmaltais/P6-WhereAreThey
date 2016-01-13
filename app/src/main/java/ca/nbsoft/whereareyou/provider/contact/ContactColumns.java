@@ -5,6 +5,7 @@ import android.provider.BaseColumns;
 
 import ca.nbsoft.whereareyou.provider.WhereRUProvider;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
+import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 
 /**
  * A contact.
@@ -45,7 +46,7 @@ public class ContactColumns implements BaseColumns {
 
     public static final String POSITION_LONGITUDE = "position_longitude";
 
-    public static final String POSITION_TIMSTAMP = "position_timstamp";
+    public static final String POSITION_TIMESTAMP = "position_timestamp";
 
 
     public static final String DEFAULT_ORDER = TABLE_NAME + "." +_ID;
@@ -62,7 +63,7 @@ public class ContactColumns implements BaseColumns {
             AUTO_REPLY,
             POSITION_LATITUDE,
             POSITION_LONGITUDE,
-            POSITION_TIMSTAMP
+            POSITION_TIMESTAMP
     };
     // @formatter:on
 
@@ -78,7 +79,7 @@ public class ContactColumns implements BaseColumns {
             if (c.equals(AUTO_REPLY) || c.contains("." + AUTO_REPLY)) return true;
             if (c.equals(POSITION_LATITUDE) || c.contains("." + POSITION_LATITUDE)) return true;
             if (c.equals(POSITION_LONGITUDE) || c.contains("." + POSITION_LONGITUDE)) return true;
-            if (c.equals(POSITION_TIMSTAMP) || c.contains("." + POSITION_TIMSTAMP)) return true;
+            if (c.equals(POSITION_TIMESTAMP) || c.contains("." + POSITION_TIMESTAMP)) return true;
         }
         return false;
     }

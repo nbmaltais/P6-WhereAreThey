@@ -47,19 +47,19 @@
 		},
 		{
 			"name" : "position_latitude",
-			"type": "Float",
+			"type": "Double",
             "nullable": false,
 			"defaultValue": 0
 		},
 		{
 			"name" : "position_longitude",
-			"type": "Float",
+			"type": "Double",
             "nullable": false,
 			"defaultValue": 0
 		},
 		{
 			"name" : "position_timestamp",
-			"type": "Float",
+			"type": "Long",
             "nullable": false,
 			"defaultValue": 0
 		},

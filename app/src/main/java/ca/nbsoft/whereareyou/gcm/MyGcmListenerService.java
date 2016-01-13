@@ -3,6 +3,8 @@ package ca.nbsoft.whereareyou.gcm;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,6 +19,8 @@ import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.Constants;
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.Utility.MessagesUtils;
+import ca.nbsoft.whereareyou.provider.contact.ContactContentValues;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 import ca.nbsoft.whereareyou.ui.main.MainActivity;
@@ -115,7 +119,7 @@ public class MyGcmListenerService extends GcmListenerService {
         int notifId = CONTACT_REQUEST_NOTIF_ID;
 
         Intent acceptIntent = ApiService.confirmContactRequestIntent(this, fromUserId);
-        acceptIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION,notifId);
+        acceptIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
         PendingIntent acceptPendingIntent = PendingIntent.getService(this,0,acceptIntent,PendingIntent.FLAG_ONE_SHOT);
 
         builder.setContentTitle(title)
@@ -162,12 +166,22 @@ public class MyGcmListenerService extends GcmListenerService {
             return;
         }
 
+        // Update the contact position in the DB
+        updateContact(fromUserId,loc,messageText);
+
+        // Add the message to the DB
+        if(messageText!=null && !messageText.isEmpty())
+        {
+            MessagesUtils.addReceivedMessage(this,contact.getId(),messageText);
+        }
+
+        // Create a notification
 
         String title = "Location Received";
-        String contentText = "From " + contact.getEmail();
+        String contentText = "From " + contact.getDisplayName();
         int notifId = LOCATION_NOTIF_ID;
 
-        // TODO: create backstack for map activity
+        // TODO: create back stack for map activity
         Intent locationIntent = new Intent(this, MapsActivity.class);
         locationIntent.putExtra(Constants.EXTRA_CONTACT,contact);
         locationIntent.putExtra(Constants.EXTRA_LOCATION,loc);
@@ -180,8 +194,6 @@ public class MyGcmListenerService extends GcmListenerService {
                 .addNextIntentWithParentStack(locationIntent)
                 .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //PendingIntent locationPendingIntent = PendingIntent.getActivity(this,0,locationIntent,PendingIntent.FLAG_ONE_SHOT);
-
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
@@ -189,7 +201,8 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(locationPendingIntent)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -201,7 +214,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.d(TAG,"onLocationRequest");
 
         String fromUserId = message.getString(KEY_USER_ID);
-        String messageText = message.getString(KEY_MESSAGE,null);
+        String messageText = message.getString(KEY_MESSAGE, null);
 
         Contact contact = getContact(fromUserId);
         if(contact==null)
@@ -210,22 +223,33 @@ public class MyGcmListenerService extends GcmListenerService {
             return;
         }
 
+        // Add the message to the DB
+        if(messageText!=null && !messageText.isEmpty())
+        {
+            MessagesUtils.addReceivedMessage(this,contact.getId(),messageText);
+        }
+
+
         int notifId = LOCATION_REQUEST_NOTIF_ID;
         String title = getString(R.string.notification_location_request_title);
         String replyText = getString(R.string.notification_reply_action);
-        String contentText = "From " + contact.getEmail();
+        String contentText = "From " + contact.getDisplayName();
 
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
-        Intent replyIntent = ApiService.sendLocationIntent(this,fromUserId,null);
-        replyIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION,notifId);
-        PendingIntent replyPendingIntent = PendingIntent.getService(this,0,replyIntent,PendingIntent.FLAG_ONE_SHOT);
+        Intent replyIntent = ApiService.sendLocationIntent(this, fromUserId, null);
+        replyIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
+        PendingIntent replyPendingIntent = PendingIntent.getService(this, 0, replyIntent, PendingIntent.FLAG_ONE_SHOT);
 
         builder.setContentTitle(title)
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification)
-                .addAction(R.drawable.ic_reply_24dp, replyText, replyPendingIntent);
+                .addAction(R.drawable.ic_reply_24dp, replyText, replyPendingIntent)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
+
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        builder.setSound(alarmSound);
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -244,6 +268,21 @@ public class MyGcmListenerService extends GcmListenerService {
         else {
             return null;
         }
+    }
+
+    private void updateContact(String userId, android.location.Location loc, String message)
+    {
+        long timestamp = System.currentTimeMillis();
+        ContactContentValues values = new ContactContentValues();
+        values.putPositionLatitude(loc.getLatitude());
+        values.putPositionLongitude(loc.getLongitude());
+        values.putPositionTimestamp(timestamp);
+
+        ContactSelection where = new ContactSelection();
+        where.userid(userId);
+
+        values.update(getContentResolver(), where);
+
     }
 
     protected void showToast(final String message) {
