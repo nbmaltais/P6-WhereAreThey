@@ -166,8 +166,11 @@ public class MyGcmListenerService extends GcmListenerService {
             return;
         }
 
+        // update the contact object
+        contact.setLatLng(loc);
+
         // Update the contact position in the DB
-        updateContact(fromUserId,loc,messageText);
+        updateContact(fromUserId, loc, messageText);
 
         // Add the message to the DB
         if(messageText!=null && !messageText.isEmpty())
@@ -175,6 +178,14 @@ public class MyGcmListenerService extends GcmListenerService {
             MessagesUtils.addReceivedMessage(this,contact.getId(),messageText);
         }
 
+        // TODO: used ordered broadcast to show notification only if no activity can
+        // use it
+        // https://commonsware.com/blog/2010/08/11/activity-notification-ordered-broadcast.html
+        sendLocationNotification(contact,messageText);
+
+    }
+
+    private void sendLocationNotification(Contact contact, String messageText) {
         // Create a notification
 
         String title = "Location Received";
@@ -184,7 +195,7 @@ public class MyGcmListenerService extends GcmListenerService {
         // TODO: create back stack for map activity
         Intent locationIntent = new Intent(this, MapsActivity.class);
         locationIntent.putExtra(Constants.EXTRA_CONTACT,contact);
-        locationIntent.putExtra(Constants.EXTRA_LOCATION,loc);
+        locationIntent.putExtra(Constants.EXTRA_LOCATION,contact.getLatLong());
         locationIntent.putExtra(Constants.EXTRA_MESSAGE,messageText);
         locationIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
 
@@ -203,6 +214,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setContentIntent(locationPendingIntent)
                 .setAutoCancel(true)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
+
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        builder.setSound(alarmSound);
+
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 

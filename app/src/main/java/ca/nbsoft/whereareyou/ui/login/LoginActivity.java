@@ -127,6 +127,7 @@ public class LoginActivity extends BaseActivity {
     protected void onAccountCreated()
     {
         Log.d(TAG, "onAccountCreated");
+        //PreferenceUtils.setAccountCreated(this, true);
         ApiService.registerDevice(this);
     }
 

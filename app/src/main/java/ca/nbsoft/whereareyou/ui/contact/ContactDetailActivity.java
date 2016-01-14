@@ -28,7 +28,6 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
 
     private static final String EXTRA_CONTACT_USER_ID = "CONTACT_USER_ID";
     @Bind(R.id.toolbar) Toolbar mToolbar;
-    @Bind(R.id.fab) FloatingActionButton mFab;
     @Bind(R.id.app_bar) AppBarLayout mAppBarLayout;
     @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
 
@@ -51,13 +50,6 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
 
         setSupportActionBar(mToolbar);
 
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

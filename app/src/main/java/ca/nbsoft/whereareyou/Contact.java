@@ -1,5 +1,6 @@
 package ca.nbsoft.whereareyou;
 
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -131,4 +132,11 @@ public class Contact implements Parcelable {
             return new Contact[size];
         }
     };
+
+    public void setLatLng(Location loc) {
+        if(loc!=null) {
+            mLatitude = loc.getLatitude();
+            mLongitude = loc.getLongitude();
+        }
+    }
 }

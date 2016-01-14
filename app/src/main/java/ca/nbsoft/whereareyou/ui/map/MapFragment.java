@@ -18,7 +18,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
@@ -27,10 +29,10 @@ import ca.nbsoft.whereareyou.R;
  * A simple {@link Fragment} subclass.
  */
 public class MapFragment extends SupportMapFragment implements OnMapReadyCallback {
-
-    GoogleMap mMap;
-    List<Contact> mContacts = new ArrayList<>();
-    CameraUpdate mCameraUpdate;
+    static final String TAG = MapFragment.class.getSimpleName();
+    GoogleMap mMap=null;
+    Map<String,Contact> mContacts = new HashMap<>();
+    CameraUpdate mCameraUpdate=null;
 
     public MapFragment() {
         // Required empty public constructor
@@ -45,10 +47,11 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
     public void addContactMarker( Contact contact, boolean centerMap)
     {
-        mContacts.add(contact);
+        Log.d(TAG,"addContactMarker");
+        mContacts.put(contact.getUserId(),contact);
         if(centerMap)
             mCameraUpdate = CameraUpdateFactory.newLatLngZoom(contact.getLatLong(), 18);
-        if(mMap!=null);
+        if(mMap!=null)
         {
             showMarker(contact);
             if(centerMap)
@@ -65,6 +68,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.d(TAG,"onMapReady");
         mMap = googleMap;
         showMarkers();
     }
@@ -77,9 +81,8 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
     }
 
 
-
     private void showMarkers() {
-        for( Contact c:mContacts)
+        for( Contact c: mContacts.values())
         {
             showMarker(c);
         }

@@ -22,6 +22,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
@@ -37,6 +38,7 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
     @Bind (R.id.contact_list)
     RecyclerView mRecyclerView;
 
+    String mAccountName;
 
     ContactAdapter mAdapter;
 
@@ -61,7 +63,9 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        getLoaderManager().initLoader(0,null,this);
+        mAccountName = PreferenceUtils.getAccountName(getContext());
+
+        getLoaderManager().initLoader(0, null, this);
 
         return view;
     }
@@ -94,14 +98,12 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
 
     }
 
-
-
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d(TAG,"onCreateLoader");
 
         ContactSelection where = new ContactSelection();
-
+        where.account(mAccountName);
 
         android.support.v4.content.CursorLoader loader =
                 new android.support.v4.content.CursorLoader(getActivity(),where.uri(), ContactColumns.ALL_COLUMNS,

@@ -17,11 +17,11 @@ import ca.nbsoft.whereareyou.Constants;
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
-    Location mLocation;
+    //Location mLocation;
     Contact mContact;
 
     @Override
@@ -29,15 +29,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        mLocation = getIntent().getParcelableExtra(Constants.EXTRA_LOCATION);
+        //mLocation = getIntent().getParcelableExtra(Constants.EXTRA_LOCATION);
         mContact = getIntent().getParcelableExtra(Constants.EXTRA_CONTACT);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        MapFragment mapFragment = (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        //mapFragment.getMapAsync(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mapFragment.addContactMarker(mContact,true);
     }
 
 
@@ -50,7 +52,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-    @Override
+    /*@Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
@@ -60,6 +62,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.addMarker(new MarkerOptions().position(contactPos).title(mContact.getDisplayName()));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom (contactPos,18));
 
-
-    }
+    }*/
 }
