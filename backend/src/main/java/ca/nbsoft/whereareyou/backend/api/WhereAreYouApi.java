@@ -66,6 +66,7 @@ public class WhereAreYouApi {
     public static final int RESULT_NO_PENDING_REQUEST = -4;
     public static final int RESULT_NOT_IN_CONTACT = -5;
     public static final int RESULT_USER_UNSUBSCRIBED = -6;
+    public static final int RESULT_NO_USER_WITH_EMAIL = -7;
 
 
     public static class BooleanResult {
@@ -397,7 +398,7 @@ public class WhereAreYouApi {
         if(contactProfile==null)
         {
             // TODO: send invitation??
-            throw new InvalidUserException("No user with the specified email exists.");
+            return new StatusResult(RESULT_NO_USER_WITH_EMAIL,"No user with the specified email has signed in.");
         }
 
         if( userProfile.containsContactUserId(contactProfile.getUserId()) )

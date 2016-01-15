@@ -123,4 +123,14 @@
     <string name="main_activity_delete_account_confirmation">Account deleted</string>
     <string name="base_activity_signin_progress_caption">Signin in</string>
     <string name="action_delete_contact">Delete</string>
+    <string name="add_contact_activity_progress">Adding contact...</string>
+    <string name="contact_detail_delete_contact_dialog_text">Are you sure you want to delete this contact?</string>
+    <string name="yes">Yes</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_contact_activity_on_failed_dialog_text">The contact you selected is not using WhereAreYou. Do you want to invite him?</string>
+    <string name="add_contact_activity_on_failed_dialog_title">User not registered</string>
+
+    <string name="no">No</string>
+    <string name="feature_not_implemented">This feature is not implemented yet...</string>
+    <string name="main_activity_delete_account_dialog_text">Are you sure you want to delete yout account?</string>
 </resources>

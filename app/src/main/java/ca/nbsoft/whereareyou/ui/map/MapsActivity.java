@@ -1,66 +1,106 @@
 package ca.nbsoft.whereareyou.ui.map;
 
-import android.location.Location;
-import android.support.v4.app.FragmentActivity;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Intent;
+import android.content.Loader;
+
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import ca.nbsoft.whereareyou.Constants;
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
+import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
+import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
+import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 
-public class MapsActivity extends AppCompatActivity {
+public class MapsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
-    private GoogleMap mMap;
-    //Location mLocation;
-    Contact mContact;
+    public static final String ACTION_SHOW_CONTACT = "ca.nbsoft.whereareyou.ui.map.action.SHOW_CONTACT";
+    public static final String ACTION_SHOW_ALL_CONTACTS = "ca.nbsoft.whereareyou.ui.map.action.SHOW_ALL_CONTACTS";
+
+    MapFragment mMapFragment;
+
+    static public Intent getShowContactIntent(Context ctx, Contact contact )
+    {
+        Intent intent = new Intent(ctx, MapsActivity.class);
+        intent.setAction(ACTION_SHOW_CONTACT);
+        intent.putExtra(Constants.EXTRA_CONTACT, contact);
+        return intent;
+    }
+
+    static public void startShowContact( Context ctx, Contact contact )
+    {
+        Intent intent = getShowContactIntent(ctx,contact);
+
+        ctx.startActivity(intent);
+    }
+
+    static public void startShowAllContacts( Context ctx )
+    {
+        Intent intent = new Intent(ctx, MapsActivity.class);
+        intent.setAction(ACTION_SHOW_ALL_CONTACTS);
+
+        ctx.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        //mLocation = getIntent().getParcelableExtra(Constants.EXTRA_LOCATION);
-        mContact = getIntent().getParcelableExtra(Constants.EXTRA_CONTACT);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        MapFragment mapFragment = (MapFragment) getSupportFragmentManager()
+       mMapFragment = (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         //mapFragment.getMapAsync(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mapFragment.addContactMarker(mContact,true);
+        switch(getIntent().getAction())
+        {
+            case ACTION_SHOW_CONTACT:
+                Contact contact = getIntent().getParcelableExtra(Constants.EXTRA_CONTACT);
+                mMapFragment.addContactMarker(contact,true);
+                break;
+            case ACTION_SHOW_ALL_CONTACTS:
+                getLoaderManager().initLoader(0,null,this);
+                break;
+        }
+
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String accountName = PreferenceUtils.getAccountName(this);
+        ContactSelection sel = new ContactSelection();
+        sel.account(accountName);
+        //sel.positionTimestampGt();
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    /*@Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        return new CursorLoader(this,sel.uri(), ContactColumns.ALL_COLUMNS,sel.sel(),sel.args(),sel.order());
 
-        // Add a marker at contact position and move the camera
-        LatLng contactPos = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-        Log.d(TAG,"onMapReady, latlong = " + contactPos);
-        mMap.addMarker(new MarkerOptions().position(contactPos).title(mContact.getDisplayName()));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom (contactPos,18));
+    }
 
-    }*/
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        ContactCursor cursor = new ContactCursor(data);
+        while(cursor.moveToNext())
+        {
+            Contact c = Contact.fromCursor(cursor);
+            mMapFragment.addContactMarker(c,false);
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
 }

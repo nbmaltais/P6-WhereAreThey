@@ -239,12 +239,13 @@ public class WhereAreYouApiTest {
         assertFalse(profile2.containsContactUserId(profile1.getUserId()));
     }
 
-    @Test(expected = InvalidUserException.class)
+    @Test
     public void testSendContactRequest_UnknownUser() throws Exception {
         UserProfile profile1 = new UserProfile(user);
         UserProfileHelper.saveUserProfile(profile1);
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendContactRequest(user, "unknown@gmail.com");
+        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_NO_USER_WITH_EMAIL);
     }
 
     @Test(expected = InvalidUserException.class)

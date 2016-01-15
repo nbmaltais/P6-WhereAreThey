@@ -193,9 +193,7 @@ public class MyGcmListenerService extends GcmListenerService {
         int notifId = LOCATION_NOTIF_ID;
 
         // TODO: create back stack for map activity
-        Intent locationIntent = new Intent(this, MapsActivity.class);
-        locationIntent.putExtra(Constants.EXTRA_CONTACT,contact);
-        locationIntent.putExtra(Constants.EXTRA_LOCATION,contact.getLatLong());
+        Intent locationIntent = MapsActivity.getShowContactIntent(this,contact);
         locationIntent.putExtra(Constants.EXTRA_MESSAGE,messageText);
         locationIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
 

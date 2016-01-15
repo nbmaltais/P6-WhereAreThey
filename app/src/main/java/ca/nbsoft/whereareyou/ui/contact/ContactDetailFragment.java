@@ -1,7 +1,13 @@
 package ca.nbsoft.whereareyou.ui.contact;
 
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.support.v4.app.DialogFragment;
 import android.content.BroadcastReceiver;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -25,6 +31,7 @@ import ca.nbsoft.whereareyou.R;
 
 import ca.nbsoft.whereareyou.Utility.Utils;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
+import ca.nbsoft.whereareyou.ui.main.AddContactActivity;
 import ca.nbsoft.whereareyou.ui.map.MapFragment;
 
 /**
@@ -33,6 +40,7 @@ import ca.nbsoft.whereareyou.ui.map.MapFragment;
 public class ContactDetailFragment extends Fragment {
 
     private static final String TAG = ContactDetailFragment.class.getSimpleName();
+    private static final int DELETE_CONTACT = 0;
     @Bind(R.id.top_container) View mTopContainer;
     @Bind(R.id.message)
     EditText mMessageView;
@@ -111,7 +119,7 @@ public class ContactDetailFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        inflater.inflate(R.menu.menu_contact_detail,menu);
+        inflater.inflate(R.menu.menu_contact_detail, menu);
     }
 
     @Override
@@ -119,11 +127,17 @@ public class ContactDetailFragment extends Fragment {
 
         if(item.getItemId() == R.id.action_delete_contact)
         {
-            deleteContact();
+            askDeleteContact();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void askDeleteContact() {
+        DialogFragment dialog = new DeleteContactDialog();
+        dialog.setTargetFragment(this, DELETE_CONTACT);
+        dialog.show(getFragmentManager(), "delete-contact-dialog");
     }
 
     private String getMessage() {
@@ -164,20 +178,17 @@ public class ContactDetailFragment extends Fragment {
     }
 
 
+
     private void deleteContact()
     {
         // TODO: use dialog to ask if user is sure
-        String text = getContext().getString(R.string.contact_detail_delete_confirmation);
-        Utils.cancelableActionSnackbar(mTopContainer, text, new Runnable() {
-            @Override
-            public void run() {
-                ApiService.deleteContact(getContext(), mUserId);
+
+        ApiService.deleteContact(getContext(), mUserId);
                 //Snackbar.make(mTopContainer,"Deleted " + mContactName, Snackbar.LENGTH_SHORT).show();
 
-                // TODO use an interface to signal the parent activity
-                getActivity().finish();
-            }
-        });
+        // TODO use an interface to signal the parent activity
+        getActivity().finish();
+
     }
 
     public void bind(ContactCursor cursor) {
@@ -200,6 +211,62 @@ public class ContactDetailFragment extends Fragment {
             mMapFragment.addContactMarker(contact,true);
         else
             Log.w(TAG,"bind : mMapFragment==null");
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+
+        if(requestCode == DELETE_CONTACT)
+        {
+            if( resultCode == Activity.RESULT_OK)
+            {
+                deleteContact();
+            }
+            else
+            {
+                Log.d(TAG,"Canceled delete contact");
+            }
+        }
+        else
+        {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+
+
+    }
+
+    static public class DeleteContactDialog extends DialogFragment
+    {
+        public DeleteContactDialog()
+        {
+
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+            Activity activity = getActivity();
+
+            return new AlertDialog.Builder(activity)
+                    //.setIcon(R.drawable.alert_dialog_dart_icon)
+                    //.setTitle(R.string.contact_detail_delete_contact_dialog_title)
+                    .setMessage(R.string.contact_detail_delete_contact_dialog_text)
+                    .setPositiveButton(R.string.yes,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+                                }
+                            })
+                    .setNegativeButton(R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
+                                }
+                            }).create();
+        }
     }
 
 }

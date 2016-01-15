@@ -1,9 +1,13 @@
 package ca.nbsoft.whereareyou.ui.main;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -91,22 +95,52 @@ public class MainActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if( item.getItemId() == R.id.action_login)
+        if(item.getItemId()==R.id.action_delete_account)
         {
-            forceRegisterDevice();
+            askDeleteAccount();
             return true;
-        }
-        else if(item.getItemId()==R.id.action_delete_account)
-        {
-            Utils.cancelableActionSnackbar(mToolbar, getString(R.string.main_activity_delete_account_confirmation), new Runnable() {
-                @Override
-                public void run() {
-                    ApiService.deleteAccount(MainActivity.this);
-                }
-            });
-
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void askDeleteAccount() {
+        DeleteAccountDialog d = new DeleteAccountDialog();
+        d.show(getSupportFragmentManager(),"tag");
+    }
+
+
+    static public class DeleteAccountDialog extends DialogFragment
+    {
+        public DeleteAccountDialog()
+        {
+
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+            final MainActivity activity = (MainActivity)getActivity();
+
+            return new AlertDialog.Builder(activity)
+                    //.setIcon(R.drawable.alert_dialog_dart_icon)
+                    .setMessage(R.string.main_activity_delete_account_dialog_text)
+                    .setPositiveButton(R.string.yes,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    ApiService.deleteAccount(activity);
+                                }
+                            })
+                    .setNegativeButton(R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+
+                                }
+                            }).create();
+        }
+    }
+
+
 }

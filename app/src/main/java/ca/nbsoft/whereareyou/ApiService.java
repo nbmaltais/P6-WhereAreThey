@@ -81,6 +81,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         public static final int RESULT_NO_PENDING_REQUEST = -4;
         public static final int RESULT_NOT_IN_CONTACT = -5;
         public static final int RESULT_USER_UNSUBSCRIBED = -6;
+        public static final int RESULT_NO_USER_WITH_EMAIL = -7;
     }
 
     @Retention(RetentionPolicy.SOURCE)

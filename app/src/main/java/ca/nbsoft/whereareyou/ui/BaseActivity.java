@@ -139,11 +139,11 @@ public  class BaseActivity extends AppCompatActivity implements GoogleApiClient.
 
             Log.d(TAG, "Handling silent sign in");
 
-            showSignInProgressDialog();
+            //showSignInProgressDialog();
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(GoogleSignInResult googleSignInResult) {
-                    hideSignInProgressDialog();
+                    //hideSignInProgressDialog();
                     handleSignInResult(googleSignInResult);
                 }
             });
