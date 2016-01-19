@@ -319,6 +319,46 @@ public class MessageSelection extends AbstractSelection<MessageSelection> {
         return this;
     }
 
+    public MessageSelection contactStatus(int... value) {
+        addEquals(ContactColumns.STATUS, toObjectArray(value));
+        return this;
+    }
+
+    public MessageSelection contactStatusNot(int... value) {
+        addNotEquals(ContactColumns.STATUS, toObjectArray(value));
+        return this;
+    }
+
+    public MessageSelection contactStatusGt(int value) {
+        addGreaterThan(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public MessageSelection contactStatusGtEq(int value) {
+        addGreaterThanOrEquals(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public MessageSelection contactStatusLt(int value) {
+        addLessThan(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public MessageSelection contactStatusLtEq(int value) {
+        addLessThanOrEquals(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public MessageSelection orderByContactStatus(boolean desc) {
+        orderBy(ContactColumns.STATUS, desc);
+        return this;
+    }
+
+    public MessageSelection orderByContactStatus() {
+        orderBy(ContactColumns.STATUS, false);
+        return this;
+    }
+
     public MessageSelection contactBlocked(boolean value) {
         addEquals(ContactColumns.BLOCKED, toObjectArray(value));
         return this;

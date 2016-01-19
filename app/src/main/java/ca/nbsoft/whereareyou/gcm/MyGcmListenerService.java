@@ -118,9 +118,14 @@ public class MyGcmListenerService extends GcmListenerService {
 
         int notifId = CONTACT_REQUEST_NOTIF_ID;
 
-        Intent acceptIntent = ApiService.confirmContactRequestIntent(this, fromUserId);
+        Intent acceptIntent = ApiService.confirmContactRequestIntent(this, fromUserId,true);
         acceptIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
         PendingIntent acceptPendingIntent = PendingIntent.getService(this,0,acceptIntent,PendingIntent.FLAG_ONE_SHOT);
+
+        Intent rejectIntent = ApiService.confirmContactRequestIntent(this, fromUserId,false);
+        acceptIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
+        PendingIntent rejectPendingIntent = PendingIntent.getService(this,0,rejectIntent,PendingIntent.FLAG_ONE_SHOT);
+
 
         builder.setContentTitle(title)
                 .setContentText(contentText)

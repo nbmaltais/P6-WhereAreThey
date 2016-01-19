@@ -10,4 +10,5 @@ public class Constants {
     public static final String EXTRA_CONTACT = "ca.nbsoft.whereareyou.extra.CONTACT";
 
 
+    public static final String EXTRA_CONTACT_CONFIRMATION = "ca.nbsoft.whereareyou.extra.CONTACT_CONFIRMATION";
 }

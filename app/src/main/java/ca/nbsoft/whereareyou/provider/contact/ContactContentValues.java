@@ -89,6 +89,15 @@ public class ContactContentValues extends AbstractContentValues {
         return this;
     }
 
+    /**
+     * Contact status
+     */
+    public ContactContentValues putStatus(int value) {
+        mContentValues.put(ContactColumns.STATUS, value);
+        return this;
+    }
+
+
     public ContactContentValues putBlocked(boolean value) {
         mContentValues.put(ContactColumns.BLOCKED, value);
         return this;

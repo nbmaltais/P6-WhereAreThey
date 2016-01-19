@@ -278,6 +278,46 @@ public class ContactSelection extends AbstractSelection<ContactSelection> {
         return this;
     }
 
+    public ContactSelection status(int... value) {
+        addEquals(ContactColumns.STATUS, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection statusNot(int... value) {
+        addNotEquals(ContactColumns.STATUS, toObjectArray(value));
+        return this;
+    }
+
+    public ContactSelection statusGt(int value) {
+        addGreaterThan(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public ContactSelection statusGtEq(int value) {
+        addGreaterThanOrEquals(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public ContactSelection statusLt(int value) {
+        addLessThan(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public ContactSelection statusLtEq(int value) {
+        addLessThanOrEquals(ContactColumns.STATUS, value);
+        return this;
+    }
+
+    public ContactSelection orderByStatus(boolean desc) {
+        orderBy(ContactColumns.STATUS, desc);
+        return this;
+    }
+
+    public ContactSelection orderByStatus() {
+        orderBy(ContactColumns.STATUS, false);
+        return this;
+    }
+
     public ContactSelection blocked(boolean value) {
         addEquals(ContactColumns.BLOCKED, toObjectArray(value));
         return this;

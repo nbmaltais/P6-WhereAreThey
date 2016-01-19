@@ -133,4 +133,7 @@
     <string name="no">No</string>
     <string name="feature_not_implemented">This feature is not implemented yet...</string>
     <string name="main_activity_delete_account_dialog_text">Are you sure you want to delete yout account?</string>
+    <string name="main_activity_delete_account_dialog_confirm">Delete</string>
+    <string name="action_add_contact">Add contact</string>
+    <string name="pick_contact_button">Pick from address book</string>
 </resources>

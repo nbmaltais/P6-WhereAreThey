@@ -34,8 +34,16 @@ public class UserProfile {
     // Contacts
     private List<String> contactsUserId = new ArrayList<>(0);
 
+    public List<String> getPendingContactRequestsUserId() {
+        return pendingContactRequestsUserId;
+    }
+
     // Contacts for whom this user is waiting for a confirmation
     private List<String> pendingContactRequestsUserId = new ArrayList<>(0);
+
+    public List<String> getWaitingForConfirmationUserId() {
+        return waitingForConfirmationUserId;
+    }
 
     // Contacts who are waiting a confirmation from this user
     private List<String> waitingForConfirmationUserId = new ArrayList<>(0);

@@ -1,14 +1,21 @@
 package ca.nbsoft.whereareyou.ui.main;
 
 import android.app.Dialog;
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,25 +25,30 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
-import ca.nbsoft.whereareyou.Utility.Utils;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
 import ca.nbsoft.whereareyou.ui.login.LoginActivity;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity  implements AddContactHelper.Client{
 
+    private static final int PICK_CONTACT_REQUEST = 1123;
+    private static final String TAG = MainActivity.class.getSimpleName();
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.fab) FloatingActionButton mFab;
+
+    AddContactHelper mAddContactHelper;
 
     BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
     {
         @Override
-        public void onDeleteAccountResult(ApiService.Result result) {
+        public void onDeleteAccountResult(ApiService.Result result, Bundle args) {
             if(result.isOk())
             {
                 registerDeviceIfNeeded();
             }
         }
+
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,23 +59,39 @@ public class MainActivity extends BaseActivity {
 
         setSupportActionBar(mToolbar);
 
+        if(savedInstanceState == null)
+        {
+            mAddContactHelper = new AddContactHelper();
+            getSupportFragmentManager().beginTransaction().add(mAddContactHelper,"AddContactHelper").commit();
+        }
+        else
+        {
+            mAddContactHelper = (AddContactHelper)getSupportFragmentManager().findFragmentByTag("AddContactHelper");
+        }
+
+
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
+                // TODO: ask permission, if refused, got to AddContactActivity, else
+                // use the pick contact intent
 
-                AddContactActivity.startActivity(MainActivity.this);
+                //AddContactActivity.startActivity(MainActivity.this);
+
+                mAddContactHelper.pickContact();
             }
         });
 
 
     }
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
-        ApiService.subscribeToResult(this, ApiService.ACTION_DELETE_ACCOUNT, mReceiver);
+        String[] actions = {ApiService.ACTION_DELETE_ACCOUNT};
+        ApiService.subscribeToResult(this, actions, mReceiver);
     }
 
     @Override
@@ -100,6 +128,11 @@ public class MainActivity extends BaseActivity {
             askDeleteAccount();
             return true;
         }
+        else if(item.getItemId()==R.id.action_add_contact)
+        {
+            AddContactActivity.startActivity(this);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -107,6 +140,16 @@ public class MainActivity extends BaseActivity {
     private void askDeleteAccount() {
         DeleteAccountDialog d = new DeleteAccountDialog();
         d.show(getSupportFragmentManager(),"tag");
+    }
+
+    @Override
+    public void showProgressDialog(String text) {
+        // TODO
+    }
+
+    @Override
+    public void hideProgressDialog() {
+        // TODO
     }
 
 
@@ -125,7 +168,7 @@ public class MainActivity extends BaseActivity {
             return new AlertDialog.Builder(activity)
                     //.setIcon(R.drawable.alert_dialog_dart_icon)
                     .setMessage(R.string.main_activity_delete_account_dialog_text)
-                    .setPositiveButton(R.string.yes,
+                    .setPositiveButton(R.string.main_activity_delete_account_dialog_confirm,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {

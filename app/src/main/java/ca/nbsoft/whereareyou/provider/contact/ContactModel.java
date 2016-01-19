@@ -48,6 +48,11 @@ public interface ContactModel extends BaseModel {
     String getPhotoUrl();
 
     /**
+     * Contact status
+     */
+    int getStatus();
+
+    /**
      * Get the {@code blocked} value.
      */
     boolean getBlocked();

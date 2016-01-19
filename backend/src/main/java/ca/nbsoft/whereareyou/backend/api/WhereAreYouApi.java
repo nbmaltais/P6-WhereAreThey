@@ -26,6 +26,8 @@ import ca.nbsoft.whereareyou.backend.GcmMessages;
 import ca.nbsoft.whereareyou.backend.data.AppEngineUser;
 import ca.nbsoft.whereareyou.backend.data.UserProfile;
 import ca.nbsoft.whereareyou.backend.data.UserProfileHelper;
+import ca.nbsoft.whereareyou.common.ContactStatus;
+import ca.nbsoft.whereareyou.common.StatusCode;
 
 
 import static ca.nbsoft.whereareyou.backend.OfyService.factory;
@@ -59,14 +61,8 @@ import static ca.nbsoft.whereareyou.backend.OfyService.ofy;
 public class WhereAreYouApi {
 
     private static final Logger log = Logger.getLogger(WhereAreYouApi.class.getName());
-    public static final int RESULT_OK = 0;
-    public static final int RESULT_NOT_REGISTERED = -1;
-    public static final int RESULT_CONTACT_ALREADY_ADDED = -2;
-    public static final int RESULT_CONTACT_REQUEST_PENDING = -3;
-    public static final int RESULT_NO_PENDING_REQUEST = -4;
-    public static final int RESULT_NOT_IN_CONTACT = -5;
-    public static final int RESULT_USER_UNSUBSCRIBED = -6;
-    public static final int RESULT_NO_USER_WITH_EMAIL = -7;
+
+
 
 
     public static class BooleanResult {
@@ -131,12 +127,12 @@ public class WhereAreYouApi {
 
     public static StatusResult noErrorStatusResult()
     {
-        return new StatusResult(RESULT_OK,"Success");
+        return new StatusResult(StatusCode.RESULT_OK,"Success");
     }
 
     public static StatusResult userUnsubscribedStatusResult()
     {
-        return new StatusResult(RESULT_USER_UNSUBSCRIBED,"This user unsubscribed.");
+        return new StatusResult(StatusCode.RESULT_USER_UNSUBSCRIBED,"This user unsubscribed.");
     }
 
 
@@ -199,18 +195,23 @@ public class WhereAreYouApi {
         if(userProfile == null)
         {
             userProfile = createUserProfile(user,accountInfo);
+            UserProfileHelper.saveUserProfile(userProfile);
+
+            return noErrorStatusResult();
         }
         else
         {
-            log.info("User " + user.getEmail() + " already signed up, skipping");
+            log.info("User " + user.getEmail() + " already signed up");
 
             userProfile.setDisplayName(accountInfo.getDisplayName());
             userProfile.setPhotoUrl(accountInfo.getPhotoUrl());
+            UserProfileHelper.saveUserProfile(userProfile);
+
+            return new StatusResult(StatusCode.RESULT_ACCOUNT_ALREADY_EXISTS,"Account already exists");
+
         }
 
-        UserProfileHelper.saveUserProfile(userProfile);
 
-        return noErrorStatusResult();
     }
 
     /**
@@ -328,7 +329,7 @@ public class WhereAreYouApi {
 
         if(!userProfile.containsContactUserId(contactUserId) && !userProfile.containsPendingContactRequestUserId(contactUserId))
         {
-            return new StatusResult(RESULT_NOT_IN_CONTACT,"User is not in contact list.");
+            return new StatusResult(StatusCode.RESULT_NOT_IN_CONTACT,"User is not in contact list.");
         }
 
         userProfile.removeContactUserId(contactUserId);
@@ -398,19 +399,19 @@ public class WhereAreYouApi {
         if(contactProfile==null)
         {
             // TODO: send invitation??
-            return new StatusResult(RESULT_NO_USER_WITH_EMAIL,"No user with the specified email has signed in.");
+            return new StatusResult(StatusCode.RESULT_NO_USER_WITH_EMAIL,"No user with the specified email has signed in.");
         }
 
         if( userProfile.containsContactUserId(contactProfile.getUserId()) )
         {
             log.info("User is already in contact, aborting sendContactRequest");
-            return new StatusResult(RESULT_CONTACT_ALREADY_ADDED,"Already in contact list");
+            return new StatusResult(StatusCode.RESULT_CONTACT_ALREADY_ADDED,"Already in contact list");
         }
 
         if( userProfile.containsPendingContactRequestUserId(contactProfile.getUserId()) )
         {
             log.info("User is already in pending contact request, aborting sendContactRequest");
-            return new StatusResult(RESULT_CONTACT_REQUEST_PENDING,"A request is already pending");
+            return new StatusResult(StatusCode.RESULT_CONTACT_REQUEST_PENDING,"A request is already pending");
         }
 
 
@@ -426,7 +427,8 @@ public class WhereAreYouApi {
 
     @ApiMethod(name = "confirmContactRequest")
     public StatusResult confirmContactRequest(User user,
-                                      @Named("contactUserId") String contactUserId) throws UnauthorizedException, IOException, InvalidUserException {
+                                      @Named("contactUserId") String contactUserId,
+                                        @Named("accept") boolean accept ) throws UnauthorizedException, IOException, InvalidUserException {
 
         log.info("API call: confirmContactRequest, user = " + user);
         if (user == null) {
@@ -446,20 +448,26 @@ public class WhereAreYouApi {
         if( !contactProfile.containsPendingContactRequestUserId(userId) )
         {
             log.info("No pending request found for userid = " + userId + ", aborting confirmContactRequest");
-            return new StatusResult(RESULT_NO_PENDING_REQUEST,"No pending contact request to confirm.");
+            return new StatusResult(StatusCode.RESULT_NO_PENDING_REQUEST,"No pending contact request to confirm.");
         }
 
         contactProfile.removePendingContactRequestUserId(userId);
-        contactProfile.addContactUserId(userId);
-        UserProfileHelper.saveUserProfile(contactProfile);
-
-        userProfile.addContactUserId(contactUserId);
         userProfile.removeWaitingForConfirmationUserId(contactUserId);
+
+        if(accept) {
+            contactProfile.addContactUserId(userId);
+            userProfile.addContactUserId(contactUserId);
+        }
+
+        UserProfileHelper.saveUserProfile(contactProfile);
         UserProfileHelper.saveUserProfile(userProfile);
 
-        //  send notification that contact request is confirmed
-        GcmMessages.confirmContactRequest(userProfile, contactProfile);
-        GcmMessages.confirmContactRequest(contactProfile, userProfile);
+        if(accept) {
+            //  send notification that contact request is confirmed
+            GcmMessages.confirmContactRequest(userProfile, contactProfile);
+            GcmMessages.confirmContactRequest(contactProfile, userProfile);
+        }
+
 
         return noErrorStatusResult();
     }
@@ -492,13 +500,15 @@ public class WhereAreYouApi {
         if( userProfile.containsContactUserId(contactUserId) ) {
 
             UserProfile contactProfile = UserProfileHelper.getUserProfile(contactUserId);
-            return createContactInfo(contactProfile);
+            return createContactInfo(contactProfile, ContactStatus.NONE);
         }
         else
         {
             throw new Exception("Invalid contact.");
         }
     }
+
+
 
     @ApiMethod(name = "getContacts")
     public Collection<ContactInfo> getContacts(  User user ) throws Exception {
@@ -517,10 +527,36 @@ public class WhereAreYouApi {
             UserProfile contactProfile = UserProfileHelper.getUserProfile(contactId);
 
             if(contactProfile!=null) {
-                contacts.add(createContactInfo(contactProfile));
+                contacts.add(createContactInfo(contactProfile, ContactStatus.NONE));
             }
             else {
                 userProfile.removeContactUserId(contactId);
+                modified=true;
+            }
+        }
+
+        for( String contactId : userProfile.getPendingContactRequestsUserId())
+        {
+            UserProfile contactProfile = UserProfileHelper.getUserProfile(contactId);
+
+            if(contactProfile!=null) {
+                contacts.add(createContactInfo(contactProfile, ContactStatus.PENDING));
+            }
+            else {
+                userProfile.removePendingContactRequestUserId(contactId);
+                modified=true;
+            }
+        }
+
+        for( String contactId : userProfile.getWaitingForConfirmationUserId())
+        {
+            UserProfile contactProfile = UserProfileHelper.getUserProfile(contactId);
+
+            if(contactProfile!=null) {
+                contacts.add(createContactInfo(contactProfile, ContactStatus.WAITING_FOR_CONFIRMATION));
+            }
+            else {
+                userProfile.removeWaitingForConfirmationUserId(contactId);
                 modified=true;
             }
         }
@@ -545,13 +581,16 @@ public class WhereAreYouApi {
         return userUnsubscribedStatusResult();
     }
 
-    private ContactInfo createContactInfo( UserProfile contactProfile )
+    private ContactInfo createContactInfo( UserProfile contactProfile, int status )
     {
+        // TODO: return all info if status is pending???
+
         ContactInfo contactInfo = new ContactInfo();
         contactInfo.setEmail(contactProfile.getEmail());
         contactInfo.setUserId(contactProfile.getUserId());
         contactInfo.setDisplayName(contactProfile.getDisplayName());
         contactInfo.setPhotoUrl(contactProfile.getPhotoUrl());
+        contactInfo.setStatus(status);
 
         return contactInfo;
     }

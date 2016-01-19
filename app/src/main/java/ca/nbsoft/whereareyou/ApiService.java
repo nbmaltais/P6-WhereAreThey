@@ -46,6 +46,7 @@ import ca.nbsoft.whereareyou.backend.whereAreYou.model.Location;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.NewAccountInfo;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.RegistrationId;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.StatusResult;
+import ca.nbsoft.whereareyou.common.StatusCode;
 import ca.nbsoft.whereareyou.provider.WhereRUProvider;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactContentValues;
@@ -71,18 +72,6 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     public static final String ACTION_REGISTER_DEVICE ="ca.nbsoft.whereareyou.action._REGISTER_DEVICE";
     public static final String ACTION_CREATE_ACCOUNT ="ca.nbsoft.whereareyou.action.CREATE_ACCOUNT";
 
-
-    public static final class StatusCode
-    {
-        public static final int RESULT_OK = 0;
-        public static final int RESULT_NOT_REGISTERED = -1;
-        public static final int RESULT_CONTACT_ALREADY_ADDED = -2;
-        public static final int RESULT_CONTACT_REQUEST_PENDING = -3;
-        public static final int RESULT_NO_PENDING_REQUEST = -4;
-        public static final int RESULT_NOT_IN_CONTACT = -5;
-        public static final int RESULT_USER_UNSUBSCRIBED = -6;
-        public static final int RESULT_NO_USER_WITH_EMAIL = -7;
-    }
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef ({ACTION_REQUEST_LOCATION,
@@ -131,8 +120,8 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
         public static Result from(StatusResult result)
         {
-            if(result.getResultCode()==StatusCode.RESULT_OK)
-                return new Result(RESULT_SUCCESS);
+            if(result.getResultCode() >= StatusCode.RESULT_OK)
+                return new Result(RESULT_SUCCESS, result.getResultCode());
             else
                 return new Result(RESULT_BACKEND_ERROR_STATUSCODE,result.getResultCode());
         }
@@ -204,70 +193,71 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         @Override
         public void onReceive(Context context, Intent intent) {
             Result result = intent.getParcelableExtra(EXTRA_RESULT_CODE);
+            Bundle args = intent.getExtras();
             switch( intent.getAction()) {
                 case ACTION_REQUEST_LOCATION:
-                    onRequestLocationResult(result);
+                    onRequestLocationResult(result,args);
                     break;
                 case ACTION_SEND_LOCATION:
-                    onSendLocationResult(result);
+                    onSendLocationResult(result,args);
                     break;
                 case ACTION_UPDATE_CONTACT_LIST:
-                    onUpdateContactListResult(result);
+                    onUpdateContactListResult(result,args);
                     break;
                 case ACTION_SEND_CONTACT_REQUEST:
-                    onSendContactRequestResult(result);
+                    onSendContactRequestResult(result,args);
                     break;
                 case ACTION_CONFIRM_CONTACT_REQUEST:
-                    onConfirmContactRequestResult(result);
+                    onConfirmContactRequestResult(result,args);
                     break;
                 case ACTION_DELETE_CONTACT:
-                    onDeleteContactResult(result);
+                    onDeleteContactResult(result,args);
                     break;
                 case ACTION_DELETE_ACCOUNT:
-                    onDeleteAccountResult(result);
+                    onDeleteAccountResult(result,args);
                     break;
                 case ACTION_REGISTER_DEVICE:
-                    onRegisterDeviceResult(result);
+                    onRegisterDeviceResult(result,args);
                     break;
                 case ACTION_CREATE_ACCOUNT:
-                    onCreateAccountResult(result);
+                    onCreateAccountResult(result,args);
                     break;
             }
         }
 
-        public void onCreateAccountResult(Result result) {
+        public void onCreateAccountResult(Result result, Bundle args) {
 
         }
 
-        public void onRegisterDeviceResult(Result result) {
+        public void onRegisterDeviceResult(Result result, Bundle args) {
 
         }
 
-        public void onDeleteAccountResult(Result result) {
+        public void onDeleteAccountResult(Result result, Bundle args) {
 
         }
 
-        public void onConfirmContactRequestResult(Result resultCode ) {
+        public void onConfirmContactRequestResult(Result resultCode, Bundle args)  {
 
         }
 
-        public void onSendContactRequestResult(Result resultCode) {
+        public void onSendContactRequestResult(Result resultCode, Bundle args) {
 
         }
 
-        public void onUpdateContactListResult(Result resultCode) {
+        public void onUpdateContactListResult(Result resultCode, Bundle args) {
 
         }
 
-        public void onSendLocationResult(Result resultCode) {
+        public void onSendLocationResult(Result resultCode, Bundle args) {
 
         }
 
-        public void onRequestLocationResult(Result resultCode) {
+        public void onRequestLocationResult(Result resultCode, Bundle args) {
 
         }
 
-        public void onDeleteContactResult(Result resultCode) {
+        public void onDeleteContactResult(Result resultCode, Bundle args) {
 
         }
     }
@@ -398,15 +388,16 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         context.startService(sendLocationIntent(context, contactId, message));
     }
 
-    public static Intent confirmContactRequestIntent(Context context, @NonNull String contactUserId) {
+    public static Intent confirmContactRequestIntent(Context context, @NonNull String contactUserId, boolean acceptRequest) {
         Intent intent = new Intent(context, ApiService.class);
         intent.setAction(ACTION_CONFIRM_CONTACT_REQUEST);
         intent.putExtra(Constants.EXTRA_CONTACT_USER_ID, contactUserId);
+        intent.putExtra(Constants.EXTRA_CONTACT_CONFIRMATION,acceptRequest);
         return intent;
     }
 
-    public static void confirmContactRequest(Context context, @NonNull String contactUserId) {
-        context.startService(confirmContactRequestIntent(context, contactUserId));
+    public static void confirmContactRequest(Context context, @NonNull String contactUserId, boolean acceptRequest) {
+        context.startService(confirmContactRequestIntent(context, contactUserId,acceptRequest));
     }
 
     public static void deleteContact(Context context, @NonNull String contactUserId) {
@@ -473,7 +464,8 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
                         break;
                     case ACTION_CONFIRM_CONTACT_REQUEST:
                         userId = intent.getStringExtra(Constants.EXTRA_CONTACT_USER_ID);
-                        resultCode = handleConfirmContactRequest(userId);
+                        boolean accept=intent.getBooleanExtra(Constants.EXTRA_CONTACT_CONFIRMATION,false);
+                        resultCode = handleConfirmContactRequest(userId,accept);
                         break;
                     case ACTION_SEND_LOCATION:
                         userId = intent.getStringExtra(Constants.EXTRA_CONTACT_USER_ID);
@@ -673,11 +665,11 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         return result;
     }
 
-    private Result handleConfirmContactRequest(@NonNull String userId) throws IOException {
+    private Result handleConfirmContactRequest(@NonNull String userId, boolean accept) throws IOException {
         Log.d(TAG, "Confirming contact request with " + userId);
         showToast("Confirming contact request with " + userId);
 
-        StatusResult result = mApi.confirmContactRequest(userId).execute();
+        StatusResult result = mApi.confirmContactRequest(userId,accept).execute();
 
         return Result.from(result);
     }

@@ -31,6 +31,7 @@ public class WhereRUSQLiteOpenHelper extends SQLiteOpenHelper {
             + ContactColumns.EMAIL + " TEXT NOT NULL, "
             + ContactColumns.USERID + " TEXT NOT NULL, "
             + ContactColumns.PHOTO_URL + " TEXT, "
+            + ContactColumns.STATUS + " INTEGER NOT NULL DEFAULT 0, "
             + ContactColumns.BLOCKED + " INTEGER NOT NULL DEFAULT 0, "
             + ContactColumns.AUTO_REPLY + " INTEGER NOT NULL DEFAULT 0, "
             + ContactColumns.POSITION_LATITUDE + " REAL NOT NULL DEFAULT 0, "

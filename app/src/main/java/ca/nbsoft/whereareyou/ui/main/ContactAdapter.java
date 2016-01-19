@@ -19,13 +19,16 @@ import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
  */
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
 
+    private OnItemClickCallback mItemClickCallback;
+    private ContactCursor mCursor;
+    private ContactCursor mWaitingForConfirmationCursor;
+
     interface OnItemClickCallback
     {
         void onContactItemClicked(String userId);
     }
 
-    private OnItemClickCallback mItemClickCallback;
-    private ContactCursor mCursor;
+
 
     public ContactAdapter(OnItemClickCallback callback)
     {
@@ -39,6 +42,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         notifyDataSetChanged();
     }
 
+    public void setWaitingForConfirmationCursor(ContactCursor contactCursor) {
+        mWaitingForConfirmationCursor = contactCursor;
+        notifyDataSetChanged();
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact,parent,false);
@@ -48,18 +56,34 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if(mCursor.moveToPosition(position))
-        {
-            holder.bind(mCursor,mItemClickCallback);
+
+        int threshold = mCursor != null ? mCursor.getCount() : 0;
+
+        if(position <threshold) {
+            if(mCursor.moveToPosition(position))
+            {
+                holder.bind(mCursor,mItemClickCallback);
+            }
         }
+        else
+        {
+            position -= threshold;
+
+        }
+
     }
 
     @Override
     public int getItemCount() {
-        if(mCursor==null)
-            return 0;
-        else
-            return mCursor.getCount();
+        int count = 0;
+        if(mCursor!=null)
+            count += mCursor.getCount();
+
+
+        if(mWaitingForConfirmationCursor!=null)
+            count += mWaitingForConfirmationCursor.getCount();
+
+        return count;
     }
 
     static class ViewHolder extends  RecyclerView.ViewHolder

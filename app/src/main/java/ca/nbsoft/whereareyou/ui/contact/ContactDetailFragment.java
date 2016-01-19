@@ -55,17 +55,17 @@ public class ContactDetailFragment extends Fragment {
     BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
     {
         @Override
-        public void onRequestLocationResult(ApiService.Result resultCode) {
+        public void onRequestLocationResult(ApiService.Result resultCode, Bundle args) {
 
         }
 
         @Override
-        public void onSendLocationResult(ApiService.Result resultCode) {
+        public void onSendLocationResult(ApiService.Result resultCode, Bundle args) {
 
         }
 
         @Override
-        public void onDeleteContactResult(ApiService.Result resultCode) {
+        public void onDeleteContactResult(ApiService.Result resultCode, Bundle args) {
 
         }
     };

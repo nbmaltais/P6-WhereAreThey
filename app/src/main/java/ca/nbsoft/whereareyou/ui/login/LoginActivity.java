@@ -19,6 +19,7 @@ import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.Endpoints;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
+import ca.nbsoft.whereareyou.common.StatusCode;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
 import ca.nbsoft.whereareyou.ui.main.MainActivity;
 
@@ -42,10 +43,11 @@ public class LoginActivity extends BaseActivity {
     BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
     {
         @Override
-        public void onCreateAccountResult(ApiService.Result result) {
+        public void onCreateAccountResult(ApiService.Result result, Bundle args) {
             if(result.isOk())
             {
-                onAccountCreated();
+                boolean alreadyExixts = result.getSpecificResultCode() == StatusCode.RESULT_ACCOUNT_ALREADY_EXISTS;
+                onAccountCreated(alreadyExixts);
             }
             else
             {
@@ -54,10 +56,10 @@ public class LoginActivity extends BaseActivity {
         }
 
         @Override
-        public void onRegisterDeviceResult(ApiService.Result result) {
+        public void onRegisterDeviceResult(ApiService.Result result, Bundle args) {
             if(result.isOk())
             {
-                onDeviceRegistered();
+                onDeviceRegistered(  );
             }
             else
             {
@@ -124,14 +126,19 @@ public class LoginActivity extends BaseActivity {
         ApiService.createAccount(this, signInAccount.getDisplayName(), signInAccount.getPhotoUrl());
     }
 
-    protected void onAccountCreated()
+    protected void onAccountCreated(boolean accountAlreadyExists)
     {
         Log.d(TAG, "onAccountCreated");
         //PreferenceUtils.setAccountCreated(this, true);
         ApiService.registerDevice(this);
+
+        if(accountAlreadyExists)
+        {
+            ApiService.updateContactList(this);
+        }
     }
 
-    protected void onDeviceRegistered()
+    protected void onDeviceRegistered( )
     {
         Log.d(TAG,"onDeviceRegistered");
         returnToMainActivity();

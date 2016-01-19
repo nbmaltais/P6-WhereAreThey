@@ -50,6 +50,7 @@ dependencies {
 def appengineversion = '1.9.30'
 
   appengineSdk 'com.google.appengine:appengine-java-sdk:' + appengineversion
+    compile project(path: ':common' )
   compile 'com.google.appengine:appengine-endpoints:' + appengineversion
   compile 'com.google.appengine:appengine-endpoints-deps:' + appengineversion
   compile 'javax.servlet:servlet-api:2.5'

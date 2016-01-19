@@ -94,6 +94,16 @@ public class MessageCursor extends AbstractCursor implements MessageModel {
     }
 
     /**
+     * Contact status
+     */
+    public int getContactStatus() {
+        Integer res = getIntegerOrNull(ContactColumns.STATUS);
+        if (res == null)
+            throw new NullPointerException("The value of 'status' in the database was null, which is not allowed according to the model definition");
+        return res;
+    }
+
+    /**
      * Get the {@code blocked} value.
      */
     public boolean getContactBlocked() {

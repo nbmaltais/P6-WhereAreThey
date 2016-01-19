@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import ca.nbsoft.whereareyou.backend.data.UserProfile;
 import ca.nbsoft.whereareyou.backend.data.UserProfileHelper;
+import ca.nbsoft.whereareyou.common.StatusCode;
 
 import static ca.nbsoft.whereareyou.backend.OfyService.ofy;
 import static junit.framework.TestCase.assertFalse;
@@ -63,7 +64,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult result = whereAreYouApi.createAccount(user,accountInfo);
 
-        assertEquals(result.getResultCode(), WhereAreYouApi.RESULT_OK);
+        assertEquals(result.getResultCode(), StatusCode.RESULT_OK);
 
         UserProfile userProfile = whereAreYouApi.getUserProfile(user);
         assertNotNull(userProfile);
@@ -148,7 +149,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult result = whereAreYouApi.registerDevice(user, REGISTRATION_TOKEN );
 
-        assertEquals(result.getResultCode(), whereAreYouApi.RESULT_OK);
+        assertEquals(result.getResultCode(), StatusCode.RESULT_OK);
 
         UserProfile userProfile = whereAreYouApi.getUserProfile(user);
 
@@ -166,7 +167,7 @@ public class WhereAreYouApiTest {
         String message = "Hello!";
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendLocation(user, otherUser.getUserId(), loc, message);
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
     }
 
     @Test
@@ -180,7 +181,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendLocation(user, otherUser.getUserId(), loc, null);
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
     }
 
     @Test(expected = InvalidUserException.class)
@@ -208,7 +209,7 @@ public class WhereAreYouApiTest {
         String message = "Hello!";
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendLocation(user, otherUser.getUserId(), loc, message);
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_USER_UNSUBSCRIBED);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_USER_UNSUBSCRIBED);
 
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
 
@@ -223,7 +224,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendContactRequest(user, otherUser.getEmail());
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
 
         // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
@@ -245,7 +246,7 @@ public class WhereAreYouApiTest {
         UserProfileHelper.saveUserProfile(profile1);
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendContactRequest(user, "unknown@gmail.com");
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_NO_USER_WITH_EMAIL);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_NO_USER_WITH_EMAIL);
     }
 
     @Test(expected = InvalidUserException.class)
@@ -262,7 +263,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendContactRequest(user, otherUser.getEmail());
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_CONTACT_REQUEST_PENDING);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_CONTACT_REQUEST_PENDING);
 
         // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
@@ -284,7 +285,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.sendContactRequest(user, otherUser.getEmail());
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_CONTACT_ALREADY_ADDED);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_CONTACT_ALREADY_ADDED);
 
         // Get the updated  profiles
 
@@ -308,7 +309,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.confirmContactRequest( otherUser, user.getUserId() );
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
 
         // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
@@ -329,7 +330,7 @@ public class WhereAreYouApiTest {
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.confirmContactRequest( otherUser, user.getUserId() );
 
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_NO_PENDING_REQUEST);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_NO_PENDING_REQUEST);
 
         // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
@@ -349,7 +350,7 @@ public class WhereAreYouApiTest {
         setupProfilesWithContacts();
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.removeContact(user, otherUser.getUserId());
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
 
         // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
@@ -368,7 +369,7 @@ public class WhereAreYouApiTest {
         setupProfilesWithPendingRequest();
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.removeContact(user, otherUser.getUserId());
-        assertEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
+        assertEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
 
         // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);
@@ -386,8 +387,8 @@ public class WhereAreYouApiTest {
         setupProfiles();
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.removeContact( user, otherUser.getUserId() );
-        assertNotEquals(statusResult.getResultCode(), WhereAreYouApi.RESULT_OK);
-        assertEquals(statusResult.getResultCode(),WhereAreYouApi.RESULT_NOT_IN_CONTACT);
+        assertNotEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
+        assertEquals(statusResult.getResultCode(),StatusCode.RESULT_NOT_IN_CONTACT);
 
         // Get the updated  profiles
         UserProfile profile1 = whereAreYouApi.getUserProfile(user);

@@ -1,13 +1,13 @@
 package ca.nbsoft.whereareyou.ui.main;
 
-import android.app.LoaderManager;
+
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,6 +23,7 @@ import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
+import ca.nbsoft.whereareyou.common.ContactStatus;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
@@ -38,9 +39,12 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
     @Bind (R.id.contact_list)
     RecyclerView mRecyclerView;
 
-    String mAccountName;
+    private String mAccountName;
 
-    ContactAdapter mAdapter;
+    private ContactAdapter mAdapter;
+
+    private int LOADER_CONTACT = 0;
+    private int LOADER_CONTACT_WAITING_CONFIRMATION = 1;
 
     public ContactListFragment() {
         // Required empty public constructor
@@ -65,7 +69,8 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
 
         mAccountName = PreferenceUtils.getAccountName(getContext());
 
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(LOADER_CONTACT, null, this);
+        //getLoaderManager().initLoader(LOADER_CONTACT_WAITING_CONFIRMATION, null, this);
 
         return view;
     }
@@ -99,27 +104,51 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
     }
 
     @Override
-    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG,"onCreateLoader");
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(TAG, "onCreateLoader");
 
-        ContactSelection where = new ContactSelection();
-        where.account(mAccountName);
+        if(id == LOADER_CONTACT) {
+            ContactSelection where = new ContactSelection();
+            where.account(mAccountName);
+            //where.status(ContactStatus.NONE);
 
-        android.support.v4.content.CursorLoader loader =
-                new android.support.v4.content.CursorLoader(getActivity(),where.uri(), ContactColumns.ALL_COLUMNS,
-                where.sel(),where.args(), where.order());
+            CursorLoader loader = new CursorLoader(getActivity(), where.uri(), ContactColumns.ALL_COLUMNS,
+                    where.sel(), where.args(), where.order());
 
-        return loader;
+            return loader;
+        }
+        else if(id == LOADER_CONTACT_WAITING_CONFIRMATION)
+        {
+            ContactSelection where = new ContactSelection();
+            where.account(mAccountName);
+            where.status(ContactStatus.WAITING_FOR_CONFIRMATION);
+
+            CursorLoader loader = new CursorLoader(getActivity(), where.uri(), ContactColumns.ALL_COLUMNS,
+                    where.sel(), where.args(), where.order());
+
+            return loader;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
-        Log.d(TAG,"onCreateLoader");
-        mAdapter.setContactCursor(new ContactCursor(data));
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(TAG, "onCreateLoader");
+        if(loader.getId() == LOADER_CONTACT) {
+            mAdapter.setContactCursor(new ContactCursor(data));
+        }
+        else if(loader.getId() == LOADER_CONTACT_WAITING_CONFIRMATION)
+        {
+            mAdapter.setWaitingForConfirmationCursor(new ContactCursor(data));
+        }
+
     }
 
     @Override
-    public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
+    public void onLoaderReset( Loader<Cursor> loader) {
 
     }
 

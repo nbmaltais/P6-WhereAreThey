@@ -83,6 +83,16 @@ public class ContactCursor extends AbstractCursor implements ContactModel {
     }
 
     /**
+     * Contact status
+     */
+    public int getStatus() {
+        Integer res = getIntegerOrNull(ContactColumns.STATUS);
+        if (res == null)
+            throw new NullPointerException("The value of 'status' in the database was null, which is not allowed according to the model definition");
+        return res;
+    }
+
+    /**
      * Get the {@code blocked} value.
      */
     public boolean getBlocked() {

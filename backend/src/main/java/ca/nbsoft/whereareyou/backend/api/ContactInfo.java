@@ -42,8 +42,17 @@ public class ContactInfo {
         this.photoUrl = photoUrl;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     String email;
     String userId;
     String displayName;
     String photoUrl;
+    int status;
 }

@@ -38,6 +38,11 @@ public class ContactColumns implements BaseColumns {
      */
     public static final String PHOTO_URL = "photo_url";
 
+    /**
+     * Contact status
+     */
+    public static final String STATUS = "status";
+
     public static final String BLOCKED = "blocked";
 
     public static final String AUTO_REPLY = "auto_reply";
@@ -59,6 +64,7 @@ public class ContactColumns implements BaseColumns {
             EMAIL,
             USERID,
             PHOTO_URL,
+            STATUS,
             BLOCKED,
             AUTO_REPLY,
             POSITION_LATITUDE,
@@ -75,6 +81,7 @@ public class ContactColumns implements BaseColumns {
             if (c.equals(EMAIL) || c.contains("." + EMAIL)) return true;
             if (c.equals(USERID) || c.contains("." + USERID)) return true;
             if (c.equals(PHOTO_URL) || c.contains("." + PHOTO_URL)) return true;
+            if (c.equals(STATUS) || c.contains("." + STATUS)) return true;
             if (c.equals(BLOCKED) || c.contains("." + BLOCKED)) return true;
             if (c.equals(AUTO_REPLY) || c.contains("." + AUTO_REPLY)) return true;
             if (c.equals(POSITION_LATITUDE) || c.contains("." + POSITION_LATITUDE)) return true;
