@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/conversation_item_view"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="8dp"
+              android:minHeight="48dp"
+              android:gravity="left">
+
+    <TextView
+        android:id="@+id/author_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="you wrote"/>
+    <TextView
+        android:id="@+id/message_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:background="@drawable/conversation_bubble"
+        tools:text="Hello buddy, how are you?"/>
+
+</LinearLayout>

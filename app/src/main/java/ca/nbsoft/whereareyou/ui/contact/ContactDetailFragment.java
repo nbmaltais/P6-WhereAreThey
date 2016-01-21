@@ -4,12 +4,18 @@ package ca.nbsoft.whereareyou.ui.contact;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.database.Cursor;
 import android.support.v4.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,7 +41,11 @@ import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
 
 import ca.nbsoft.whereareyou.Utility.Utils;
+import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
+import ca.nbsoft.whereareyou.provider.message.MessageColumns;
+import ca.nbsoft.whereareyou.provider.message.MessageCursor;
+import ca.nbsoft.whereareyou.provider.message.MessageSelection;
 import ca.nbsoft.whereareyou.ui.ErrorMessages;
 import ca.nbsoft.whereareyou.ui.map.MapHelper;
 
@@ -43,22 +53,22 @@ import ca.nbsoft.whereareyou.ui.map.MapHelper;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ContactDetailFragment extends Fragment implements OnMapReadyCallback {
+public class ContactDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = ContactDetailFragment.class.getSimpleName();
     private static final int DELETE_CONTACT = 0;
-    @Bind(R.id.content) View mContentContainer;
-    @Bind(R.id.compose) View mComposeContainer;
+    @Bind(R.id.recycler_view)
+    RecyclerView mRecyclerView;
+    @Bind(R.id.compose)
+    View mComposeContainer;
     @Bind(R.id.message)
     EditText mMessageView;
     @Bind(R.id.photo_view)
     ImageView mPhotoView;
 
-    SupportMapFragment mMapFragment;
-    MapHelper mMapHelper = new MapHelper();
 
-    private String mUserId;
-    private String mContactName;
+    private MessageAdapter mAdapter;
+    private Contact mContact;
 
     BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
     {
@@ -80,7 +90,8 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
                 ErrorMessages.showErrorMessage(getContext(), resultCode);
         }
     };
-    private String mPhotoUrl;
+
+
 
     public ContactDetailFragment() {
         // Required empty public constructor
@@ -99,18 +110,10 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
         View view = inflater.inflate(R.layout.layout_contact_detail, container, false);
         ButterKnife.bind(this, view);
 
-        if (savedInstanceState == null) {
-            mMapFragment =  SupportMapFragment.newInstance();
-            getFragmentManager().beginTransaction().add(R.id.map,mMapFragment).commit();
 
-        } else{
-            mMapFragment = (SupportMapFragment) getFragmentManager().findFragmentById(R.id.map);
-        }
-
-        if(mMapFragment==null)
-            Log.w(TAG,"onCreateView : mMapFragment==null");
-
-        mMapFragment.getMapAsync(this);
+        mAdapter = new MessageAdapter();
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Adjust the padding of the coordinato layout main content so that we
         // can see the last message. If we don't do that, the message is hidden by the compose layout
@@ -121,9 +124,9 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
                 if (vto.isAlive())
                     vto.removeOnPreDrawListener(this);
 
-                mContentContainer.setPadding(mContentContainer.getPaddingLeft(),
-                        mContentContainer.getPaddingTop(),
-                        mContentContainer.getPaddingRight(),
+                mRecyclerView.setPadding(mRecyclerView.getPaddingLeft(),
+                        mRecyclerView.getPaddingTop(),
+                        mRecyclerView.getPaddingRight(),
                         mComposeContainer.getHeight());
 
                 return true;
@@ -184,7 +187,7 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
         Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
             @Override
             public void run() {
-                ApiService.requestContactLocation(getContext(), mUserId, getMessage());
+                ApiService.requestContactLocation(getContext(), mContact.getUserId(), getMessage());
             }
         });
 
@@ -201,7 +204,7 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
         Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
             @Override
             public void run() {
-                ApiService.sendLocation(getContext(), mUserId, getMessage());
+                ApiService.sendLocation(getContext(), mContact.getUserId(), getMessage());
             }
         });
 
@@ -215,7 +218,7 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
     {
         // TODO: use dialog to ask if user is sure
 
-        ApiService.deleteContact(getContext(), mUserId);
+        ApiService.deleteContact(getContext(), mContact.getUserId());
                 //Snackbar.make(mTopContainer,"Deleted " + mContactName, Snackbar.LENGTH_SHORT).show();
 
         // TODO use an interface to signal the parent activity
@@ -225,24 +228,23 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
 
     public void bind(ContactCursor cursor) {
         Log.d(TAG,"bind contact cursor");
-        mUserId = cursor.getUserid();
-        mContactName = cursor.getName();
-        mPhotoUrl=cursor.getPhotoUrl();
+        mContact = Contact.fromCursor(cursor);
 
-        if(mPhotoUrl!=null && !mPhotoUrl.isEmpty()) {
-            Picasso.with(getContext()).load(mPhotoUrl).centerCrop().fit().into(mPhotoView);
+
+        String photoUrl=cursor.getPhotoUrl();
+
+        if(photoUrl!=null && !photoUrl.isEmpty()) {
+            Picasso.with(getContext()).load(photoUrl).centerCrop().fit().into(mPhotoView);
         }
         else
         {
 
         }
 
-        Contact contact = Contact.fromCursor(cursor);
 
-        if(mMapFragment!=null)
-            mMapHelper.addContactMarker(contact,true);
-        else
-            Log.w(TAG,"bind : mMapFragment==null");
+        mAdapter.setContact(mContact);
+
+        getLoaderManager().initLoader(0,null,this);
     }
 
     @Override
@@ -269,9 +271,31 @@ public class ContactDetailFragment extends Fragment implements OnMapReadyCallbac
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMapHelper.onMapReady(googleMap);
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        MessageSelection sel = new MessageSelection();
+        sel.contactId(mContact.getId());
+        sel.orderByTimestamp();
+
+        String[] projection = {MessageColumns._ID, MessageColumns.TIMESTAMP,MessageColumns.CONTENT,MessageColumns.USERISSENDER};
+
+        CursorLoader loader = new CursorLoader(getContext(),sel.uri(),projection,sel.sel(),sel.args(),sel.order() );
+
+        return loader;
     }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        MessageCursor cursor = new MessageCursor(data);
+        mAdapter.setMessageCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.setMessageCursor(null);
+    }
+
 
     static public class DeleteContactDialog extends DialogFragment
     {
