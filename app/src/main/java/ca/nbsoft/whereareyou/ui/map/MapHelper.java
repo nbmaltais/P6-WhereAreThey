@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -28,22 +29,16 @@ import ca.nbsoft.whereareyou.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapFragment extends SupportMapFragment implements OnMapReadyCallback {
+public class MapHelper  {
     static final String TAG = MapFragment.class.getSimpleName();
     GoogleMap mMap=null;
     Map<String,Contact> mContacts = new HashMap<>();
     CameraUpdate mCameraUpdate=null;
 
-    public MapFragment() {
+    public MapHelper() {
         // Required empty public constructor
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        getMapAsync(this);
-    }
 
     public void addContactMarker( Contact contact, boolean centerMap)
     {
@@ -66,7 +61,6 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         }
     }
 
-    @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG,"onMapReady");
         mMap = googleMap;

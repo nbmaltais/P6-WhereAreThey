@@ -20,6 +20,7 @@ import android.view.View;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.gcm.MyGcmListenerService;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
@@ -32,6 +33,14 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
     @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
 
     private String mContactUserId;
+
+
+    public static Intent getStartActivityIntent(Context ctx, String contactId) {
+        Intent intent = new Intent(ctx,ContactDetailActivity.class);
+        intent.putExtra(EXTRA_CONTACT_USER_ID,contactId);
+
+        return intent;
+    }
 
     static public void startActivity( Context ctx, String contactId )
     {
@@ -54,7 +63,7 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mContactUserId = getIntent().getStringExtra(EXTRA_CONTACT_USER_ID);
-        getLoaderManager().initLoader(0,null,this);
+        getLoaderManager().initLoader(0, null, this);
 
     }
 
@@ -86,4 +95,6 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+
+
 }

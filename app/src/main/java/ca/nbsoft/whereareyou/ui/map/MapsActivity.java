@@ -10,6 +10,10 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+
 import ca.nbsoft.whereareyou.Constants;
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
@@ -18,13 +22,14 @@ import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 
-public class MapsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MapsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     public static final String ACTION_SHOW_CONTACT = "ca.nbsoft.whereareyou.ui.map.action.SHOW_CONTACT";
     public static final String ACTION_SHOW_ALL_CONTACTS = "ca.nbsoft.whereareyou.ui.map.action.SHOW_ALL_CONTACTS";
 
     MapFragment mMapFragment;
+    MapHelper mMapHelper = new MapHelper();
 
     static public Intent getShowContactIntent(Context ctx, Contact contact )
     {
@@ -56,9 +61,9 @@ public class MapsActivity extends AppCompatActivity implements LoaderManager.Loa
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-       mMapFragment = (MapFragment) getSupportFragmentManager()
+       mMapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
-        //mapFragment.getMapAsync(this);
+        mMapFragment.getMapAsync(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -66,7 +71,7 @@ public class MapsActivity extends AppCompatActivity implements LoaderManager.Loa
         {
             case ACTION_SHOW_CONTACT:
                 Contact contact = getIntent().getParcelableExtra(Constants.EXTRA_CONTACT);
-                mMapFragment.addContactMarker(contact,true);
+                mMapHelper.addContactMarker(contact,true);
                 break;
             case ACTION_SHOW_ALL_CONTACTS:
                 getLoaderManager().initLoader(0,null,this);
@@ -93,7 +98,7 @@ public class MapsActivity extends AppCompatActivity implements LoaderManager.Loa
         while(cursor.moveToNext())
         {
             Contact c = Contact.fromCursor(cursor);
-            mMapFragment.addContactMarker(c,false);
+            mMapHelper.addContactMarker(c,false);
         }
 
     }
@@ -103,4 +108,8 @@ public class MapsActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMapHelper.onMapReady(googleMap);
+    }
 }

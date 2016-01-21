@@ -21,6 +21,7 @@ import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.common.StatusCode;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
+import ca.nbsoft.whereareyou.ui.ErrorMessages;
 import ca.nbsoft.whereareyou.ui.main.MainActivity;
 
 /**
@@ -51,7 +52,7 @@ public class LoginActivity extends BaseActivity {
             }
             else
             {
-                onOperationFailed();
+                onOperationFailed(result);
             }
         }
 
@@ -63,7 +64,7 @@ public class LoginActivity extends BaseActivity {
             }
             else
             {
-                onOperationFailed();
+                onOperationFailed(result);
             }
         }
     };
@@ -144,8 +145,9 @@ public class LoginActivity extends BaseActivity {
         returnToMainActivity();
     }
 
-    private void onOperationFailed() {
+    private void onOperationFailed(ApiService.Result result) {
         hideSignInProgressDialog();
+        ErrorMessages.showErrorMessage(this,result);
     }
 
     /*private void startLoginProcess() {

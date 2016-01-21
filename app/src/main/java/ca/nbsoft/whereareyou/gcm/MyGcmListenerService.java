@@ -23,6 +23,7 @@ import ca.nbsoft.whereareyou.Utility.MessagesUtils;
 import ca.nbsoft.whereareyou.provider.contact.ContactContentValues;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
+import ca.nbsoft.whereareyou.ui.contact.ContactDetailActivity;
 import ca.nbsoft.whereareyou.ui.main.MainActivity;
 import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
@@ -260,9 +261,15 @@ public class MyGcmListenerService extends GcmListenerService {
         replyIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
         PendingIntent replyPendingIntent = PendingIntent.getService(this, 0, replyIntent, PendingIntent.FLAG_ONE_SHOT);
 
+
+        Intent contentIntent = ContactDetailActivity.getStartActivityIntent(this, fromUserId);
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_ONE_SHOT);
+
         builder.setContentTitle(title)
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification)
+                .setAutoCancel(true)
+                .setContentIntent(contentPendingIntent)
                 .addAction(R.drawable.ic_reply_24dp, replyText, replyPendingIntent)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
 

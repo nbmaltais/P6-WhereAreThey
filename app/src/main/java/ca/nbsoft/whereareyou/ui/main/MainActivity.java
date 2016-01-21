@@ -26,6 +26,7 @@ import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
+import ca.nbsoft.whereareyou.ui.ErrorMessages;
 import ca.nbsoft.whereareyou.ui.login.LoginActivity;
 
 public class MainActivity extends BaseActivity  implements AddContactHelper.Client{
@@ -44,6 +45,9 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
             if(result.isOk())
             {
                 registerDeviceIfNeeded();
+            }
+            else{
+                ErrorMessages.showErrorMessage(MainActivity.this,result);
             }
         }
 

@@ -17,9 +17,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
@@ -31,23 +36,26 @@ import ca.nbsoft.whereareyou.R;
 
 import ca.nbsoft.whereareyou.Utility.Utils;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
-import ca.nbsoft.whereareyou.ui.main.AddContactActivity;
-import ca.nbsoft.whereareyou.ui.map.MapFragment;
+import ca.nbsoft.whereareyou.ui.ErrorMessages;
+import ca.nbsoft.whereareyou.ui.map.MapHelper;
+
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ContactDetailFragment extends Fragment {
+public class ContactDetailFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = ContactDetailFragment.class.getSimpleName();
     private static final int DELETE_CONTACT = 0;
-    @Bind(R.id.top_container) View mTopContainer;
+    @Bind(R.id.content) View mContentContainer;
+    @Bind(R.id.compose) View mComposeContainer;
     @Bind(R.id.message)
     EditText mMessageView;
     @Bind(R.id.photo_view)
     ImageView mPhotoView;
 
-    MapFragment mMapFragment;
+    SupportMapFragment mMapFragment;
+    MapHelper mMapHelper = new MapHelper();
 
     private String mUserId;
     private String mContactName;
@@ -56,17 +64,20 @@ public class ContactDetailFragment extends Fragment {
     {
         @Override
         public void onRequestLocationResult(ApiService.Result resultCode, Bundle args) {
-
+            if(!resultCode.isOk())
+                ErrorMessages.showErrorMessage(getContext(), resultCode);
         }
 
         @Override
         public void onSendLocationResult(ApiService.Result resultCode, Bundle args) {
-
+            if(!resultCode.isOk())
+                ErrorMessages.showErrorMessage(getContext(), resultCode);
         }
 
         @Override
         public void onDeleteContactResult(ApiService.Result resultCode, Bundle args) {
-
+            if(!resultCode.isOk())
+                ErrorMessages.showErrorMessage(getContext(), resultCode);
         }
     };
     private String mPhotoUrl;
@@ -89,15 +100,36 @@ public class ContactDetailFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         if (savedInstanceState == null) {
-            mMapFragment = new MapFragment();
+            mMapFragment =  SupportMapFragment.newInstance();
             getFragmentManager().beginTransaction().add(R.id.map,mMapFragment).commit();
 
         } else{
-            mMapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+            mMapFragment = (SupportMapFragment) getFragmentManager().findFragmentById(R.id.map);
         }
 
         if(mMapFragment==null)
             Log.w(TAG,"onCreateView : mMapFragment==null");
+
+        mMapFragment.getMapAsync(this);
+
+        // Adjust the padding of the coordinato layout main content so that we
+        // can see the last message. If we don't do that, the message is hidden by the compose layout
+        final ViewTreeObserver vto = view.getViewTreeObserver();
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                if (vto.isAlive())
+                    vto.removeOnPreDrawListener(this);
+
+                mContentContainer.setPadding(mContentContainer.getPaddingLeft(),
+                        mContentContainer.getPaddingTop(),
+                        mContentContainer.getPaddingRight(),
+                        mComposeContainer.getHeight());
+
+                return true;
+            }
+        });
+
         return view;
     }
 
@@ -149,7 +181,7 @@ public class ContactDetailFragment extends Fragment {
     {
         String text = getContext().getString(R.string.contact_detail_request_position_confirmation);
 
-        Utils.cancelableActionSnackbar(mTopContainer, text, new Runnable() {
+        Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
             @Override
             public void run() {
                 ApiService.requestContactLocation(getContext(), mUserId, getMessage());
@@ -166,7 +198,7 @@ public class ContactDetailFragment extends Fragment {
     {
         String text = getContext().getString(R.string.contact_detail_send_position_confirmation);
 
-        Utils.cancelableActionSnackbar(mTopContainer, text, new Runnable() {
+        Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
             @Override
             public void run() {
                 ApiService.sendLocation(getContext(), mUserId, getMessage());
@@ -208,7 +240,7 @@ public class ContactDetailFragment extends Fragment {
         Contact contact = Contact.fromCursor(cursor);
 
         if(mMapFragment!=null)
-            mMapFragment.addContactMarker(contact,true);
+            mMapHelper.addContactMarker(contact,true);
         else
             Log.w(TAG,"bind : mMapFragment==null");
     }
@@ -234,6 +266,11 @@ public class ContactDetailFragment extends Fragment {
         }
 
 
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMapHelper.onMapReady(googleMap);
     }
 
     static public class DeleteContactDialog extends DialogFragment

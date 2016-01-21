@@ -1,47 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
+<LinearLayout
+    android:id="@+id/content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/top_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:orientation="vertical"
     tools:context="ca.nbsoft.whereareyou.ui.contact.ContactDetailActivity"
-    tools:showIn="@layout/layout_contact_detail">
+    tools:showIn="@layout/layout_contact_detail"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    >
 
-    <LinearLayout
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:layout_height="match_parent"
 
-        <FrameLayout android:id="@+id/map"
-                  android:layout_width="match_parent"
-                  android:layout_marginBottom="16dp"
-                  android:layout_height="200dp"/>
+        >
 
-        <Button
-            android:id="@+id/request_location_button"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/contact_detail_request_location"/>
+            android:orientation="vertical">
+            <FrameLayout
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/send_location_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/contact_detail_send_location"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla"/>
 
-        <EditText
-            android:id="@+id/message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:lines="3"
-            android:hint="@string/contact_detail_message_hint"
-            />
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla"/>
 
-</android.support.v4.widget.NestedScrollView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla Blabla blabla blabla"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Il faut voir ca"/>
+
+        </LinearLayout>
+
+
+
+
+    </android.support.v4.widget.NestedScrollView>
+
+
+
+</LinearLayout>

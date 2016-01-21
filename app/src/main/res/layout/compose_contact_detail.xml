@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:elevation="2dp"
+              android:background="@android:color/white"
+    android:paddingLeft="16dp"
+              android:paddingRight="16dp">
+
+    <EditText
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/contact_detail_message_hint"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="right">
+
+
+        <Button
+            android:id="@+id/request_location_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_detail_request_location"/>
+
+        <Button
+            android:id="@+id/send_location_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_detail_send_location"/>
+    </LinearLayout>
+
+</LinearLayout>
