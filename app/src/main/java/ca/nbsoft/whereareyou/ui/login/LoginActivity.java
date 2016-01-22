@@ -32,8 +32,6 @@ public class LoginActivity extends BaseActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int REQUEST_ACCOUNT_PICKER = 1010;
 
-    @Bind(R.id.status_view)
-    TextView mStatusView;
 
     @Bind(R.id.signin_button)
     SignInButton mSignInButton;

@@ -2,19 +2,25 @@ package ca.nbsoft.whereareyou.ui.main;
 
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +36,9 @@ import ca.nbsoft.whereareyou.ui.ErrorMessages;
 public class AddContactHelper extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int PICK_CONTACT_REQUEST = 10345;
+    private static final int CONFIRM_CONTACT = 10346;
     private static final String TAG = AddContactHelper.class.getSimpleName();
+    private String mEmail;
 
     interface Client
     {
@@ -39,6 +47,7 @@ public class AddContactHelper extends Fragment implements LoaderManager.LoaderCa
     }
 
     Client mClient;
+
 
     BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
     {
@@ -83,7 +92,7 @@ public class AddContactHelper extends Fragment implements LoaderManager.LoaderCa
     public void onResume() {
         super.onResume();
 
-        ApiService.subscribeToResult(getContext(),ApiService.ACTION_SEND_CONTACT_REQUEST,mReceiver);
+        ApiService.subscribeToResult(getContext(), ApiService.ACTION_SEND_CONTACT_REQUEST, mReceiver);
 
     }
 
@@ -110,6 +119,12 @@ public class AddContactHelper extends Fragment implements LoaderManager.LoaderCa
                 loadContact(data);
             }
         }
+        else if(requestCode == CONFIRM_CONTACT)
+        {
+            if (resultCode == Activity.RESULT_OK) {
+                addContactByEmail(mEmail);
+            }
+        }
     }
 
     private void loadContact(Intent intent) {
@@ -127,7 +142,7 @@ public class AddContactHelper extends Fragment implements LoaderManager.LoaderCa
 
         Log.d(TAG, "onCreateLoader: Loading contact " + contactUri);
 
-        String[] projection = {ContactsContract.CommonDataKinds.Email.ADDRESS};
+        String[] projection = {ContactsContract.CommonDataKinds.Email.ADDRESS, ContactsContract.CommonDataKinds.Nickname.NAME};
         CursorLoader loader = new CursorLoader(getContext(),contactUri,projection,null,null,null);
 
         return loader;
@@ -139,13 +154,31 @@ public class AddContactHelper extends Fragment implements LoaderManager.LoaderCa
 
         if(cursor.moveToFirst()) {
 
-            int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS);
-            String email = cursor.getString(column);
+            int emailColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS);
+            int nameColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Nickname.NAME);
+            mEmail = cursor.getString(emailColumn);
+            final String name = cursor.getString(nameColumn);
+            Log.d(TAG, "onLoadFinished: got email:" + mEmail);
 
-            Log.d(TAG, "onLoadFinished: got email:" + email);
 
-            addContactByEmail(email);
+            // We can't create the dialog from the loader callback, so
+            // post it
+            Handler handler = new Handler();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    addContactByEmailWithConfirmation(name,mEmail);
+                }
+            });
+
         }
+    }
+
+    private void addContactByEmailWithConfirmation(String name,String email) {
+        ConfirmAddContactDialog d = ConfirmAddContactDialog.newInstance(this,name,email);
+
+        d.show(getFragmentManager(),"ConfirmAddContactDialog");
     }
 
     @Override
@@ -156,5 +189,58 @@ public class AddContactHelper extends Fragment implements LoaderManager.LoaderCa
     public void addContactByEmail(String email) {
         mClient.showProgressDialog(getString(R.string.add_contact_activity_progress));
         ApiService.sendContactRequest(getContext(), email);
+    }
+
+    static public class ConfirmAddContactDialog extends DialogFragment
+    {
+
+
+        static public ConfirmAddContactDialog newInstance( AddContactHelper fragment, String name, String email)
+        {
+            ConfirmAddContactDialog f = new ConfirmAddContactDialog();
+            Bundle args = new Bundle();
+            args.putString("name",name);
+            args.putString("email", email);
+            f.setArguments(args);
+            f.setTargetFragment(fragment,CONFIRM_CONTACT);
+            return f;
+        }
+
+        public ConfirmAddContactDialog()
+        {
+
+        }
+
+        @NonNull
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+            final Activity activity = getActivity();
+
+            Bundle args = getArguments();
+            String name = args.getString("name");
+            String email = args.getString("email");
+
+            String message = getString(R.string.add_contact_activity_confirm_dialog_text,name);
+
+            return new AlertDialog.Builder(activity)
+                    //.setIcon(R.drawable.alert_dialog_dart_icon)
+                    .setMessage(message)
+                    .setPositiveButton(R.string.yes,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    getTargetFragment().onActivityResult(getTargetRequestCode(),Activity.RESULT_OK,null);
+                                }
+                            })
+                    .setNegativeButton(R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    getTargetFragment().onActivityResult(getTargetRequestCode(),Activity.RESULT_CANCELED,null);
+                                }
+                            }).create();
+
+        }
     }
 }
