@@ -39,6 +39,7 @@ import java.util.List;
 
 import ca.nbsoft.whereareyou.Utility.MessagesUtils;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
+import ca.nbsoft.whereareyou.Utility.Utils;
 import ca.nbsoft.whereareyou.backend.whereAreYou.WhereAreYou;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfo;
 import ca.nbsoft.whereareyou.backend.whereAreYou.model.ContactInfoCollection;
@@ -434,6 +435,11 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             final String message;
             Result resultCode = new Result(Result.RESULT_INVALID_ACTION);
 
+            if(!Utils.isNetworkAvailable(this)) {
+                ResultBroadcastReceiver.sendResult(this, action, Result.from(Result.RESULT_ERROR_NO_NETWORK));
+                return;
+            }
+
 
             try {
                 // Cancel the associated notification
@@ -620,6 +626,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     private Result handleSendLocation(@NonNull String userId, @NonNull String message) throws IOException, InterruptedException {
         Log.d(TAG, "Sending location to " + userId);
 
+
         Location loc = null;
 
         // TODO ask permission
@@ -667,7 +674,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
     private Result handleConfirmContactRequest(@NonNull String userId, boolean accept) throws IOException {
         Log.d(TAG, "Confirming contact request with " + userId);
-        showToast("Confirming contact request with " + userId);
+
 
         StatusResult result = mApi.confirmContactRequest(userId,accept).execute();
 
@@ -717,6 +724,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
     private Result  handleSendContactRequest(@NonNull String email)throws IOException {
         Log.d(TAG, "handleSendContactRequest");
 
+
         StatusResult result = mApi.sendContactRequest(email).execute();
 
         return Result.from(result);
@@ -724,6 +732,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
     private Result handleRequestContactLocation(@NonNull String userId, String message)throws IOException {
         Log.d(TAG, "handleRequestContactLocation, userId = " + userId);
+
 
         WhereAreYou.RequestContactLocation requestContactLocation = mApi.requestContactLocation(userId);
         if(message!=null)

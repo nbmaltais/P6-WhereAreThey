@@ -2,6 +2,8 @@ package ca.nbsoft.whereareyou.Utility;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -12,6 +14,15 @@ import ca.nbsoft.whereareyou.R;
  * Created by Nicolas on 2015-12-24.
  */
 public class Utils {
+
+    static public boolean isNetworkAvailable(Context c) {
+        ConnectivityManager cm =
+                (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
 
     static public void closeKeyboard(Activity activity)
     {

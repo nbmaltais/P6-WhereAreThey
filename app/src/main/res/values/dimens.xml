@@ -7,4 +7,11 @@
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="map_item_height">200dp</dimen>
+    <dimen name="item_message_left_margin">32dp</dimen>
+    <dimen name="map_item_bottom_margin">16dp</dimen>
+    <dimen name="compose_view_elevation">2dp</dimen>
+    <dimen name="conversation_bubble_padding">8dp</dimen>
+    <dimen name="list_item_text_vertical_padding">8dp</dimen>
+    <dimen name="list_item_text_padding_small">4dp</dimen>
+    <dimen name="list_image_size">40dp</dimen>
 </resources>
