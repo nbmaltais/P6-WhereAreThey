@@ -30,13 +30,13 @@ import ca.nbsoft.whereareyou.R;
  * A simple {@link Fragment} subclass.
  */
 public class MapHelper  {
-    static final String TAG = MapFragment.class.getSimpleName();
+    static final String TAG = MapHelper.class.getSimpleName();
     GoogleMap mMap=null;
     Map<String,Contact> mContacts = new HashMap<>();
     CameraUpdate mCameraUpdate=null;
 
     public MapHelper() {
-        // Required empty public constructor
+
     }
 
 

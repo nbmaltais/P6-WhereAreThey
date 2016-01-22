@@ -2,6 +2,7 @@ package ca.nbsoft.whereareyou.ui.contact;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +10,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -20,13 +24,14 @@ import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageCursor;
 import ca.nbsoft.whereareyou.ui.main.ContactAdapter;
 import ca.nbsoft.whereareyou.ui.map.MapHelper;
+import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
 /**
  * Created by Nicolas on 2016-01-20.
  */
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
-    class ViewHolder extends  RecyclerView.ViewHolder
+    static class ViewHolder extends  RecyclerView.ViewHolder
     {
         public ViewHolder(View itemView) {
             super(itemView);
@@ -34,7 +39,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         }
     }
 
-    class MessageViewHolder extends ViewHolder
+    static class MessageViewHolder extends ViewHolder
     {
         @Bind(R.id.conversation_item_view)
         LinearLayout mContainer;
@@ -69,18 +74,34 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     }
 
-    class MapViewHolder extends ViewHolder
-    {
-        MapHelper mMapHelper;
+    class MapViewHolder extends ViewHolder implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
+        MapHelper mMapHelper = new MapHelper();
         @Bind(R.id.map)
         MapView mMapView;
         public MapViewHolder(View itemView) {
             super(itemView);
+            ButterKnife.bind(this, itemView);
+
+            mMapView.onCreate(null);
+            mMapView.getMapAsync(this);
         }
 
         void bind(Contact contact)
         {
+            mMapHelper.addContactMarker(contact,true);
+        }
 
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            Log.d("MapViewHolder","onMapReady");
+            mMapHelper.onMapReady(googleMap);
+
+            googleMap.setOnMapClickListener(this);
+        }
+
+        @Override
+        public void onMapClick(LatLng latLng) {
+            mCallbacks.onMapClicked();
         }
     }
 
@@ -90,9 +111,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private static final int MAP_VIEW = 0;
     private static final int MESSAGE_VIEW = 1;
 
-    public MessageAdapter()
-    {
+    interface Callbacks{
+        void onMapClicked();
     }
+
+    Callbacks mCallbacks;
+
+    public MessageAdapter(Callbacks cb)
+    {
+        mCallbacks = cb;
+    }
+
 
     void setContact(Contact c)
     {

@@ -138,4 +138,6 @@
     <string name="pick_contact_button">Pick from address book</string>
     <string name="conversation_item_written_by_user">you wrote:</string>
     <string name="conversation_item_written_by_contact">%1$s wrote:</string>
+    <string name="error_message_generic">An error occurred</string>
+    <string name="error_message_no_network">The network is unavailable, please retry when a network connection is available.</string>
 </resources>

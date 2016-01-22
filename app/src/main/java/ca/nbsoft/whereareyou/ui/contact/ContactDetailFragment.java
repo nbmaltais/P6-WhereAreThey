@@ -48,6 +48,7 @@ import ca.nbsoft.whereareyou.provider.message.MessageCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageSelection;
 import ca.nbsoft.whereareyou.ui.ErrorMessages;
 import ca.nbsoft.whereareyou.ui.map.MapHelper;
+import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
 
 /**
@@ -111,7 +112,14 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         ButterKnife.bind(this, view);
 
 
-        mAdapter = new MessageAdapter();
+        mAdapter = new MessageAdapter( new MessageAdapter.Callbacks(){
+
+            @Override
+            public void onMapClicked() {
+                MapsActivity.startShowContact(getContext(),mContact);
+            }
+        });
+
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
