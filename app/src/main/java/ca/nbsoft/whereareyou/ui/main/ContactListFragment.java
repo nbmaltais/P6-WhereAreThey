@@ -154,7 +154,8 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
 
 
     @Override
-    public void onContactItemClicked(String userId) {
-        ContactDetailActivity.startActivity(getContext(),userId);
+    public void onContactItemClicked(String userId, View transitionView) {
+        //ContactDetailActivity.startActivity(getContext(),userId);
+        ContactDetailActivity.startActivityWithTransition(getActivity(), userId, transitionView );
     }
 }

@@ -1,5 +1,6 @@
 package ca.nbsoft.whereareyou.ui.main;
 
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +26,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     interface OnItemClickCallback
     {
-        void onContactItemClicked(String userId);
+        void onContactItemClicked(String userId, View transitionView);
     }
 
 
@@ -107,6 +108,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             mEmailView.setText(cursor.getEmail());
             mNameView.setText(cursor.getName());
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mPhotoView.setTransitionName("photo_user_" + mUserId);
+            }
+
             String photoUrl = cursor.getPhotoUrl();
             if(photoUrl!=null && !photoUrl.isEmpty()) {
                 Picasso.with(itemView.getContext()).load(photoUrl).centerCrop().fit().into(mPhotoView);
@@ -118,7 +123,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    itemClickCallback.onContactItemClicked(mUserId);
+                    itemClickCallback.onContactItemClicked(mUserId,mPhotoView);
                 }
             });
         }

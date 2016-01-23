@@ -141,4 +141,5 @@
     <string name="error_message_generic">An error occurred</string>
     <string name="error_message_no_network">The network is unavailable, please retry when a network connection is available.</string>
     <string name="add_contact_activity_confirm_dialog_text">Do you want to add %1$s in your contacts?</string>
+    <string name="transition_user_photo">user_photot</string>
 </resources>

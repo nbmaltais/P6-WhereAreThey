@@ -12,9 +12,12 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.ActionMode;
+import android.view.MenuItem;
 import android.view.View;
 
 import butterknife.Bind;
@@ -50,6 +53,19 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
         ctx.startActivity(intent);
     }
 
+    public static void startActivityWithTransition(FragmentActivity context, String userId, View transitionView) {
+        ActivityOptionsCompat sceneTransitionAnimation
+                = ActivityOptionsCompat.makeSceneTransitionAnimation(context, transitionView,
+                context.getString(R.string.transition_user_photo));
+
+        // Starts the activity with the participants, animating from one to the other.
+        final Bundle transitionBundle = sceneTransitionAnimation.toBundle();
+
+        Intent intent = getStartActivityIntent(context,userId);
+        context.startActivity(intent,transitionBundle);
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +75,10 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
 
         setSupportActionBar(mToolbar);
 
+        if(savedInstanceState==null)
+        {
+            supportPostponeEnterTransition();
+        }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -88,6 +108,7 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
             ContactDetailFragment contactFragment = (ContactDetailFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
 
             contactFragment.bind(cursor);
+            supportStartPostponedEnterTransition();
         }
     }
 
@@ -95,6 +116,18 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                supportFinishAfterTransition();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
 
 }

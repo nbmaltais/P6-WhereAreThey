@@ -26,7 +26,8 @@
             <ImageView
                 android:id="@+id/photo_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:transitionName="@string/transition_user_photo"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"

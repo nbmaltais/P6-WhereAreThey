@@ -21,7 +21,7 @@
         android:layout_marginLeft="@dimen/item_message_left_margin"
         android:layout_marginRight="@dimen/item_message_left_margin"
         android:padding="@dimen/conversation_bubble_padding"
-        android:background="@drawable/conversation_bubble"
+        android:background="@drawable/conversation_bubble_user"
         tools:text="Hello buddy, how are you?"/>
 
 </LinearLayout>

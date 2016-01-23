@@ -41,6 +41,7 @@ public class MyGcmListenerService extends GcmListenerService {
     private static final String KEY_LATITUDE = "location_lat";
     private static final String KEY_LONGITUDE = "location_long";
 
+    boolean mNotificationSound=true;
 
     public MyGcmListenerService() {
     }
@@ -140,12 +141,20 @@ public class MyGcmListenerService extends GcmListenerService {
 
     private void onLocation(Bundle message) {
 
-        Log.d(TAG,"onLocation");
+        Log.d(TAG, "onLocation");
 
         String fromUserId = message.getString(KEY_USER_ID);
-        String messageText= message.getString(KEY_MESSAGE,null);
+        String messageText= message.getString(KEY_MESSAGE, null);
 
-        android.location.Location loc = new android.location.Location("WhereAreYouBackend");
+        Contact contact = getContact(fromUserId);
+        if(contact==null)
+        {
+            Log.w(TAG,"onLocation, no contact matching contact id");
+            return;
+        }
+
+
+        android.location.Location loc =null;
         if(message.containsKey(KEY_LATITUDE) && message.containsKey(KEY_LONGITUDE))
         {
             try {
@@ -155,9 +164,13 @@ public class MyGcmListenerService extends GcmListenerService {
                 double latDouble = Double.parseDouble(latString);
                 double longDouble = Double.parseDouble(longString);
 
+                loc = new android.location.Location("WhereAreYouBackend");
                 loc.setLatitude(latDouble);
                 loc.setLongitude(longDouble);
                 Log.d(TAG, "location = " + loc);
+
+                // update the contact object
+                contact.setLatLng(loc);
             }
             catch(NumberFormatException e)
             {
@@ -165,15 +178,6 @@ public class MyGcmListenerService extends GcmListenerService {
             }
         }
 
-        Contact contact = getContact(fromUserId);
-        if(contact==null)
-        {
-            Log.w(TAG,"onLocation, no contact matching contact id");
-            return;
-        }
-
-        // update the contact object
-        contact.setLatLng(loc);
 
         // Update the contact position in the DB
         updateContact(fromUserId, loc, messageText);
@@ -187,27 +191,30 @@ public class MyGcmListenerService extends GcmListenerService {
         // TODO: used ordered broadcast to show notification only if no activity can
         // use it
         // https://commonsware.com/blog/2010/08/11/activity-notification-ordered-broadcast.html
-        sendLocationNotification(contact,messageText);
+        sendLocationNotification(contact, messageText);
 
     }
 
     private void sendLocationNotification(Contact contact, String messageText) {
         // Create a notification
 
+        Log.d(TAG,"sendLocationNotification, messageText = " + messageText);
+
         String title = "Location Received";
         String contentText = "From " + contact.getDisplayName();
         int notifId = LOCATION_NOTIF_ID;
 
-        // TODO: create back stack for map activity
-        Intent locationIntent = MapsActivity.getShowContactIntent(this,contact);
+        Intent contentIntent = ContactDetailActivity.getStartActivityIntent(this, contact.getUserId());
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        /*Intent locationIntent = MapsActivity.getShowContactIntent(this, contact);
         locationIntent.putExtra(Constants.EXTRA_MESSAGE,messageText);
         locationIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
-
         PendingIntent locationPendingIntent = TaskStackBuilder.create(this)
                 // add all of DetailsActivity's parents to the stack,
                 // followed by DetailsActivity itself
                 .addNextIntentWithParentStack(locationIntent)
-                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);*/
 
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
@@ -215,12 +222,14 @@ public class MyGcmListenerService extends GcmListenerService {
         builder.setContentTitle(title)
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setContentIntent(locationPendingIntent)
+                .setContentIntent(contentPendingIntent)
                 .setAutoCancel(true)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
 
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        builder.setSound(alarmSound);
+        if( mNotificationSound) {
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            builder.setSound(alarmSound);
+        }
 
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -273,8 +282,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 .addAction(R.drawable.ic_reply_24dp, replyText, replyPendingIntent)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
 
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        builder.setSound(alarmSound);
+        if( mNotificationSound) {
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            builder.setSound(alarmSound);
+        }
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -299,9 +310,12 @@ public class MyGcmListenerService extends GcmListenerService {
     {
         long timestamp = System.currentTimeMillis();
         ContactContentValues values = new ContactContentValues();
-        values.putPositionLatitude(loc.getLatitude());
-        values.putPositionLongitude(loc.getLongitude());
-        values.putPositionTimestamp(timestamp);
+        if(loc!=null) {
+            values.putPositionLatitude(loc.getLatitude());
+            values.putPositionLongitude(loc.getLongitude());
+            values.putPositionTimestamp(timestamp);
+        }
+
 
         ContactSelection where = new ContactSelection();
         where.userid(userId);

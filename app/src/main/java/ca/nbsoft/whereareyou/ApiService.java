@@ -653,7 +653,6 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
             loc.setLatitude(lastLocation.getLatitude());
         }
 
-        showToast("Sending location to " + userId);
 
         WhereAreYou.SendLocation sendLocation = mApi.sendLocation(userId, loc);
         if(message!=null) {
@@ -751,14 +750,6 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
 
 
-    protected void showToast(final String message) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
 
 
     @Override

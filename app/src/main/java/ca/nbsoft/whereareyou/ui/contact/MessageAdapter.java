@@ -1,7 +1,6 @@
 package ca.nbsoft.whereareyou.ui.contact;
 
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -11,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
@@ -20,11 +18,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
-import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageCursor;
-import ca.nbsoft.whereareyou.ui.main.ContactAdapter;
 import ca.nbsoft.whereareyou.ui.map.MapHelper;
-import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
 /**
  * Created by Nicolas on 2016-01-20.
@@ -61,13 +56,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             if( cursor.getUserissender())
             {
                 mAuthorView.setText(R.string.conversation_item_written_by_user);
-                mContainer.setGravity(Gravity.LEFT);
             }
             else
             {
                 String text = itemView.getContext().getString(R.string.conversation_item_written_by_contact,mContactName);
                 mAuthorView.setText(text);
-                mContainer.setGravity(Gravity.RIGHT);
             }
         }
 
@@ -109,7 +102,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     MessageCursor mMessageCursor;
 
     private static final int MAP_VIEW = 0;
-    private static final int MESSAGE_VIEW = 1;
+    private static final int USER_MESSAGE_VIEW = 1;
+    private static final int CONTACT_MESSAGE_VIEW = 2;
 
     interface Callbacks{
         void onMapClicked();
@@ -141,9 +135,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_map,parent,false);
             return new MapViewHolder(v);
         }
-        else if(viewType==MESSAGE_VIEW)
+        else if(viewType==USER_MESSAGE_VIEW)
         {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_conversation_message,parent,false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_message,parent,false);
+            return new MessageViewHolder(v);
+        }
+        else if(viewType==CONTACT_MESSAGE_VIEW)
+        {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_message,parent,false);
             return new MessageViewHolder(v);
         }
 
@@ -158,7 +157,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             MapViewHolder vh = (MapViewHolder)holder;
             vh.bind(mContact);
         }
-        else if(getItemViewType(position) == MESSAGE_VIEW)
+        else
         {
             mMessageCursor.moveToPosition(position-1);
             MessageViewHolder vh = (MessageViewHolder)holder;
@@ -178,6 +177,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         if(position == 0)
             return MAP_VIEW;
         else
-            return MESSAGE_VIEW;
+        {
+            mMessageCursor.moveToPosition(position-1);
+            if( mMessageCursor.getUserissender() == true)
+                return USER_MESSAGE_VIEW;
+            else
+                return CONTACT_MESSAGE_VIEW;
+        }
+
     }
 }

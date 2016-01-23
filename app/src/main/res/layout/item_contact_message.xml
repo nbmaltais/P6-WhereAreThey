@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/conversation_item_view"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:gravity="right">
+
+    <TextView
+        android:id="@+id/author_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/item_message_left_margin"
+        android:layout_marginRight="@dimen/item_message_left_margin"
+        tools:text="John Doe wrote"/>
+    <TextView
+        android:id="@+id/message_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/item_message_left_margin"
+        android:layout_marginRight="@dimen/item_message_left_margin"
+        android:padding="@dimen/conversation_bubble_padding"
+        android:background="@drawable/conversation_bubble_contact"
+        tools:text="Hello buddy, how are you?"/>
+
+</LinearLayout>
