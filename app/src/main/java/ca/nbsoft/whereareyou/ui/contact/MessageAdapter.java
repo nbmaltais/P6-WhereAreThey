@@ -26,6 +26,13 @@ import ca.nbsoft.whereareyou.ui.map.MapHelper;
  */
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
+    private boolean mMapVisible = false;
+
+    public void showMap() {
+        mMapVisible = true;
+        notifyDataSetChanged();
+    }
+
     static class ViewHolder extends  RecyclerView.ViewHolder
     {
         public ViewHolder(View itemView) {
@@ -71,6 +78,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         MapHelper mMapHelper = new MapHelper();
         @Bind(R.id.map)
         MapView mMapView;
+        @Bind(R.id.placeholder)
+        View mPlaceHolderView;
+
         public MapViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
@@ -82,6 +92,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         void bind(Contact contact)
         {
             mMapHelper.addContactMarker(contact,true);
+            if(mMapVisible ) {
+                if(mMapView.getVisibility() != View.VISIBLE) {
+                    mMapView.setVisibility(View.VISIBLE);
+                    mPlaceHolderView.setVisibility(View.INVISIBLE);
+                }
+            }
+            else
+            {
+                mMapView.setVisibility(View.INVISIBLE);
+                mPlaceHolderView.setVisibility(View.VISIBLE);
+            }
+
         }
 
         @Override
@@ -167,7 +189,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        if(mContact == null)
+        if(mContact == null )
             return 0;
         return 1 + (mMessageCursor!=null ? mMessageCursor.getCount() : 0);
     }

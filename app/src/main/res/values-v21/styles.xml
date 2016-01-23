@@ -7,4 +7,14 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowContentTransitions">true</item>
     </style>
+
+    <style name="MainActivityStyle" parent="AppTheme.NoActionBar">
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+    <style name="ContactDetailStyle" parent="AppTheme.NoActionBar">
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowEnterTransition">@transition/contact_detail_enter</item>
+        <item name="android:windowReturnTransition">@transition/contact_detail_exit</item>
+    </style>
 </resources>

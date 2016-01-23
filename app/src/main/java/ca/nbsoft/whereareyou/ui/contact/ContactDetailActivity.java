@@ -1,11 +1,13 @@
 package ca.nbsoft.whereareyou.ui.contact;
 
 import android.app.LoaderManager;
+import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -16,9 +18,12 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Transition;
 import android.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -80,6 +85,40 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
             supportPostponeEnterTransition();
         }
 
+        final ContactDetailFragment fragment = (ContactDetailFragment)getSupportFragmentManager().findFragmentById(R.id.fragment);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
+            getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
+                @Override
+                public void onTransitionStart(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    fragment.onSharedElementEnd();
+                }
+
+                @Override
+                public void onTransitionCancel(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionPause(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionResume(Transition transition) {
+
+                }
+            });
+
+
+        }
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mContactUserId = getIntent().getStringExtra(EXTRA_CONTACT_USER_ID);
@@ -108,7 +147,7 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
             ContactDetailFragment contactFragment = (ContactDetailFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
 
             contactFragment.bind(cursor);
-            supportStartPostponedEnterTransition();
+
         }
     }
 

@@ -29,8 +29,10 @@ import android.widget.ImageView;
 
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
@@ -105,6 +107,13 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        MapsInitializer.initialize(getContext());
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.w(TAG, "onCreateView");
@@ -136,6 +145,8 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
                         mRecyclerView.getPaddingTop(),
                         mRecyclerView.getPaddingRight(),
                         mComposeContainer.getHeight());
+
+                //getActivity().supportStartPostponedEnterTransition();
 
                 return true;
             }
@@ -242,17 +253,27 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         String photoUrl=cursor.getPhotoUrl();
 
         if(photoUrl!=null && !photoUrl.isEmpty()) {
-            Picasso.with(getContext()).load(photoUrl).centerCrop().fit().into(mPhotoView);
+            Picasso.with(getContext()).load(photoUrl).centerCrop().fit().into(mPhotoView, new Callback() {
+                @Override
+                public void onSuccess() {
+                    //getActivity().supportStartPostponedEnterTransition();
+                }
+
+                @Override
+                public void onError() {
+                    //getActivity().supportStartPostponedEnterTransition();
+                }
+            });
         }
         else
         {
-
+            //getActivity().supportStartPostponedEnterTransition();
         }
 
 
         mAdapter.setContact(mContact);
 
-        getLoaderManager().initLoader(0,null,this);
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -297,11 +318,18 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
 
         MessageCursor cursor = new MessageCursor(data);
         mAdapter.setMessageCursor(cursor);
+
+        getActivity().supportStartPostponedEnterTransition();
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.setMessageCursor(null);
+    }
+
+    public void onSharedElementEnd() {
+        Log.d(TAG,"onSharedElementEnd");
+        mAdapter.showMap();
     }
 
 

@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.gms.maps.MapView
-    android:id="@+id/map"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/map_item_height"
-    android:layout_marginBottom="@dimen/map_item_bottom_margin"
-    android:orientation="vertical"
-    map:liteMode="true">
-</com.google.android.gms.maps.MapView>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:map="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="@dimen/map_item_height"
+             android:layout_marginBottom="@dimen/map_item_bottom_margin">
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        map:liteMode="true"
+        android:visibility="invisible"
+      />
+
+    <View
+        android:id="@+id/placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        />
+
+
+</FrameLayout>

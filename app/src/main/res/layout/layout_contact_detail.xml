@@ -13,6 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/app_bar_height"
         android:fitsSystemWindows="true"
+        android:transitionGroup="true"
+        android:elevation="@dimen/appbar_elevation"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -41,9 +43,19 @@
 
 
 
-    <include
+    <!--<include
         layout="@layout/content_contact_detail"
 
+        />-->
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="ca.nbsoft.whereareyou.ui.ContactListFragment"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:listitem="@layout/item_user_message"
+        android:transitionGroup="true"
         />
 
     <include
