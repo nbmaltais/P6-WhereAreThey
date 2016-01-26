@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:configure="ca.nbsoft.whereareyou.widget.FavoriteContactsWidgetConfigureActivity"
+                    android:initialKeyguardLayout="@layout/favorite_contacts_widget"
+                    android:initialLayout="@layout/favorite_contacts_widget"
+                    android:minHeight="40dp"
+                    android:minWidth="250dp"
+                    android:previewImage="@drawable/example_appwidget_preview"
+                    android:resizeMode="horizontal|vertical"
+                    android:updatePeriodMillis="0"
+                    android:widgetCategory="home_screen">
+</appwidget-provider>

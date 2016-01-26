@@ -4,6 +4,7 @@ package ca.nbsoft.whereareyou.ui.contact;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.os.Build;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -120,6 +121,9 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         View view = inflater.inflate(R.layout.layout_contact_detail, container, false);
         ButterKnife.bind(this, view);
 
+        //TODO find a cleaner way to detect if we where launched with transition animation
+        boolean withTransition = getActivity().getIntent().getBooleanExtra(ContactDetailActivity.EXTRA_TRANSITION, false);
+
 
         mAdapter = new MessageAdapter( new MessageAdapter.Callbacks(){
 
@@ -128,6 +132,10 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
                 MapsActivity.startShowContact(getContext(),mContact);
             }
         });
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || withTransition==false) {
+            mAdapter.showMap();
+        }
 
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -145,8 +153,6 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
                         mRecyclerView.getPaddingTop(),
                         mRecyclerView.getPaddingRight(),
                         mComposeContainer.getHeight());
-
-                //getActivity().supportStartPostponedEnterTransition();
 
                 return true;
             }
@@ -211,7 +217,6 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         });
 
 
-        //Snackbar.make(mTopContainer,  text, Snackbar.LENGTH_SHORT).show();
     }
 
 
@@ -227,8 +232,7 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
             }
         });
 
-        //ApiService.sendLocation(getContext(), mUserId, getMessage());
-        //Snackbar.make(mTopContainer,text, Snackbar.LENGTH_SHORT).show();
+
     }
 
 
@@ -253,21 +257,11 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         String photoUrl=cursor.getPhotoUrl();
 
         if(photoUrl!=null && !photoUrl.isEmpty()) {
-            Picasso.with(getContext()).load(photoUrl).centerCrop().fit().into(mPhotoView, new Callback() {
-                @Override
-                public void onSuccess() {
-                    //getActivity().supportStartPostponedEnterTransition();
-                }
-
-                @Override
-                public void onError() {
-                    //getActivity().supportStartPostponedEnterTransition();
-                }
-            });
+            Picasso.with(getContext()).load(photoUrl).centerCrop().fit().into(mPhotoView);
         }
         else
         {
-            //getActivity().supportStartPostponedEnterTransition();
+
         }
 
 
@@ -346,8 +340,6 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
             Activity activity = getActivity();
 
             return new AlertDialog.Builder(activity)
-                    //.setIcon(R.drawable.alert_dialog_dart_icon)
-                    //.setTitle(R.string.contact_detail_delete_contact_dialog_title)
                     .setMessage(R.string.contact_detail_delete_contact_dialog_text)
                     .setPositiveButton(R.string.yes,
                             new DialogInterface.OnClickListener() {

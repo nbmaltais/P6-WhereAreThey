@@ -55,11 +55,12 @@ public class AddContactHelper extends Fragment implements LoaderManager.LoaderCa
         @Override
         public void onSendContactRequestResult(ApiService.Result resultCode, Bundle args) {
 
+            View v = getActivity().findViewById(android.R.id.content);
             mClient.hideProgressDialog();
             if( resultCode.getResultCode() == ApiService.Result.RESULT_SUCCESS)
             {
                 //mEmailView.getText();
-                Snackbar.make(getView(), R.string.add_contact_succeeded, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(v, R.string.add_contact_succeeded, Snackbar.LENGTH_LONG).show();
             }
             else
             {

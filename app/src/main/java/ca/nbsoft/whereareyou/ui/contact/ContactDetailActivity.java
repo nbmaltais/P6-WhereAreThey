@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,8 @@ import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 public class ContactDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String EXTRA_CONTACT_USER_ID = "CONTACT_USER_ID";
+    public static final String EXTRA_TRANSITION = "TRANSITION";// is there another way ?
+    private static final String TAG = ContactDetailActivity.class.getSimpleName();
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.app_bar) AppBarLayout mAppBarLayout;
     @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -67,6 +70,7 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
         final Bundle transitionBundle = sceneTransitionAnimation.toBundle();
 
         Intent intent = getStartActivityIntent(context,userId);
+        intent.putExtra(EXTRA_TRANSITION,true);
         context.startActivity(intent,transitionBundle);
 
     }
@@ -85,6 +89,8 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
             supportPostponeEnterTransition();
         }
 
+
+
         final ContactDetailFragment fragment = (ContactDetailFragment)getSupportFragmentManager().findFragmentById(R.id.fragment);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -97,6 +103,7 @@ public class ContactDetailActivity extends AppCompatActivity implements LoaderMa
 
                 @Override
                 public void onTransitionEnd(Transition transition) {
+                    Log.d(TAG, "onTransitionEnd");
                     fragment.onSharedElementEnd();
                 }
 

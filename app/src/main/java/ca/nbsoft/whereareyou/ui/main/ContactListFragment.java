@@ -28,12 +28,11 @@ import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 import ca.nbsoft.whereareyou.ui.contact.ContactDetailActivity;
-import ca.nbsoft.whereareyou.ui.main.ContactAdapter;
 
 /**
  *
  */
-public class ContactListFragment extends Fragment implements LoaderCallbacks<Cursor>, ContactAdapter.OnItemClickCallback {
+public class ContactListFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
     private static final String TAG = ContactListFragment.class.getSimpleName();
     @Bind (R.id.contact_list)
@@ -45,6 +44,30 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
 
     private int LOADER_CONTACT = 0;
     private int LOADER_CONTACT_WAITING_CONFIRMATION = 1;
+
+    ContactAdapter.OnContactClickCallback mContactClickHandler = new ContactAdapter.OnContactClickCallback() {
+        @Override
+        public void onContactItemClicked(String userId, View transitionView) {
+            ContactDetailActivity.startActivityWithTransition(getActivity(), userId, transitionView );
+        }
+    };
+
+    ContactAdapter.OnPendingContactClickCallback mPendingContactClickHandler = new ContactAdapter.OnPendingContactClickCallback() {
+        @Override
+        public void onContactItemClicked(String userId, View transitionView) {
+
+        }
+
+        @Override
+        public void onAcceptRequest(String userId) {
+            ApiService.confirmContactRequest(getContext(),userId,true);
+        }
+
+        @Override
+        public void onRefuseRequest(String userId) {
+            ApiService.confirmContactRequest(getContext(),userId,false);
+        }
+    };
 
     public ContactListFragment() {
         // Required empty public constructor
@@ -63,14 +86,14 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
         View view = inflater.inflate(R.layout.fragment_contact_list, container, false);
         ButterKnife.bind(this, view);
 
-        mAdapter = new ContactAdapter(this);
+        mAdapter = new ContactAdapter(mContactClickHandler,mPendingContactClickHandler);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mAccountName = PreferenceUtils.getAccountName(getContext());
 
         getLoaderManager().initLoader(LOADER_CONTACT, null, this);
-        //getLoaderManager().initLoader(LOADER_CONTACT_WAITING_CONFIRMATION, null, this);
+        getLoaderManager().initLoader(LOADER_CONTACT_WAITING_CONFIRMATION, null, this);
 
         return view;
     }
@@ -109,8 +132,8 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
 
         if(id == LOADER_CONTACT) {
             ContactSelection where = new ContactSelection();
-            where.account(mAccountName);
-            //where.status(ContactStatus.NONE);
+            where.account(mAccountName).and().status(ContactStatus.NONE);
+            where.orderByName();
 
             CursorLoader loader = new CursorLoader(getActivity(), where.uri(), ContactColumns.ALL_COLUMNS,
                     where.sel(), where.args(), where.order());
@@ -120,8 +143,8 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
         else if(id == LOADER_CONTACT_WAITING_CONFIRMATION)
         {
             ContactSelection where = new ContactSelection();
-            where.account(mAccountName);
-            where.status(ContactStatus.WAITING_FOR_CONFIRMATION);
+            where.account(mAccountName).and().status(ContactStatus.WAITING_FOR_CONFIRMATION);
+            where.orderByName();
 
             CursorLoader loader = new CursorLoader(getActivity(), where.uri(), ContactColumns.ALL_COLUMNS,
                     where.sel(), where.args(), where.order());
@@ -153,9 +176,5 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
     }
 
 
-    @Override
-    public void onContactItemClicked(String userId, View transitionView) {
-        //ContactDetailActivity.startActivity(getContext(),userId);
-        ContactDetailActivity.startActivityWithTransition(getActivity(), userId, transitionView );
-    }
+
 }

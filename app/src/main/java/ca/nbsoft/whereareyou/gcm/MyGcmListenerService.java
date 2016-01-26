@@ -2,13 +2,13 @@ package ca.nbsoft.whereareyou.gcm;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -16,24 +16,22 @@ import android.widget.Toast;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import ca.nbsoft.whereareyou.ApiService;
-import ca.nbsoft.whereareyou.Constants;
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.Utility.MessagesUtils;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
+import ca.nbsoft.whereareyou.common.ContactStatus;
+import ca.nbsoft.whereareyou.common.GsmMessageKeys;
+import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactContentValues;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 import ca.nbsoft.whereareyou.ui.contact.ContactDetailActivity;
 import ca.nbsoft.whereareyou.ui.main.MainActivity;
-import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
 public class MyGcmListenerService extends GcmListenerService {
     private static final String TAG = GcmListenerService.class.getSimpleName();
-    private static final String KEY_TYPE = "type";
-    private static final String KEY_USER_ID = "user_id";
-    private static final String KEY_USER_EMAIL = "user_email";
-    private static final String KEY_MESSAGE = "message";
-    private static final String LOCATION = "location";
+
     private static final int CONTACT_REQUEST_NOTIF_ID = 1011;
     private static final int LOCATION_REQUEST_NOTIF_ID = 1012;
     private static final int LOCATION_NOTIF_ID = 1013;
@@ -42,8 +40,15 @@ public class MyGcmListenerService extends GcmListenerService {
     private static final String KEY_LONGITUDE = "location_long";
 
     boolean mNotificationSound=true;
+    private String mAccountName;
 
     public MyGcmListenerService() {
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mAccountName = PreferenceUtils.getAccountName(this);
     }
 
     @Override
@@ -51,7 +56,9 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
 
-        String type = message.getString(KEY_TYPE);
+
+
+        String type = message.getString(GsmMessageKeys.KEY_TYPE);
         switch(type)
         {
             case "location-request":
@@ -76,14 +83,14 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Log.d(TAG,"onContactConfirmation");
 
-        String fromEmail = message.getString(KEY_USER_EMAIL);
-        String fromUserId = message.getString(KEY_USER_ID);
+        String fromEmail = message.getString(GsmMessageKeys.KEY_USER_EMAIL);
+        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
 
         String title = "Contact Confirmation";
         String contentText = "From " + fromEmail;
 
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
         // Notification
         NotificationCompat.Builder builder
@@ -108,43 +115,68 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Log.d(TAG,"onContactRequest");
 
-        String fromEmail = message.getString(KEY_USER_EMAIL);
-        String fromUserId = message.getString(KEY_USER_ID);
+        String fromEmail = message.getString(GsmMessageKeys.KEY_USER_EMAIL);
+        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
+        String fromUserName = message.getString(GsmMessageKeys.KEY_USER_NAME);
 
-        String title = getString(R.string.notification_contact_request_title);
-        String contentText = "From " + fromEmail;
+        String contentTitle = getString(R.string.notification_contact_request_title);
+        String contentText = getString(R.string.notification_contact_from, fromUserName);
         String acceptText = getString(R.string.notification_accept_action);
 
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
+        // Get the number of contact waiting fo confirmation
+        int pending = getPendingConfirmationRequest();
+
+
         int notifId = CONTACT_REQUEST_NOTIF_ID;
+
+        Intent clickIntent = new Intent(this,MainActivity.class);
+        PendingIntent clickPendingIntent = TaskStackBuilder.create(this).addNextIntentWithParentStack(clickIntent).getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent acceptIntent = ApiService.confirmContactRequestIntent(this, fromUserId,true);
         acceptIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
+        // TODO: handle case where we have multiple pending contact request
         PendingIntent acceptPendingIntent = PendingIntent.getService(this,0,acceptIntent,PendingIntent.FLAG_ONE_SHOT);
 
         Intent rejectIntent = ApiService.confirmContactRequestIntent(this, fromUserId,false);
         acceptIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
+        // TODO: handle case where we have multiple pending contact request
         PendingIntent rejectPendingIntent = PendingIntent.getService(this,0,rejectIntent,PendingIntent.FLAG_ONE_SHOT);
 
+        //  we should check the number of pending contact request. If there is more than one, don't show actions
 
-        builder.setContentTitle(title)
+        builder.setContentTitle(contentTitle)
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_notification)
-                .addAction(R.drawable.ic_confirm_contact, acceptText, acceptPendingIntent);
+                .setContentIntent(clickPendingIntent);
+
+        // If there are no other pending, show action
+        if(pending==0) {
+            builder.addAction(R.drawable.ic_confirm_contact, acceptText, acceptPendingIntent);
+        }
+        else
+        {
+            String subText = getString(R.string.notification_other_request_pending,pending);
+            builder.setSubText(subText);
+        }
+
+        addPendingContactRequest(fromUserId,fromUserName,fromEmail);
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         notifyMgr.notify(notifId, builder.build());
     }
 
+
+
     private void onLocation(Bundle message) {
 
         Log.d(TAG, "onLocation");
 
-        String fromUserId = message.getString(KEY_USER_ID);
-        String messageText= message.getString(KEY_MESSAGE, null);
+        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
+        String messageText= message.getString(GsmMessageKeys.KEY_MESSAGE, null);
 
         Contact contact = getContact(fromUserId);
         if(contact==null)
@@ -191,21 +223,23 @@ public class MyGcmListenerService extends GcmListenerService {
         // TODO: used ordered broadcast to show notification only if no activity can
         // use it
         // https://commonsware.com/blog/2010/08/11/activity-notification-ordered-broadcast.html
-        sendLocationNotification(contact, messageText);
+        showLocationNotification(contact, messageText);
 
     }
 
-    private void sendLocationNotification(Contact contact, String messageText) {
+    private void showLocationNotification(Contact contact, String messageText) {
         // Create a notification
 
-        Log.d(TAG,"sendLocationNotification, messageText = " + messageText);
+        Log.d(TAG,"showLocationNotification, messageText = " + messageText);
 
         String title = "Location Received";
         String contentText = "From " + contact.getDisplayName();
         int notifId = LOCATION_NOTIF_ID;
 
         Intent contentIntent = ContactDetailActivity.getStartActivityIntent(this, contact.getUserId());
-        PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_ONE_SHOT);
+        // Use contact id to differentiate pending inten since extra is not enough
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(this, (int)contact.getId(),
+                contentIntent, PendingIntent.FLAG_ONE_SHOT);
 
         /*Intent locationIntent = MapsActivity.getShowContactIntent(this, contact);
         locationIntent.putExtra(Constants.EXTRA_MESSAGE,messageText);
@@ -241,8 +275,8 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Log.d(TAG,"onLocationRequest");
 
-        String fromUserId = message.getString(KEY_USER_ID);
-        String messageText = message.getString(KEY_MESSAGE, null);
+        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
+        String messageText = message.getString(GsmMessageKeys.KEY_MESSAGE, null);
 
         Contact contact = getContact(fromUserId);
         if(contact==null)
@@ -254,9 +288,15 @@ public class MyGcmListenerService extends GcmListenerService {
         // Add the message to the DB
         if(messageText!=null && !messageText.isEmpty())
         {
-            MessagesUtils.addReceivedMessage(this,contact.getId(),messageText);
+            MessagesUtils.addReceivedMessage(this, contact.getId(), messageText);
         }
 
+        showLocationRequestNotification(contact, messageText);
+
+    }
+
+    private void showLocationRequestNotification(Contact contact, String messageText)
+    {
 
         int notifId = LOCATION_REQUEST_NOTIF_ID;
         String title = getString(R.string.notification_location_request_title);
@@ -266,13 +306,14 @@ public class MyGcmListenerService extends GcmListenerService {
         NotificationCompat.Builder builder
                 = new NotificationCompat.Builder(this);
 
-        Intent replyIntent = ApiService.sendLocationIntent(this, fromUserId, null);
+
+        Intent replyIntent = ApiService.sendLocationIntent(this, contact.getUserId(), null);
         replyIntent.putExtra(ApiService.EXTRA_CANCEL_NOTIFICATION, notifId);
         PendingIntent replyPendingIntent = PendingIntent.getService(this, 0, replyIntent, PendingIntent.FLAG_ONE_SHOT);
 
 
-        Intent contentIntent = ContactDetailActivity.getStartActivityIntent(this, fromUserId);
-        PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_ONE_SHOT);
+        Intent contentIntent = ContactDetailActivity.getStartActivityIntent(this, contact.getUserId());
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(this, (int) contact.getId(), contentIntent, PendingIntent.FLAG_ONE_SHOT);
 
         builder.setContentTitle(title)
                 .setContentText(contentText)
@@ -294,7 +335,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
     private Contact getContact(String fromUserId) {
         ContactSelection where = new ContactSelection();
-        where.userid(fromUserId);
+        where.userid(fromUserId).and().account(mAccountName);
 
         ContactCursor query = where.query(getContentResolver());
         if(query.moveToFirst())
@@ -304,6 +345,18 @@ public class MyGcmListenerService extends GcmListenerService {
         else {
             return null;
         }
+    }
+
+    private void addPendingContactRequest(String fromUserId, String fromUserName, String fromEmail) {
+        ContactContentValues values = new ContactContentValues();
+
+        values.putAccount(mAccountName);
+        values.putUserid(fromUserId);
+        values.putName(fromUserName);
+        values.putEmail(fromEmail);
+        values.putStatus(ContactStatus.WAITING_FOR_CONFIRMATION);
+
+        values.insert(this);
     }
 
     private void updateContact(String userId, android.location.Location loc, String message)
@@ -318,10 +371,20 @@ public class MyGcmListenerService extends GcmListenerService {
 
 
         ContactSelection where = new ContactSelection();
-        where.userid(userId);
+        where.userid(userId).and().account(mAccountName);
 
         values.update(getContentResolver(), where);
 
+    }
+
+    private int getPendingConfirmationRequest()
+    {
+        ContactSelection sel = new ContactSelection();
+        sel.account(mAccountName).and().status(ContactStatus.WAITING_FOR_CONFIRMATION);
+
+        ContactCursor cursor = sel.query(getContentResolver(), new String[] {ContactColumns._ID});
+
+        return cursor.getCount();
     }
 
     protected void showToast(final String message) {

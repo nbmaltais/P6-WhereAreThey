@@ -141,5 +141,13 @@
     <string name="error_message_generic">An error occurred</string>
     <string name="error_message_no_network">The network is unavailable, please retry when a network connection is available.</string>
     <string name="add_contact_activity_confirm_dialog_text">Do you want to add %1$s in your contacts?</string>
-    <string name="transition_user_photo">user_photot</string>
+    <string name="transition_user_photo">user_photo</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="widget_configure_text">Select contacts</string>
+    <string name="add_widget">Add widget</string>
+    <string name="widget_configure_no_contact_selected">None</string>
+    <string name="notification_contact_from">From %1$s</string>
+    <string name="notification_other_request_pending">%1$s other request</string>
+    <string name="section_pending_contact_request">Pending request</string>
+    <string name="section_contacts">Contacts</string>
 </resources>
