@@ -4,7 +4,6 @@ import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
-import com.google.appengine.api.datastore.GeoPt;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -12,7 +11,8 @@ import java.util.logging.Logger;
 import WhereAreYou.BuildConfig;
 import ca.nbsoft.whereareyou.backend.api.Location;
 import ca.nbsoft.whereareyou.backend.data.UserProfile;
-import ca.nbsoft.whereareyou.common.GsmMessageKeys;
+import ca.nbsoft.whereareyou.common.GcmMessageKeys;
+import ca.nbsoft.whereareyou.common.GcmMessageTypes;
 
 /**
  * Created by Nicolas on 2015-12-10.
@@ -33,11 +33,12 @@ public class GcmMessages {
 
         Sender sender = new Sender(API_KEY);
         Message.Builder builder = new Message.Builder()
-                .addData(GsmMessageKeys.KEY_TYPE, "location-request")
-                .addData(GsmMessageKeys.KEY_USER_ID, from.getUserId());
+                .addData(GcmMessageKeys.KEY_TYPE, GcmMessageTypes.LOCATION_REQUEST)
+                .addData(GcmMessageKeys.KEY_USER_ID, to.getEmail())
+                .addData(GcmMessageKeys.KEY_CONTACT_ID, from.getUserId());
 
         if(message!=null)
-            builder.addData(GsmMessageKeys.KEY_MESSAGE, message);
+            builder.addData(GcmMessageKeys.KEY_MESSAGE, message);
 
         Message msg = builder.build();
         Result result = sender.send(msg, to.getRegId(), 5);
@@ -56,15 +57,16 @@ public class GcmMessages {
         }
 
         Message.Builder builder = new Message.Builder()
-                .addData(GsmMessageKeys.KEY_TYPE, "location")
-                .addData(GsmMessageKeys.KEY_USER_ID, from.getUserId());
+                .addData(GcmMessageKeys.KEY_TYPE, GcmMessageTypes.LOCATION)
+                .addData(GcmMessageKeys.KEY_USER_ID, to.getEmail())
+                .addData(GcmMessageKeys.KEY_CONTACT_ID, from.getUserId());
 
         if(message!=null)
-            builder.addData(GsmMessageKeys.KEY_MESSAGE, message);
+            builder.addData(GcmMessageKeys.KEY_MESSAGE, message);
 
         if(location!=null) {
-            builder.addData("location_lat", Double.toString(location.getLatitude()))
-                    .addData("location_long", Double.toString(location.getLongitude()));
+            builder.addData(GcmMessageKeys.KEY_LATITUDE, Double.toString(location.getLatitude()))
+                    .addData(GcmMessageKeys.KEY_LONGITUDE, Double.toString(location.getLongitude()));
         }
 
         Message msg = builder.build();
@@ -86,10 +88,11 @@ public class GcmMessages {
 
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
-                .addData(GsmMessageKeys.KEY_TYPE, "contact-request")
-                .addData(GsmMessageKeys.KEY_USER_ID, from.getUserId())
-                .addData(GsmMessageKeys.KEY_USER_EMAIL, from.getEmail())
-                .addData(GsmMessageKeys.KEY_USER_NAME, from.getDisplayName())
+                .addData(GcmMessageKeys.KEY_TYPE, GcmMessageTypes.CONTACT_REQUEST)
+                .addData(GcmMessageKeys.KEY_USER_ID, to.getEmail())
+                .addData(GcmMessageKeys.KEY_CONTACT_ID, from.getUserId())
+                .addData(GcmMessageKeys.KEY_CONTACT_EMAIL, from.getEmail())
+                .addData(GcmMessageKeys.KEY_CONTACT_NAME, from.getDisplayName())
                 .build();
 
         Result result = sender.send(msg, to.getRegId(), 5);
@@ -97,7 +100,7 @@ public class GcmMessages {
         handleResult(result,to.getRegId());
     }
 
-    public static void confirmContactRequest(UserProfile from, UserProfile to) throws IOException {
+    public static void confirmContactRequest(UserProfile confirmedContact, UserProfile to) throws IOException {
 
         if(to.getRegId()==null)
         {
@@ -107,15 +110,35 @@ public class GcmMessages {
 
         Sender sender = new Sender(API_KEY);
         Message msg = new Message.Builder()
-                .addData(GsmMessageKeys.KEY_TYPE, "contact-confirmation")
-                .addData(GsmMessageKeys.KEY_USER_ID, from.getUserId())
-                .addData(GsmMessageKeys.KEY_USER_EMAIL, from.getEmail())
-                .addData(GsmMessageKeys.KEY_USER_NAME, from.getDisplayName())
+                .addData(GcmMessageKeys.KEY_TYPE, GcmMessageTypes.CONTACT_CONFIRMATION)
+                .addData(GcmMessageKeys.KEY_USER_ID, to.getEmail())
+                .addData(GcmMessageKeys.KEY_CONTACT_ID, confirmedContact.getUserId())
+                .addData(GcmMessageKeys.KEY_CONTACT_EMAIL, confirmedContact.getEmail())
+                .addData(GcmMessageKeys.KEY_CONTACT_NAME, confirmedContact.getDisplayName())
                 .build();
 
         Result result = sender.send(msg, to.getRegId(), 5);
 
         handleResult(result,to.getRegId());
+    }
+
+    public static void notifyContactListModified(  UserProfile to ) throws IOException {
+        if(to.getRegId()==null)
+        {
+            log.info("confirmContactRequest: user has no registered device");
+            return;
+        }
+
+        Sender sender = new Sender(API_KEY);
+        Message msg = new Message.Builder()
+                .addData(GcmMessageKeys.KEY_TYPE, GcmMessageTypes.CONTACTS_MODIFIED)
+                .addData(GcmMessageKeys.KEY_USER_ID, to.getEmail())
+                .build();
+
+        Result result = sender.send(msg, to.getRegId(), 5);
+
+        handleResult(result,to.getRegId());
+
     }
 
     private static void handleResult(Result result, String toRegId) {

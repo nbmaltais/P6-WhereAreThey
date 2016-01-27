@@ -317,7 +317,7 @@ public class WhereAreYouApi {
 
 
     @ApiMethod(name = "removeContact")
-    public StatusResult removeContact(User user, @Named("contactId") String contactUserId) throws UnauthorizedException, InvalidUserException {
+    public StatusResult removeContact(User user, @Named("contactId") String contactUserId) throws UnauthorizedException, InvalidUserException, IOException {
 
         log.info("API call: requestContactLocation, user = " + user);
 
@@ -347,6 +347,7 @@ public class WhereAreYouApi {
         contactProfile.removeWaitingForConfirmationUserId(userProfile.getUserId());
         UserProfileHelper.saveUserProfile(contactProfile);
 
+        GcmMessages.notifyContactListModified(userProfile);
 
         return noErrorStatusResult();
     }
@@ -402,10 +403,21 @@ public class WhereAreYouApi {
             return new StatusResult(StatusCode.RESULT_NO_USER_WITH_EMAIL,"No user with the specified email has signed in.");
         }
 
-        if( userProfile.containsContactUserId(contactProfile.getUserId()) )
+        boolean contactContainUser = contactProfile.containsContactUserId(userProfile.getUserId());
+        boolean userContainContact = userProfile.containsContactUserId(contactProfile.getUserId());;
+
+        if( contactContainUser && userContainContact)
         {
             log.info("User is already in contact, aborting sendContactRequest");
             return new StatusResult(StatusCode.RESULT_CONTACT_ALREADY_ADDED,"Already in contact list");
+        }
+        else if( contactContainUser || userContainContact )
+        {
+            // This is weird, but it can happen if one of the user
+            // delete and recreate it's account. Remove contact from each other
+            // and reconfirm
+            contactProfile.removeContactUserId(userProfile.getUserId());
+            userProfile.removeContactUserId(contactProfile.getUserId());
         }
 
         if( userProfile.containsPendingContactRequestUserId(contactProfile.getUserId()) )
@@ -414,14 +426,24 @@ public class WhereAreYouApi {
             return new StatusResult(StatusCode.RESULT_CONTACT_REQUEST_PENDING,"A request is already pending");
         }
 
+        if( contactProfile.containsContactUserId(userProfile.getUserId()) )
+        {
+            // The contact already accepted the user, but the user does not have contact in his contact
+            // list. This could happen if user deleted his accout and recreated it.
+            // We will ask confirmation just in case
+            contactProfile.removeContactUserId(userProfile.getUserId());
+        }
 
-        GcmMessages.sendContactRequest(userProfile, contactProfile);
 
         userProfile.addPendingContactRequestUserId(contactProfile.getUserId());
         contactProfile.addWaitingForConfirmationUserId(userProfile.getUserId());
 
         UserProfileHelper.saveUserProfile(userProfile);
         UserProfileHelper.saveUserProfile(contactProfile);
+
+        GcmMessages.sendContactRequest(userProfile, contactProfile);
+        GcmMessages.notifyContactListModified(userProfile);
+
         return noErrorStatusResult();
     }
 
@@ -465,7 +487,12 @@ public class WhereAreYouApi {
         if(accept) {
             //  send notification that contact request is confirmed
             GcmMessages.confirmContactRequest(userProfile, contactProfile);
-            GcmMessages.confirmContactRequest(contactProfile, userProfile);
+            GcmMessages.notifyContactListModified(userProfile);
+        }
+        else
+        {
+            GcmMessages.notifyContactListModified(userProfile);
+            GcmMessages.notifyContactListModified(contactProfile);
         }
 
 
@@ -569,7 +596,7 @@ public class WhereAreYouApi {
         return contacts;
     }
 
-    private StatusResult handleDeletedUser(UserProfile userProfile, String contactUserId) {
+    private StatusResult handleDeletedUser(UserProfile userProfile, String contactUserId) throws IOException {
 
         // Remove user from all user lists
         userProfile.removeContactUserId(contactUserId);
@@ -577,6 +604,8 @@ public class WhereAreYouApi {
         userProfile.removeWaitingForConfirmationUserId(contactUserId);
 
         UserProfileHelper.saveUserProfile(userProfile);
+
+        GcmMessages.notifyContactListModified(userProfile);
 
         return userUnsubscribedStatusResult();
     }

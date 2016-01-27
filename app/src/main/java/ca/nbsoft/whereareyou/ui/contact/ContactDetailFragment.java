@@ -29,11 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
@@ -44,13 +40,11 @@ import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
 
 import ca.nbsoft.whereareyou.Utility.Utils;
-import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 import ca.nbsoft.whereareyou.provider.message.MessageCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageSelection;
 import ca.nbsoft.whereareyou.ui.ErrorMessages;
-import ca.nbsoft.whereareyou.ui.map.MapHelper;
 import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
 
@@ -200,8 +194,11 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         dialog.show(getFragmentManager(), "delete-contact-dialog");
     }
 
-    private String getMessage() {
-        return mMessageView.getText().toString();
+    private String getMessageAndClearEditText() {
+
+        String message = mMessageView.getText().toString();
+        mMessageView.setText("");
+        return message;
     }
 
     @OnClick(R.id.request_location_button)
@@ -212,7 +209,7 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
             @Override
             public void run() {
-                ApiService.requestContactLocation(getContext(), mContact.getUserId(), getMessage());
+                ApiService.requestContactLocation(getContext(), mContact.getUserId(), getMessageAndClearEditText());
             }
         });
 
@@ -228,7 +225,7 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
         Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
             @Override
             public void run() {
-                ApiService.sendLocation(getContext(), mContact.getUserId(), getMessage());
+                ApiService.sendLocation(getContext(), mContact.getUserId(), getMessageAndClearEditText());
             }
         });
 

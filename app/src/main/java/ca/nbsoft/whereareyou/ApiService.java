@@ -687,8 +687,9 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
 
         // TODO: do a merge instead of nuking all contacts and recreating them
-
-        getContentResolver().delete(ContactColumns.CONTENT_URI, null, null);
+        ContactSelection deleteSelection = new ContactSelection();
+        deleteSelection.account(mAccountName);
+        deleteSelection.delete(this);
 
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
@@ -702,6 +703,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
                 values.putEmail(contact.getEmail());
                 values.putName(contact.getDisplayName());
                 values.putPhotoUrl(contact.getPhotoUrl());
+                values.putStatus(contact.getStatus());
 
                 batch.add(ContentProviderOperation.newInsert(ContactColumns.CONTENT_URI).withValues(values.values()).build());
             }
@@ -722,7 +724,6 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
     private Result  handleSendContactRequest(@NonNull String email)throws IOException {
         Log.d(TAG, "handleSendContactRequest");
-
 
         StatusResult result = mApi.sendContactRequest(email).execute();
 
@@ -747,8 +748,6 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
 
         return result;
     }
-
-
 
 
 

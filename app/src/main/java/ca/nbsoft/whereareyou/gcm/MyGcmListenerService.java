@@ -21,7 +21,8 @@ import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.Utility.MessagesUtils;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.common.ContactStatus;
-import ca.nbsoft.whereareyou.common.GsmMessageKeys;
+import ca.nbsoft.whereareyou.common.GcmMessageTypes;
+import ca.nbsoft.whereareyou.common.GcmMessageKeys;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactContentValues;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
@@ -32,12 +33,13 @@ import ca.nbsoft.whereareyou.ui.main.MainActivity;
 public class MyGcmListenerService extends GcmListenerService {
     private static final String TAG = GcmListenerService.class.getSimpleName();
 
-    private static final int CONTACT_REQUEST_NOTIF_ID = 1011;
-    private static final int LOCATION_REQUEST_NOTIF_ID = 1012;
-    private static final int LOCATION_NOTIF_ID = 1013;
-    private static final int CONTACT_CONFIRMATION_NOTIF_ID = 1014;
-    private static final String KEY_LATITUDE = "location_lat";
-    private static final String KEY_LONGITUDE = "location_long";
+
+    //private static final int LOCATION_REQUEST_NOTIF_ID = 1012;
+    //private static final int LOCATION_NOTIF_ID = 1013;
+
+    private static final int CONTACT_REQUEST_NOTIF_ID = -1;
+    private static final int CONTACT_CONFIRMATION_NOTIF_ID = -2;
+
 
     boolean mNotificationSound=true;
     private String mAccountName;
@@ -56,35 +58,50 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
 
+        // Check if the user id match the logged in user
+        String userId = message.getString(GcmMessageKeys.KEY_USER_ID);
+        if(!checkUserId(userId))
+            return;
 
-
-        String type = message.getString(GsmMessageKeys.KEY_TYPE);
+        String type = message.getString(GcmMessageKeys.KEY_TYPE);
         switch(type)
         {
-            case "location-request":
+            case GcmMessageTypes.LOCATION_REQUEST:
                 onLocationRequest(message);
                 break;
-            case "location":
+            case GcmMessageTypes.LOCATION:
                 onLocation(message);
                 break;
-            case "contact-request":
+            case GcmMessageTypes.CONTACT_REQUEST:
                 onContactRequest(message);
                 break;
-            case "contact-confirmation":
+            case GcmMessageTypes.CONTACT_CONFIRMATION:
                 onContactConfirmation(message);
                 break;
+            case GcmMessageTypes.CONTACTS_MODIFIED:
+                onContactsModified(message);
         }
 
         //showToast(message.getString(KEY_MESSAGE));
 
     }
 
+    private boolean checkUserId(String userId) {
+        return PreferenceUtils.getAccountName(this).equals(userId);
+    }
+
+    private void onContactsModified(Bundle message) {
+        Log.d(TAG,"onContactsModified");
+
+        ApiService.updateContactList(this);
+    }
+
     private void onContactConfirmation(Bundle message) {
 
         Log.d(TAG,"onContactConfirmation");
 
-        String fromEmail = message.getString(GsmMessageKeys.KEY_USER_EMAIL);
-        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
+        String fromEmail = message.getString(GcmMessageKeys.KEY_CONTACT_EMAIL);
+        String fromUserId = message.getString(GcmMessageKeys.KEY_CONTACT_ID);
 
         String title = "Contact Confirmation";
         String contentText = "From " + fromEmail;
@@ -115,9 +132,9 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Log.d(TAG,"onContactRequest");
 
-        String fromEmail = message.getString(GsmMessageKeys.KEY_USER_EMAIL);
-        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
-        String fromUserName = message.getString(GsmMessageKeys.KEY_USER_NAME);
+        String fromEmail = message.getString(GcmMessageKeys.KEY_CONTACT_EMAIL);
+        String fromUserId = message.getString(GcmMessageKeys.KEY_CONTACT_ID);
+        String fromUserName = message.getString(GcmMessageKeys.KEY_CONTACT_NAME);
 
         String contentTitle = getString(R.string.notification_contact_request_title);
         String contentText = getString(R.string.notification_contact_from, fromUserName);
@@ -160,9 +177,10 @@ public class MyGcmListenerService extends GcmListenerService {
         {
             String subText = getString(R.string.notification_other_request_pending,pending);
             builder.setSubText(subText);
+            builder.setNumber(pending);
         }
 
-        addPendingContactRequest(fromUserId,fromUserName,fromEmail);
+        addWaitForConfirmationContactRequest(fromUserId, fromUserName, fromEmail);
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -175,8 +193,8 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Log.d(TAG, "onLocation");
 
-        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
-        String messageText= message.getString(GsmMessageKeys.KEY_MESSAGE, null);
+        String fromUserId = message.getString(GcmMessageKeys.KEY_CONTACT_ID);
+        String messageText= message.getString(GcmMessageKeys.KEY_MESSAGE, null);
 
         Contact contact = getContact(fromUserId);
         if(contact==null)
@@ -187,11 +205,11 @@ public class MyGcmListenerService extends GcmListenerService {
 
 
         android.location.Location loc =null;
-        if(message.containsKey(KEY_LATITUDE) && message.containsKey(KEY_LONGITUDE))
+        if(message.containsKey( GcmMessageKeys.KEY_LATITUDE) && message.containsKey(GcmMessageKeys.KEY_LONGITUDE))
         {
             try {
-                String latString = message.getString(KEY_LATITUDE);
-                String longString = message.getString(KEY_LONGITUDE);
+                String latString = message.getString(GcmMessageKeys.KEY_LATITUDE);
+                String longString = message.getString(GcmMessageKeys.KEY_LONGITUDE);
 
                 double latDouble = Double.parseDouble(latString);
                 double longDouble = Double.parseDouble(longString);
@@ -234,7 +252,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         String title = "Location Received";
         String contentText = "From " + contact.getDisplayName();
-        int notifId = LOCATION_NOTIF_ID;
+        int notifId = (int)contact.getId();
 
         Intent contentIntent = ContactDetailActivity.getStartActivityIntent(this, contact.getUserId());
         // Use contact id to differentiate pending inten since extra is not enough
@@ -258,7 +276,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(contentPendingIntent)
                 .setAutoCancel(true)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(messageText)
+                        .setBigContentTitle(title)
+                        .setSummaryText(contentText) );
 
         if( mNotificationSound) {
             Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -268,6 +289,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        notifyMgr.cancel(notifId);
         notifyMgr.notify(notifId, builder.build());
     }
 
@@ -275,8 +297,8 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Log.d(TAG,"onLocationRequest");
 
-        String fromUserId = message.getString(GsmMessageKeys.KEY_USER_ID);
-        String messageText = message.getString(GsmMessageKeys.KEY_MESSAGE, null);
+        String fromUserId = message.getString(GcmMessageKeys.KEY_CONTACT_ID);
+        String messageText = message.getString(GcmMessageKeys.KEY_MESSAGE, null);
 
         Contact contact = getContact(fromUserId);
         if(contact==null)
@@ -297,8 +319,8 @@ public class MyGcmListenerService extends GcmListenerService {
 
     private void showLocationRequestNotification(Contact contact, String messageText)
     {
-
-        int notifId = LOCATION_REQUEST_NOTIF_ID;
+        // Use the contact id for notification id
+        int notifId = (int)contact.getId();
         String title = getString(R.string.notification_location_request_title);
         String replyText = getString(R.string.notification_reply_action);
         String contentText = "From " + contact.getDisplayName();
@@ -321,7 +343,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setAutoCancel(true)
                 .setContentIntent(contentPendingIntent)
                 .addAction(R.drawable.ic_reply_24dp, replyText, replyPendingIntent)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(messageText));
+                .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(messageText)
+                                .setBigContentTitle(title)
+                                .setSummaryText(contentText));
 
         if( mNotificationSound) {
             Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -330,6 +355,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        notifyMgr.cancel(notifId);
         notifyMgr.notify(notifId, builder.build());
     }
 
@@ -347,7 +373,7 @@ public class MyGcmListenerService extends GcmListenerService {
         }
     }
 
-    private void addPendingContactRequest(String fromUserId, String fromUserName, String fromEmail) {
+    private void addWaitForConfirmationContactRequest(String fromUserId, String fromUserName, String fromEmail) {
         ContactContentValues values = new ContactContentValues();
 
         values.putAccount(mAccountName);

@@ -150,4 +150,5 @@
     <string name="notification_other_request_pending">%1$s other request</string>
     <string name="section_pending_contact_request">Pending request</string>
     <string name="section_contacts">Contacts</string>
+    <string name="action_sign_out">Sign out</string>
 </resources>

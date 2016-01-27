@@ -73,7 +73,7 @@ public  class BaseActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
 
-    protected void revokeAccessClicked(View v) {
+    protected void revokeAccess() {
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {

@@ -2,6 +2,7 @@ package ca.nbsoft.whereareyou.ui.main;
 
 import android.app.Dialog;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
@@ -25,6 +26,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;
+import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
 import ca.nbsoft.whereareyou.ui.ErrorMessages;
 import ca.nbsoft.whereareyou.ui.login.LoginActivity;
@@ -35,7 +37,7 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
     private static final String TAG = MainActivity.class.getSimpleName();
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.fab) FloatingActionButton mFab;
-
+    private ProgressDialog mProgressDialog; // TODO: replace by progress bar
     AddContactHelper mAddContactHelper;
 
     BroadcastReceiver mReceiver = new ApiService.ResultBroadcastReceiver()
@@ -44,7 +46,8 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
         public void onDeleteAccountResult(ApiService.Result result, Bundle args) {
             if(result.isOk())
             {
-                registerDeviceIfNeeded();
+                onAccountDeleted();
+
             }
             else{
                 ErrorMessages.showErrorMessage(MainActivity.this,result);
@@ -52,6 +55,7 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
         }
 
     };
+
 
 
     @Override
@@ -137,6 +141,10 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
             AddContactActivity.startActivity(this);
             return true;
         }
+        else if(item.getItemId()==R.id.action_sign_out)
+        {
+            signOut();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -146,14 +154,49 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
         d.show(getSupportFragmentManager(),"tag");
     }
 
+    private void deleteAccount() {
+        ApiService.deleteAccount(this);
+    }
+
+    private void onAccountDeleted() {
+        revokeAccess();
+        clearAccountInfo();
+
+        onSignInRequired();
+    }
+
+    @Override
+    protected void onSignedOut() {
+        clearAccountInfo();
+
+        onSignInRequired();
+    }
+
+    protected void clearAccountInfo()
+    {
+        PreferenceUtils.setAccountName(this, null);
+        PreferenceUtils.setUserId(this, null);
+        PreferenceUtils.setSentRegistrationToBackend(this, false);
+    }
+
     @Override
     public void showProgressDialog(String text) {
-        // TODO
+        // TODO: replace with pogress bar
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(text);
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.show();
     }
 
     @Override
     public void hideProgressDialog() {
         // TODO
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.hide();
+        }
     }
 
 
@@ -176,7 +219,8 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-                                    ApiService.deleteAccount(activity);
+                                    activity.deleteAccount();
+
                                 }
                             })
                     .setNegativeButton(R.string.cancel,
@@ -188,6 +232,8 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
                             }).create();
         }
     }
+
+
 
 
 }

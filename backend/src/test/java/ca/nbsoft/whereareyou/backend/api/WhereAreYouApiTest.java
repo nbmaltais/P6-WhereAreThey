@@ -307,7 +307,7 @@ public class WhereAreYouApiTest {
     public void testConfirmContactRequest() throws UnauthorizedException, IOException, InvalidUserException {
         setupProfilesWithPendingRequest();
 
-        WhereAreYouApi.StatusResult statusResult = whereAreYouApi.confirmContactRequest( otherUser, user.getUserId() );
+        WhereAreYouApi.StatusResult statusResult = whereAreYouApi.confirmContactRequest( otherUser, user.getUserId(), true );
 
         assertEquals(statusResult.getResultCode(), StatusCode.RESULT_OK);
 
@@ -328,7 +328,7 @@ public class WhereAreYouApiTest {
     public void testConfirmContactRequest_noPending() throws UnauthorizedException, IOException, InvalidUserException {
         setupProfiles();
 
-        WhereAreYouApi.StatusResult statusResult = whereAreYouApi.confirmContactRequest( otherUser, user.getUserId() );
+        WhereAreYouApi.StatusResult statusResult = whereAreYouApi.confirmContactRequest( otherUser, user.getUserId(), true );
 
         assertEquals(statusResult.getResultCode(), StatusCode.RESULT_NO_PENDING_REQUEST);
 
@@ -346,7 +346,7 @@ public class WhereAreYouApiTest {
     }
 
     @Test
-    public void testRemoveContact() throws UnauthorizedException, InvalidUserException {
+    public void testRemoveContact() throws UnauthorizedException, InvalidUserException, IOException {
         setupProfilesWithContacts();
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.removeContact(user, otherUser.getUserId());
@@ -365,7 +365,7 @@ public class WhereAreYouApiTest {
     }
 
     @Test
-    public void testRemoveContact_pending() throws UnauthorizedException, InvalidUserException {
+    public void testRemoveContact_pending() throws UnauthorizedException, InvalidUserException, IOException {
         setupProfilesWithPendingRequest();
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.removeContact(user, otherUser.getUserId());
@@ -383,7 +383,7 @@ public class WhereAreYouApiTest {
         assertFalse(profile2.containsPendingContactRequestUserId(profile1.getUserId()));
     }
     @Test
-    public void testRemoveContact_notInList() throws UnauthorizedException, InvalidUserException {
+    public void testRemoveContact_notInList() throws UnauthorizedException, InvalidUserException, IOException {
         setupProfiles();
 
         WhereAreYouApi.StatusResult statusResult = whereAreYouApi.removeContact( user, otherUser.getUserId() );
