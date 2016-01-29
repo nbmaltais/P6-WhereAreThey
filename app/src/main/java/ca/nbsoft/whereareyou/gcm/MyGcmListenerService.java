@@ -51,6 +51,7 @@ public class MyGcmListenerService extends GcmListenerService {
     public void onCreate() {
         super.onCreate();
         mAccountName = PreferenceUtils.getAccountName(this);
+        mNotificationSound = PreferenceUtils.getPlayNotificationSound(this);
     }
 
     @Override

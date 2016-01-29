@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import ca.nbsoft.whereareyou.gcm.MyGcmListenerService;
+
 /**
  * Created by Nicolas on 2015-11-29.
  */
@@ -12,6 +14,7 @@ public class PreferenceUtils {
     static final String ACCOUNT_NAME = "ACCOUNT_NAME";
     static final String SENT_TOKEN_TO_SERVER = "SENT_TOKEN_TO_SERVER";
     private static final String USER_ID = "USER_ID";
+    private static final String NOTIFICATION_SOUND = "notifications_sound";
 
     static public void setSentRegistrationToBackend( Context ctx, boolean sent)
     {
@@ -50,5 +53,10 @@ public class PreferenceUtils {
     {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         return sharedPreferences.getString(USER_ID,null);
+    }
+
+    public static boolean getPlayNotificationSound(Context ctx) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return sharedPreferences.getBoolean(NOTIFICATION_SOUND, false);
     }
 }

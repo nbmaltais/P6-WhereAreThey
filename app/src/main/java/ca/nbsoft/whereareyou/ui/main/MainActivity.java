@@ -30,6 +30,7 @@ import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
 import ca.nbsoft.whereareyou.ui.BaseActivity;
 import ca.nbsoft.whereareyou.ui.ErrorMessages;
 import ca.nbsoft.whereareyou.ui.login.LoginActivity;
+import ca.nbsoft.whereareyou.ui.settings.SettingsActivity;
 
 public class MainActivity extends BaseActivity  implements AddContactHelper.Client{
 
@@ -144,6 +145,13 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
         else if(item.getItemId()==R.id.action_sign_out)
         {
             signOut();
+            return true;
+        }
+        else if(item.getItemId()==R.id.action_settings)
+        {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
