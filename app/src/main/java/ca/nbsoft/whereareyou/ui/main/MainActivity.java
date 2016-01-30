@@ -1,18 +1,15 @@
 package ca.nbsoft.whereareyou.ui.main;
 
 import android.app.Dialog;
-import android.app.LoaderManager;
+
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.CursorLoader;
+
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
+
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.design.widget.FloatingActionButton;
+
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +18,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -37,7 +37,14 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
     private static final int PICK_CONTACT_REQUEST = 1123;
     private static final String TAG = MainActivity.class.getSimpleName();
     @Bind(R.id.toolbar) Toolbar mToolbar;
-    @Bind(R.id.fab) FloatingActionButton mFab;
+    //@Bind(R.id.fab) FloatingActionButton mFab;
+    @Bind(R.id.fab_menu)
+    FloatingActionsMenu mFabMenu;
+    @Bind(R.id.fab_pick_contact)
+    FloatingActionButton mFabPick;
+    @Bind(R.id.fab_add_from_email)
+    FloatingActionButton mFabAdd;
+
     private ProgressDialog mProgressDialog; // TODO: replace by progress bar
     AddContactHelper mAddContactHelper;
 
@@ -79,7 +86,7 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
         }
 
 
-        mFab.setOnClickListener(new View.OnClickListener() {
+        mFabPick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // TODO: ask permission, if refused, got to AddContactActivity, else
@@ -88,6 +95,17 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
                 //AddContactActivity.startActivity(MainActivity.this);
 
                 mAddContactHelper.pickContact();
+                mFabMenu.collapse();
+
+            }
+        });
+
+        mFabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: ask permission, if refused, got to AddContactActivity, else
+                AddContactActivity.startActivity(MainActivity.this);
+                mFabMenu.collapse();
             }
         });
 
@@ -125,7 +143,6 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
         inflater.inflate(R.menu.main_menu, menu);
 
         return true;
-
 
     }
 
