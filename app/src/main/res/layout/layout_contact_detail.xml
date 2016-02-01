@@ -11,7 +11,7 @@
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/app_bar_height"
+        android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         android:transitionGroup="true"
         android:elevation="@dimen/appbar_elevation"
@@ -20,15 +20,17 @@
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <ImageView
+            <ca.nbsoft.whereareyou.ui.views.FixedRatioImageView
                 android:id="@+id/photo_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                app:layout_collapseMode="parallax"
+                app:ratio="1"
                 android:transitionName="@string/transition_user_photo"/>
 
             <android.support.v7.widget.Toolbar

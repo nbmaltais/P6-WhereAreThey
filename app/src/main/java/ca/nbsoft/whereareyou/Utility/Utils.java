@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -36,6 +37,19 @@ public class Utils {
     public static void cancelableActionSnackbar(View v, String text, final Runnable action)
     {
         Snackbar snackbar = Snackbar.make(v, text, Snackbar.LENGTH_SHORT);
+        doCancelableActionSnackbar(snackbar,action);
+
+    }
+
+    public static void cancelableActionSnackbar(View v, @StringRes int string, final Runnable action)
+    {
+        Snackbar snackbar = Snackbar.make(v, string, Snackbar.LENGTH_SHORT);
+        doCancelableActionSnackbar(snackbar,action);
+
+    }
+
+    static private void doCancelableActionSnackbar( Snackbar snackbar,   final Runnable action)
+    {
         snackbar.setAction(R.string.contact_detail_cancel, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,6 +67,5 @@ public class Utils {
         });
 
         snackbar.show();
-
     }
 }

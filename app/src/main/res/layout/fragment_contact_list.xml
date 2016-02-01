@@ -44,7 +44,7 @@
         app:fab_addButtonColorPressed="@color/colorAccent"
         app:fab_addButtonPlusIconColor="@android:color/white"
         app:fab_labelsPosition="left"
-        app:layout_behavior="ca.nbsoft.whereareyou.widget.FabSnackbarBehavior"
+        app:layout_behavior="ca.nbsoft.whereareyou.ui.views.FabSnackbarBehavior"
         app:fab_labelStyle="@style/fab_menu_labels_style"
         >
 

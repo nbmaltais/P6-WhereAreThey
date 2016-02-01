@@ -44,6 +44,7 @@ import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 import ca.nbsoft.whereareyou.provider.message.MessageCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageSelection;
+import ca.nbsoft.whereareyou.ui.CancelableBackendActions;
 import ca.nbsoft.whereareyou.ui.ErrorMessages;
 import ca.nbsoft.whereareyou.ui.map.MapsActivity;
 
@@ -204,15 +205,9 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
     @OnClick(R.id.request_location_button)
     void onRequestLocationClicked()
     {
-        String text = getContext().getString(R.string.contact_detail_request_position_confirmation);
 
-        Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
-            @Override
-            public void run() {
-                ApiService.requestContactLocation(getContext(), mContact.getUserId(), getMessageAndClearEditText());
-            }
-        });
-
+        CancelableBackendActions.requestLocation(
+                getActivity(),mContact.getUserId(), getMessageAndClearEditText());
 
     }
 
@@ -220,15 +215,9 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
     @OnClick(R.id.send_location_button)
     void onSendLocationClicked()
     {
-        String text = getContext().getString(R.string.contact_detail_send_position_confirmation);
 
-        Utils.cancelableActionSnackbar(getView(), text, new Runnable() {
-            @Override
-            public void run() {
-                ApiService.sendLocation(getContext(), mContact.getUserId(), getMessageAndClearEditText());
-            }
-        });
-
+        CancelableBackendActions.sendLocation(
+                getActivity(), mContact.getUserId(), getMessageAndClearEditText());
 
     }
 
@@ -236,8 +225,6 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
 
     private void deleteContact()
     {
-        // TODO: use dialog to ask if user is sure
-
         ApiService.deleteContact(getContext(), mContact.getUserId());
                 //Snackbar.make(mTopContainer,"Deleted " + mContactName, Snackbar.LENGTH_SHORT).show();
 

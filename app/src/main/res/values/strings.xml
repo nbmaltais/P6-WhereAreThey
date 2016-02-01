@@ -73,4 +73,6 @@
 
     <string name="fab_label_pick">Pick from address book</string>
     <string name="fab_label_add">Add from email</string>
+    <string name="confirm_contact_confirmation">Accepting contact request</string>
+    <string name="refuse_contact_confirmation">Refused contact request</string>
 </resources>

@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,13 +22,13 @@ import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
  */
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
 
-    private final OnPendingContactClickCallback mPengingItemClickCallback;
+    private final OnContactRequestClickCallback mRequestItemClickCallback;
     private final OnContactClickCallback  mItemClickCallback;
     private ContactCursor mCursor;
     private ContactCursor mWaitingForConfirmationCursor;
 
     private static final int VIEW_CONTACT=1;
-    private static final int VIEW_PENDING_CONTACT=2;
+    private static final int VIEW_CONTACT_REQUEST =2;
     private static final int VIEW_HEADER=3;
 
     interface OnContactClickCallback
@@ -35,7 +36,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         void onContactItemClicked(String userId, View transitionView);
     }
 
-    interface OnPendingContactClickCallback
+    interface OnContactRequestClickCallback
     {
         void onContactItemClicked(String userId, View transitionView);
         void onAcceptRequest(String userId);
@@ -44,11 +45,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
 
 
-    public ContactAdapter(OnContactClickCallback callback, OnPendingContactClickCallback pendingContactClickCallback)
+    public ContactAdapter(OnContactClickCallback callback, OnContactRequestClickCallback pendingContactClickCallback)
     {
         super();
         mItemClickCallback=callback;
-        mPengingItemClickCallback=pendingContactClickCallback;
+        mRequestItemClickCallback =pendingContactClickCallback;
     }
 
     public void setContactCursor( ContactCursor c )
@@ -69,10 +70,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             ViewHolder vh = new ContactViewHolder(v,mItemClickCallback);
             return vh;
         }
-        else if(viewType == VIEW_PENDING_CONTACT)
+        else if(viewType == VIEW_CONTACT_REQUEST)
         {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact, parent, false);
-            ViewHolder vh = new PendingContactViewHolder(v,mPengingItemClickCallback);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_request, parent, false);
+            ViewHolder vh = new ContactRequestViewHolder(v, mRequestItemClickCallback);
             return vh;
         }
         else if(viewType == VIEW_HEADER)
@@ -129,7 +130,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             position-=1;
 
             if(position < mWaitingForConfirmationCursor.getCount())
-                return VIEW_PENDING_CONTACT;
+                return VIEW_CONTACT_REQUEST;
 
             position-=mWaitingForConfirmationCursor.getCount();
         }
@@ -251,10 +252,15 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     }
 
-    static class PendingContactViewHolder extends BaseContactViewHolder {
-        OnPendingContactClickCallback mCallback;
+    static class ContactRequestViewHolder extends BaseContactViewHolder {
+        OnContactRequestClickCallback mCallback;
 
-        public PendingContactViewHolder(View itemView, OnPendingContactClickCallback itemClickCallback) {
+        @Bind(R.id.button_accept)
+        ImageButton mAcceptButton;
+        @Bind(R.id.button_reject)
+        ImageButton mRejectButton;
+
+        public ContactRequestViewHolder(View itemView, OnContactRequestClickCallback itemClickCallback) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             mCallback = itemClickCallback;
@@ -264,11 +270,18 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         public void bind(ContactCursor cursor) {
             super.bind(cursor);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            mAcceptButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mCallback != null)
                         mCallback.onAcceptRequest(mUserId);
+                }
+            });
+            mRejectButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mCallback != null)
+                        mCallback.onRefuseRequest(mUserId);
                 }
             });
         }

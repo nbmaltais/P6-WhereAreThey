@@ -27,6 +27,7 @@ import ca.nbsoft.whereareyou.common.ContactStatus;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
+import ca.nbsoft.whereareyou.ui.CancelableBackendActions;
 import ca.nbsoft.whereareyou.ui.contact.ContactDetailActivity;
 
 /**
@@ -52,7 +53,7 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
         }
     };
 
-    ContactAdapter.OnPendingContactClickCallback mPendingContactClickHandler = new ContactAdapter.OnPendingContactClickCallback() {
+    ContactAdapter.OnContactRequestClickCallback mPendingContactClickHandler = new ContactAdapter.OnContactRequestClickCallback() {
         @Override
         public void onContactItemClicked(String userId, View transitionView) {
 
@@ -60,12 +61,12 @@ public class ContactListFragment extends Fragment implements LoaderCallbacks<Cur
 
         @Override
         public void onAcceptRequest(String userId) {
-            ApiService.confirmContactRequest(getContext(),userId,true);
+            CancelableBackendActions.confirmContactRequest(getActivity(),userId);
         }
 
         @Override
         public void onRefuseRequest(String userId) {
-            ApiService.confirmContactRequest(getContext(),userId,false);
+            CancelableBackendActions.refuseContactRequest(getActivity(),userId);
         }
     };
 

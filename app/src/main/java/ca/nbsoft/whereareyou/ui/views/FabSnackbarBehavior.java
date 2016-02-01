@@ -1,4 +1,4 @@
-package ca.nbsoft.whereareyou.widget;
+package ca.nbsoft.whereareyou.ui.views;
 
 import android.animation.ValueAnimator;
 import android.content.Context;

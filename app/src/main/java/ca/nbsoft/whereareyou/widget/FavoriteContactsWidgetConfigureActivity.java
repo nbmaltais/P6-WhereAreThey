@@ -24,6 +24,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.Utility.PreferenceUtils;
+import ca.nbsoft.whereareyou.common.ContactStatus;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
@@ -160,7 +161,7 @@ public class FavoriteContactsWidgetConfigureActivity extends Activity implements
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         ContactSelection sel = new ContactSelection();
 
-        sel.account(mAccountName);
+        sel.account(mAccountName).and().status(ContactStatus.NONE);
         sel.orderByName();
 
         String[] projection = {ContactColumns.USERID,ContactColumns.NAME};
