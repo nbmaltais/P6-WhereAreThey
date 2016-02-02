@@ -154,11 +154,6 @@ public class MainActivity extends BaseActivity  implements AddContactHelper.Clie
             askDeleteAccount();
             return true;
         }
-        else if(item.getItemId()==R.id.action_add_contact)
-        {
-            AddContactActivity.startActivity(this);
-            return true;
-        }
         else if(item.getItemId()==R.id.action_sign_out)
         {
             signOut();

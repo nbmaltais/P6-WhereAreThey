@@ -9,24 +9,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/widget_configure_text"/>
+        android:text="@string/widget_configure_text"
+        />
 
     <Spinner
         android:id="@+id/contact1"
         android:layout_width="match_parent"
         android:layout_height="?attr/listPreferredItemHeight"
+        android:contentDescription="@string/widget_setup_contact_spinner1_description"
         />
 
     <Spinner
         android:id="@+id/contact2"
         android:layout_width="match_parent"
         android:layout_height="?attr/listPreferredItemHeight"
+        android:contentDescription="@string/widget_setup_contact_spinner2_description"
         />
 
     <Spinner
         android:id="@+id/contact3"
         android:layout_width="match_parent"
         android:layout_height="?attr/listPreferredItemHeight"
+        android:contentDescription="@string/widget_setup_contact_spinner3_description"
         />
 
     <Button
@@ -34,6 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/add_widget"/>
+        android:text="@string/add_widget"
+        android:contentDescription="@string/widget_setup_add_button_description"/>
 
 </LinearLayout>

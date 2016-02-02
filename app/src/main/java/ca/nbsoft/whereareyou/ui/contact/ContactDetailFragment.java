@@ -128,14 +128,16 @@ public class ContactDetailFragment extends Fragment implements LoaderManager.Loa
             }
         });
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || withTransition==false) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || withTransition==false || savedInstanceState!=null) {
+            // The map must be invisible for transition to work, else there is a glitch.
+            // If there is no transition, show the map right now
             mAdapter.showMap();
         }
 
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        // Adjust the padding of the coordinato layout main content so that we
+        // Adjust the padding of the coordinator layout main content so that we
         // can see the last message. If we don't do that, the message is hidden by the compose layout
         final ViewTreeObserver vto = view.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {

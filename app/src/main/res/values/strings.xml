@@ -75,4 +75,23 @@
     <string name="fab_label_add">Add from email</string>
     <string name="confirm_contact_confirmation">Accepting contact request</string>
     <string name="refuse_contact_confirmation">Refused contact request</string>
+    <string name="add_contact_activity_email_view_description">Enter email address here</string>
+    <string name="add_contact_activity_add_button_description">Add contact with provided email button</string>
+    <string name="add_activity_pick_button_description">Select a contact from the address book.</string>
+    <string name="message_edittext_description">Message</string>
+    <string name="request_location_button_description">Ask contact location button</string>
+    <string name="send_location_button_description">Send location to contact button</string>
+    <string name="widget_contact1_default_text">Contact 1</string>
+    <string name="widget_contact2_default_text">Contact 2</string>
+    <string name="widget_contact3_default_text">Contact 3</string>
+    <string name="widget_contact_button_description">Open contact %1$s</string>
+    <string name="widget_setup_contact_spinner1_description">First favorite contact</string>
+    <string name="widget_setup_contact_spinner2_description">Second favorite contact</string>
+    <string name="widget_setup_contact_spinner3_description">Third favorite contact</string>
+    <string name="widget_setup_add_button_description">Create widget button</string>
+    <string name="fragment_contact_contact_image_description">Image of the contact</string>
+    <string name="fragment_contact_fab_description">Add a new contact</string>
+    <string name="fragment_contact_fab_pick_description">Pick a contact from address book</string>
+    <string name="fragment_contact_fab_add_description">Add a contact by email</string>
+    <string name="item_contact_image_description">Image of the contact</string>
 </resources>

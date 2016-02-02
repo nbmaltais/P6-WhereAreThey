@@ -30,6 +30,7 @@
         android:name="ca.nbsoft.whereareyou.ui.ContactListFragment"
         android:paddingTop="16dp"
         tools:listitem="@layout/item_contact"
+        android:contentDescription="@string/fragment_contact_contact_image_description"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         />
 
@@ -46,6 +47,7 @@
         app:fab_labelsPosition="left"
         app:layout_behavior="ca.nbsoft.whereareyou.ui.views.FabSnackbarBehavior"
         app:fab_labelStyle="@style/fab_menu_labels_style"
+        android:contentDescription="@string/fragment_contact_fab_description"
         >
 
         <com.getbase.floatingactionbutton.FloatingActionButton
@@ -56,7 +58,8 @@
             app:fab_title="@string/fab_label_pick"
             app:fab_icon="@drawable/ic_person_add_24dp"
             app:fab_size="mini"
-            app:fab_colorPressed="@color/colorAccent"/>
+            app:fab_colorPressed="@color/colorAccent"
+            android:contentDescription="@string/fragment_contact_fab_pick_description"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_add_from_email"
@@ -66,7 +69,8 @@
             app:fab_size="mini"
             app:fab_title="@string/fab_label_add"
             app:fab_icon="@drawable/ic_person_add_24dp"
-            app:fab_colorPressed="@color/colorAccent"/>
+            app:fab_colorPressed="@color/colorAccent"
+            android:contentDescription="@string/fragment_contact_fab_add_description"/>
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 </android.support.design.widget.CoordinatorLayout>

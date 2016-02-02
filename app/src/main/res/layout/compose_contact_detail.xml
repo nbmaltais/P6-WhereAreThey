@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/contact_detail_message_hint"
+        android:contentDescription="@string/message_edittext_description"
         />
 
     <LinearLayout
@@ -26,13 +27,15 @@
             android:id="@+id/request_location_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/contact_detail_request_location"/>
+            android:text="@string/contact_detail_request_location"
+            android:contentDescription="@string/request_location_button_description"/>
 
         <Button
             android:id="@+id/send_location_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/contact_detail_send_location"/>
+            android:text="@string/contact_detail_send_location"
+            android:contentDescription="@string/send_location_button_description"/>
     </LinearLayout>
 
 </LinearLayout>

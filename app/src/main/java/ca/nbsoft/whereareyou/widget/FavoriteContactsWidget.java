@@ -53,9 +53,13 @@ public class FavoriteContactsWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.appwidget_contact2,name2);
         views.setTextViewText(R.id.appwidget_contact3, name3);
 
-        views.setViewVisibility(R.id.appwidget_contact1, userId1!= null ? View.VISIBLE : View.GONE);
+        views.setViewVisibility(R.id.appwidget_contact1, userId1 != null ? View.VISIBLE : View.GONE);
         views.setViewVisibility(R.id.appwidget_contact2, userId2!=null ? View.VISIBLE : View.GONE);
         views.setViewVisibility(R.id.appwidget_contact3, userId3!=null ? View.VISIBLE : View.GONE);
+
+        views.setContentDescription(R.id.appwidget_contact1, context.getString(R.string.widget_contact_button_description, name1));
+        views.setContentDescription(R.id.appwidget_contact2, context.getString(R.string.widget_contact_button_description,name2));
+        views.setContentDescription(R.id.appwidget_contact3, context.getString(R.string.widget_contact_button_description,name3));
 
         if(userId1!=null) {
             views.setOnClickPendingIntent(R.id.appwidget_contact1, getOnClickPendingIntent(context,11,userId1));
