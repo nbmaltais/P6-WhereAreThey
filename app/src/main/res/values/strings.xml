@@ -94,4 +94,10 @@
     <string name="fragment_contact_fab_pick_description">Pick a contact from address book</string>
     <string name="fragment_contact_fab_add_description">Add a contact by email</string>
     <string name="item_contact_image_description">Image of the contact</string>
+    <string name="contact_detail_map_description">%1$s is at %2$f.2 degrees of latitude and %3$f.2 degrees of longitude</string>
+    <string name="contact_detailed_message_description">%1$s %2$s</string>
+    <string name="contact_item_name_description">Contact name is %1$s</string>
+    <string name="contact_item_email_description">Contact email is %1$s</string>
+    <string name="contact_request_item_accept_button_description">Accept contact request from %1$s</string>
+    <string name="contact_request_item_reject_button_description">Reject contact request from %1$s</string>
 </resources>

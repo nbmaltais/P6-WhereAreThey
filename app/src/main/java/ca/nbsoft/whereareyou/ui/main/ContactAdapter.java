@@ -1,5 +1,6 @@
 package ca.nbsoft.whereareyou.ui.main;
 
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.StringRes;
 import android.support.v7.widget.RecyclerView;
@@ -209,9 +210,15 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         }
 
         public void bind(ContactCursor cursor) {
+
+            Context ctx = itemView.getContext();
+
             mUserId = cursor.getUserid();
             mEmailView.setText(cursor.getEmail());
             mNameView.setText(cursor.getName());
+
+            mNameView.setContentDescription(ctx.getString(R.string.contact_item_name_description, cursor.getName()));
+            mEmailView.setContentDescription(ctx.getString(R.string.contact_item_email_description,cursor.getEmail()));
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mPhotoView.setTransitionName("photo_user_" + mUserId);
@@ -270,6 +277,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         public void bind(ContactCursor cursor) {
             super.bind(cursor);
 
+            Context ctx = itemView.getContext();
+
             mAcceptButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -284,6 +293,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                         mCallback.onRefuseRequest(mUserId);
                 }
             });
+
+            mAcceptButton.setContentDescription(
+                    ctx.getString(R.string.contact_request_item_accept_button_description, cursor.getName()));
+            mRejectButton.setContentDescription(
+                    ctx.getString(R.string.contact_request_item_reject_button_description,cursor.getName()));
         }
     }
 

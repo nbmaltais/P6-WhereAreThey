@@ -1,5 +1,6 @@
 package ca.nbsoft.whereareyou.ui.contact;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
@@ -58,17 +59,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         public void bind(String displayName, MessageCursor cursor)
         {
+            Context ctx = itemView.getContext();
+
             mContactName = displayName;
             mMessageView.setText(cursor.getContent());
+            String author;
+            String messageContent =  cursor.getContent();
             if( cursor.getUserissender())
             {
-                mAuthorView.setText(R.string.conversation_item_written_by_user);
+                author = ctx.getString(R.string.conversation_item_written_by_user);
             }
             else
             {
-                String text = itemView.getContext().getString(R.string.conversation_item_written_by_contact,mContactName);
-                mAuthorView.setText(text);
+                author = ctx.getString(R.string.conversation_item_written_by_contact, mContactName);
             }
+
+            mAuthorView.setText(author);
+            mMessageView.setText(cursor.getContent());
+
+
+            String contentDescription = itemView.getResources().getString(R.string.contact_detailed_message_description,
+                    author, messageContent );
+            itemView.setContentDescription(contentDescription);
         }
 
 
@@ -91,7 +103,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         void bind(Contact contact)
         {
-            mMapHelper.addContactMarker(contact,true);
+            mMapHelper.addContactMarker(contact, true);
+            String descr = itemView.getResources().getString(R.string.contact_detail_map_description,
+                    contact.getDisplayName(),contact.getLatitude(),contact.getLongitude());
+            mMapView.setContentDescription( descr );
             if(mMapVisible ) {
                 if(mMapView.getVisibility() != View.VISIBLE) {
                     mMapView.setVisibility(View.VISIBLE);
