@@ -4,8 +4,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 import ca.nbsoft.whereareyou.provider.WhereRUProvider;
-import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
-import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 
 /**
  * A contact.

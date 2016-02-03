@@ -1,7 +1,6 @@
 package ca.nbsoft.whereareyou.ui;
 
 import android.app.Activity;
-import android.content.Context;
 
 import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.R;

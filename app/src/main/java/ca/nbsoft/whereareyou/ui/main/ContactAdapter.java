@@ -145,7 +145,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 return VIEW_CONTACT;
         }
 
-        assert(false);
         return -1;
 
     }

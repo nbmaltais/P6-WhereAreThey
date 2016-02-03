@@ -2,8 +2,6 @@ package ca.nbsoft.whereareyou.provider.contact;
 
 import ca.nbsoft.whereareyou.provider.base.BaseModel;
 
-import java.util.Date;
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 

@@ -6,7 +6,6 @@ import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.contact.ContactSelection;
 import ca.nbsoft.whereareyou.provider.message.MessageContentValues;
-import ca.nbsoft.whereareyou.provider.message.MessageSelection;
 
 /**
  * Created by Nicolas on 2016-01-12.

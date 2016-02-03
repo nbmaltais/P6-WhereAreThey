@@ -2,7 +2,7 @@
     <string name="app_name">WhereAreYou</string>
     <string name="title_activity_main">WhereAreThey</string>
     <string name="login_button">Login</string>
-    <string name="login.error.registration_failed">An eror occured while signing up.</string>
+    <string name="login.error.registration_failed">An error occurred while signing up.</string>
     <string name="login.message.registration_in_progress">Creating account.</string>
 
     <string name="title_activity_maps">Map</string>
@@ -100,4 +100,5 @@
     <string name="contact_item_email_description">Contact email is %1$s</string>
     <string name="contact_request_item_accept_button_description">Accept contact request from %1$s</string>
     <string name="contact_request_item_reject_button_description">Reject contact request from %1$s</string>
+    <string name="signin_button_description">Sign in button.</string>
 </resources>

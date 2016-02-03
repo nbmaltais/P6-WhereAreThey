@@ -11,8 +11,6 @@ import android.content.OperationApplicationException;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -22,7 +20,6 @@ import android.support.annotation.StringDef;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -623,7 +620,7 @@ public class ApiService extends IntentService implements GoogleApiClient.Connect
         getContentResolver().delete(ContactColumns.CONTENT_URI, null, null);
     }
 
-    private Result handleSendLocation(@NonNull String userId, @NonNull String message) throws IOException, InterruptedException {
+    private Result handleSendLocation(@NonNull String userId,  String message) throws IOException, InterruptedException {
         Log.d(TAG, "Sending location to " + userId);
 
 

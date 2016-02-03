@@ -1,7 +1,5 @@
 package ca.nbsoft.whereareyou.provider.contact;
 
-import java.util.Date;
-
 import android.content.Context;
 import android.content.ContentResolver;
 import android.database.Cursor;

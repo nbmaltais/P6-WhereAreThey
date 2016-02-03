@@ -10,14 +10,9 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.ArraySet;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Spinner;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

@@ -5,7 +5,6 @@ import android.provider.BaseColumns;
 
 import ca.nbsoft.whereareyou.provider.WhereRUProvider;
 import ca.nbsoft.whereareyou.provider.contact.ContactColumns;
-import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 
 /**
  * Columns for the {@code message} table.

@@ -39,7 +39,6 @@ import ca.nbsoft.whereareyou.ApiService;
 import ca.nbsoft.whereareyou.Contact;
 import ca.nbsoft.whereareyou.R;
 
-import ca.nbsoft.whereareyou.Utility.Utils;
 import ca.nbsoft.whereareyou.provider.contact.ContactCursor;
 import ca.nbsoft.whereareyou.provider.message.MessageColumns;
 import ca.nbsoft.whereareyou.provider.message.MessageCursor;

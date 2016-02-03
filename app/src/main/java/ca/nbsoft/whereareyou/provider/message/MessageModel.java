@@ -2,10 +2,7 @@ package ca.nbsoft.whereareyou.provider.message;
 
 import ca.nbsoft.whereareyou.provider.base.BaseModel;
 
-import java.util.Date;
-
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 /**
  * Data model for the {@code message} table.
