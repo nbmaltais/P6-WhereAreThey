@@ -71,7 +71,6 @@
             </intent-filter>
         </service>
 
-
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/title_activity_main"
@@ -142,6 +141,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ca.nbsoft.whereareyou.ui.main.MainActivity"/>
         </activity>
+
+        <service
+            android:name=".LocationRequestService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

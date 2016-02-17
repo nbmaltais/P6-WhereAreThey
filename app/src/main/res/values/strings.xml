@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WhereAreYou</string>
+    <string name="app_name">WhereAreThey</string>
     <string name="title_activity_main">WhereAreThey</string>
     <string name="login_button">Login</string>
     <string name="login.error.registration_failed">An error occurred while signing up.</string>

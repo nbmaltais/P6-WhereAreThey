@@ -30,4 +30,9 @@
         <item name="android:textColor">#fff</item>
     </style>
 
+    <style name="widget_favorite_item">
+        <item name="android:textSize">@dimen/widget_text_size</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item >
+    </style>
+
 </resources>

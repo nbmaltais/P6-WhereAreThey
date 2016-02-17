@@ -2,41 +2,42 @@
               xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorPrimary"
                 android:padding="@dimen/widget_margin"
+                android:layout_margin="@dimen/widget_layout_margin"
                 android:orientation="vertical">
 
     <TextView
-    android:id="@+id/appwidget_contact1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/widget_layout_margin"
-    android:background="?android:attr/selectableItemBackground"
-    android:text="@string/widget_contact1_default_text"
-    android:textColor="#ffffff"
-    android:textSize="@dimen/widget_text_size"
-    android:textStyle="bold|italic"/>
+        android:id="@+id/appwidget_header"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/listPreferredItemHeight"
+        android:background="@color/colorPrimary"
+        android:text="@string/app_name"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/widget_text_size"
+        android:gravity="center"
+        android:textStyle="bold|italic"/>
+
+    <TextView
+        android:id="@+id/appwidget_contact1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:theme="@style/widget_favorite_item"
+        android:text="@string/widget_contact1_default_text"
+    />
 
     <TextView
         android:id="@+id/appwidget_contact2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/widget_layout_margin"
-        android:background="?android:attr/selectableItemBackground"
+        android:theme="@style/widget_favorite_item"
         android:text="@string/widget_contact2_default_text"
-        android:textColor="#ffffff"
-        android:textSize="@dimen/widget_text_size"
-        android:textStyle="bold|italic"/>
+    />
 
     <TextView
         android:id="@+id/appwidget_contact3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/widget_layout_margin"
-        android:background="?android:attr/selectableItemBackground"
         android:text="@string/widget_contact3_default_text"
-        android:textColor="#ffffff"
-        android:textSize="@dimen/widget_text_size"
-        android:textStyle="bold|italic"/>
+        android:theme="@style/widget_favorite_item"/>
 
 </LinearLayout>
