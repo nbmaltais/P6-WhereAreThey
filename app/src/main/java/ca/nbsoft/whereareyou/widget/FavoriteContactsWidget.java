@@ -15,6 +15,7 @@ import android.widget.RemoteViews;
 
 import ca.nbsoft.whereareyou.R;
 import ca.nbsoft.whereareyou.ui.contact.ContactDetailActivity;
+import ca.nbsoft.whereareyou.ui.main.MainActivity;
 
 /**
  * Implementation of App Widget functionality.
@@ -49,17 +50,20 @@ public class FavoriteContactsWidget extends AppWidgetProvider {
         String userId3 = sharedPreferences.getString(FavoriteContactsWidgetConfigureActivity.userIdKey(2,appWidgetId), null);
 
 
-        views.setTextViewText(R.id.appwidget_contact1,name1);
-        views.setTextViewText(R.id.appwidget_contact2,name2);
+        views.setTextViewText(R.id.appwidget_contact1, name1);
+        views.setTextViewText(R.id.appwidget_contact2, name2);
         views.setTextViewText(R.id.appwidget_contact3, name3);
 
         views.setViewVisibility(R.id.appwidget_contact1, userId1 != null ? View.VISIBLE : View.GONE);
-        views.setViewVisibility(R.id.appwidget_contact2, userId2!=null ? View.VISIBLE : View.GONE);
-        views.setViewVisibility(R.id.appwidget_contact3, userId3!=null ? View.VISIBLE : View.GONE);
+        views.setViewVisibility(R.id.appwidget_contact2, userId2 != null ? View.VISIBLE : View.GONE);
+        views.setViewVisibility(R.id.appwidget_contact3, userId3 != null ? View.VISIBLE : View.GONE);
 
         views.setContentDescription(R.id.appwidget_contact1, context.getString(R.string.widget_contact_button_description, name1));
-        views.setContentDescription(R.id.appwidget_contact2, context.getString(R.string.widget_contact_button_description,name2));
-        views.setContentDescription(R.id.appwidget_contact3, context.getString(R.string.widget_contact_button_description,name3));
+        views.setContentDescription(R.id.appwidget_contact2, context.getString(R.string.widget_contact_button_description, name2));
+        views.setContentDescription(R.id.appwidget_contact3, context.getString(R.string.widget_contact_button_description, name3));
+
+        Intent mainIntent = new Intent(context, MainActivity.class);
+        views.setOnClickPendingIntent(R.id.appwidget_header, PendingIntent.getActivity(context, 0, mainIntent,0));
 
         if(userId1!=null) {
             views.setOnClickPendingIntent(R.id.appwidget_contact1, getOnClickPendingIntent(context,11,userId1));
