@@ -52,7 +52,16 @@ public class UserBot {
     public void handleRequestContactLocation(String userId, String message) {
         try {
             Location loc = randomLocation();
-            mApi.sendLocation(mUser, userId, loc, "Your message was: " + message);
+            String reply;
+            if(message == null)
+            {
+                reply = "You never write anything... :(";
+            }
+            else
+            {
+                reply = "Why did you wrote me " + message + "???";
+            }
+            mApi.sendLocation(mUser, userId, loc, "Your message was: " + reply);
         } catch (Exception e) {
             log.info("handleRequestContactLocation Failed, e  = " + e.getMessage());
         }
@@ -79,6 +88,7 @@ public class UserBot {
         sLocations.add(new Location(40.7142700,-74.0059700)); // New york
         sLocations.add(new Location(48.8534100,2.3488000)); // Paris
         sLocations.add(new Location(35.6895000,139.6917100 )); // Tokyo
+        sLocations.add(new Location(21.315603, -157.858093)); // Honolulu
     }
 
     private Location randomLocation() {
