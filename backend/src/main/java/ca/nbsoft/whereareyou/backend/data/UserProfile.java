@@ -27,9 +27,15 @@ public class UserProfile {
 
     private String photoUrl;
 
+    public boolean isBot() {
+        return this.isBot;
+    }
 
+    public void setIsBot(boolean isBot) {
+        this.isBot = isBot;
+    }
 
-
+    private boolean isBot;
 
     // Contacts
     private List<String> contactsUserId = new ArrayList<>(0);
@@ -49,11 +55,13 @@ public class UserProfile {
     private List<String> waitingForConfirmationUserId = new ArrayList<>(0);
 
     public UserProfile() {
+        isBot=false;
     }
 
     public UserProfile(User user) {
         userId = user.getUserId();
         email = user.getEmail();
+        isBot=false;
     }
 
     public String getDisplayName() {

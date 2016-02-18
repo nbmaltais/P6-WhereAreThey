@@ -61,8 +61,7 @@ import static ca.nbsoft.whereareyou.backend.OfyService.ofy;
 public class WhereAreYouApi {
 
     private static final Logger log = Logger.getLogger(WhereAreYouApi.class.getName());
-
-
+    private static final boolean SUPPORT_BOTS = true;
 
 
     public static class BooleanResult {
@@ -311,6 +310,13 @@ public class WhereAreYouApi {
 
         GcmMessages.sendLocationRequest(userProfile, contactUserProfile, message);
 
+
+        if(contactUserProfile.isBot())
+        {
+            UserBot bot = new UserBot(contactUserProfile,this);
+            bot.handleRequestContactLocation(userProfile.getUserId(), message);
+        }
+
         return noErrorStatusResult();
     }
 
@@ -376,6 +382,12 @@ public class WhereAreYouApi {
         }
 
         GcmMessages.sendLocation(userProfile, contactProfile, location, message);
+
+        if(contactProfile.isBot())
+        {
+            UserBot bot = new UserBot(contactProfile,this);
+            bot.handleSendLocation(userProfile.getUserId(), message);
+        }
 
         return noErrorStatusResult();
     }
@@ -443,6 +455,12 @@ public class WhereAreYouApi {
 
         GcmMessages.sendContactRequest(userProfile, contactProfile);
         GcmMessages.notifyContactListModified(userProfile);
+
+        if(contactProfile.isBot())
+        {
+            UserBot bot = new UserBot(contactProfile,this);
+            bot.handleContactRequest(userProfile.getUserId());
+        }
 
         return noErrorStatusResult();
     }
@@ -622,6 +640,45 @@ public class WhereAreYouApi {
         contactInfo.setStatus(status);
 
         return contactInfo;
+    }
+
+
+    @ApiMethod(name = "createBot")
+    public StatusResult createBot(@Named("username") String username, @Named("name") String name, @Named("photo_url") String photo_url) throws UnauthorizedException {
+        
+        if( SUPPORT_BOTS) {
+            String email = username + "@wherearethey.com";
+            User user = new User(email, UserBot.AUTH_DOMAIN);
+            NewAccountInfo info = new NewAccountInfo();
+            info.setDisplayName(name);
+            info.setPhotoUrl(photo_url);
+
+            StatusResult result = createAccount(user, info);
+
+            UserProfile userProfile = UserProfileHelper.getUserProfileByEmail(email);
+
+            userProfile.setIsBot(true);
+
+            UserProfileHelper.saveUserProfile(userProfile);
+
+            return result;
+        }
+        else
+            return new StatusResult(StatusCode.RESULT_ERROR,"Bots are not supported in final build.");
+    }
+
+
+    @ApiMethod(name = "createBots")
+    public StatusResult createBots() throws UnauthorizedException {
+        if( SUPPORT_BOTS) {
+            createBot("john.doe", "John Doe", "http://themes.justgoodthemes.com/demo/getready/full-blue/images/John_Doe.jpg");
+            createBot("jane.doe", "Jane Doe", "http://cps-static.rovicorp.com/3/JPG_400/MI0001/639/MI0001639267.jpg");
+            return noErrorStatusResult();
+        }
+        else
+        {
+            return new StatusResult(StatusCode.RESULT_ERROR,"Bots are not supported in final build.");
+        }
     }
 
 }
