@@ -1,0 +1,28 @@
+# Project-wide Gradle settings.
+# Enter your API key in this file
+
+#### API keys ####
+
+# An API keys generated for your android client 
+# package name = ca.nbsoft.whereareyou
+# SHA1 key from debug or release keystore
+ANDROID_API_KEY=""
+# An API keys generated for a server ( no special parameter) 
+SERVER_API_KEY=""
+
+#### OAuth 2.0 client IDs ####
+
+# Client ID for web, add http://localhost:8080 in Authorized JavaScript origins
+WEB_CLIENT_ID = "XXXX.apps.googleusercontent.com"
+# Client id for release and debug android client
+ANDROID_DEBUG_CLIENT_ID = "XXXX.apps.googleusercontent.com"
+ANDROID_RELEASE_CLIENT_ID = "XXXX.apps.googleusercontent.com"
+
+# Project ID from the Developper Console Dashboard
+GCM_SENDER_ID = ""
+
+# URL for the local server. Enter your machine IP address instead of 192.168.1.1
+LOCAL_BACKEND_URL = "http://192.168.1.1:8080/_ah/api/"
+# Project URL when deployed. Relace XXXX.
+BACKEND_URL = "https://XXXX.appspot.com/_ah/api/"
+
