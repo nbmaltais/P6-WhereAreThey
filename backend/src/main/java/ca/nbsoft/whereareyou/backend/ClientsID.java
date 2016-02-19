@@ -1,6 +1,6 @@
 package ca.nbsoft.whereareyou.backend;
 
-import WhereAreYou.BuildConfig;
+
 
 /**
  * Created by Nicolas on 2015-12-06.

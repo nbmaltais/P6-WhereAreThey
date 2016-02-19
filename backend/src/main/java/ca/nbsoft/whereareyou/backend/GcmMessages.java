@@ -8,7 +8,7 @@ import com.google.android.gcm.server.Sender;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import WhereAreYou.BuildConfig;
+
 import ca.nbsoft.whereareyou.backend.api.Location;
 import ca.nbsoft.whereareyou.backend.data.UserProfile;
 import ca.nbsoft.whereareyou.common.GcmMessageKeys;
