@@ -17,7 +17,7 @@ In the API Manager, create the following credentials:
 - OAuth 2.0 client IDs for the debug configuration of the android app
 - OAuth 2.0 client IDs for the release configuration of the android app
 
-Rename the file gradle.properties.example to gradle.properties.
+Rename the file <b>gradle.properties.example</b> to <b>gradle.properties</b>.
 Open the file and paste the various key generated in the developper. The file conains additionnal infromation.
 
 ### Testing with bots
