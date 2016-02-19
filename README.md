@@ -9,7 +9,7 @@ Enable the following API:
 - Google Cloud Messaging 
 - Google Maps Android API
 
-Inte the API Manager, create the following credentials:
+In the API Manager, create the following credentials:
 
 - API Key for server (no special parameter)
 - API Key for the android application ( package name is ca.nbsoft.whereareyou).
